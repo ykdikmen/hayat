@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hayat</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hayat">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a1310">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="ikon-180.png">
+<link rel="icon" type="image/png" href="ikon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout: one phone-width column; header + scrolling middle + tab bar pinned at the bottom. Single dark world, like the tracker reel. */
+  color-scheme: dark;
+  --bg:#0a1310;
+  --card:#12201b;
+  --card-2:#182a24;
+  --line:#22372f;
+  --ink:#eef5f1;
+  --ink-2:#a9bbb3;
+  --ink-3:#72887e;
+  --accent:#ff8a3d;
+  --accent-ink:#1d0e03;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;           /* chart series, validated on --card */
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+  --font-display:"Outfit","Avenir Next",system-ui,sans-serif;
+  --font-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+#main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 14px) 16px 24px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+
+/* tab bar */
+nav.tabs{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:#0d1915;border-top:1px solid var(--line);padding:6px 6px calc(env(safe-area-inset-bottom) + 6px)}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 4px;color:var(--ink-3);text-decoration:none;font-size:11.5px;font-weight:600;border-radius:12px}
+nav.tabs a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs a[aria-current="page"]{color:var(--ink)}
+nav.tabs a[aria-current="page"] svg{stroke:var(--accent)}
+
+/* header */
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:2px 2px 4px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--font-display);font-weight:800;font-size:28px;line-height:1.05;margin:2px 0 0;letter-spacing:-.01em;text-wrap:balance}
+.navbtns{display:flex;gap:6px;flex:none}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;color:var(--ink-2)}
+.iconbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+.banner{border-radius:12px;padding:10px 12px;font-size:13px;background:#2a2410;color:#f5dc9a;border:1px solid #4a3d14}
+.banner.info{background:#13263a;color:#bcd7f5;border-color:#22415f}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.card h2{font-family:var(--font-display);font-size:18px;font-weight:700;margin:0 0 10px;display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.card h2 .meta{font-family:var(--font-body);font-size:12.5px;font-weight:600;color:var(--ink-3)}
+.muted{color:var(--ink-3)}
+.small{font-size:12.5px}
+.num{font-variant-numeric:tabular-nums}
+
+/* hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.ring text{font-family:var(--font-display);font-weight:700;fill:var(--ink)}
+.stats{display:grid;gap:8px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding-bottom:7px}
+.stat:last-child{border-bottom:0;padding-bottom:0}
+.stat b{font-family:var(--font-display);font-size:19px;font-weight:700}
+.stat span{color:var(--ink-2);font-size:13px}
+
+/* lists */
+ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+ul.list li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+ul.list li:last-child{border-bottom:0}
+.check{width:26px;height:26px;border-radius:8px;border:2px solid var(--ink-3);background:transparent;display:grid;place-items:center;flex:none;padding:0}
+.check svg{width:15px;height:15px;stroke:var(--accent-ink);stroke-width:3;fill:none;opacity:0}
+.check[aria-pressed="true"]{background:var(--good);border-color:var(--good)}
+.check[aria-pressed="true"] svg{opacity:1;stroke:#04210a}
+.li-time{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink-2);font-size:13.5px;min-width:42px}
+.li-text{flex:1;min-width:0;overflow-wrap:anywhere}
+li.done .li-text{color:var(--ink-3);text-decoration:line-through}
+.x{border:0;background:transparent;color:var(--ink-3);width:32px;height:32px;border-radius:8px;flex:none;font-size:18px;line-height:1}
+.x:hover{color:var(--ink)}
+
+form.add{display:flex;gap:8px;margin-top:10px}
+.field{background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0;color:var(--ink)}
+.field::placeholder{color:var(--ink-3)}
+form.add .grow{flex:1}
+input[type=time].field{width:96px;flex:none;padding:10px 8px}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:10px 14px;font-weight:700;flex:none}
+.btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line)}
+.btn:disabled{opacity:.5}
+textarea.field{width:100%;resize:vertical;min-height:72px}
+
+/* tours */
+.tour{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.tour:last-child{border-bottom:0}
+.tour .t{font-variant-numeric:tabular-nums;font-weight:700;font-size:13.5px}
+.tour .n{font-weight:600;overflow-wrap:anywhere}
+.tour .d{font-size:12.5px;color:var(--ink-3)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 8px;white-space:nowrap}
+.pill.ok{background:rgba(12,163,12,.16);color:#7fe07f}
+.pill.wait{background:rgba(250,178,25,.14);color:#f8cf72}
+.pill.gyg{border-left:3px solid #e23d2f;background:#2b1a17;color:#f2b4a9;border-radius:6px}
+.pill.via{border-left:3px solid #1ea97c;background:#132a22;color:#9fe0c8;border-radius:6px}
+.tourtot{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.kpi{background:var(--card-2);border-radius:12px;padding:10px}
+.kpi b{display:block;font-family:var(--font-display);font-size:22px;font-weight:700;line-height:1.1}
+.kpi span{font-size:12px;color:var(--ink-3);font-weight:600}
+
+/* habits quick log */
+.habchecks{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.habchip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card-2);border-radius:12px;padding:9px 12px;font-weight:600}
+.habchip .dot{width:16px;height:16px;border-radius:5px;border:2px solid var(--ink-3)}
+.habchip[aria-pressed="true"]{border-color:var(--good);background:rgba(12,163,12,.14)}
+.habchip[aria-pressed="true"] .dot{background:var(--good);border-color:var(--good)}
+.counters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.counter{background:var(--card-2);border-radius:12px;padding:8px 10px 10px;display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0}
+.counter .lbl{font-size:13px;font-weight:600;color:var(--ink-2);line-height:1.2}
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.stepper button{width:40px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:18px;font-weight:700;color:var(--ink);padding:0}
+.stepper output{min-width:30px;text-align:center;font-family:var(--font-display);font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* sliders */
+.slider{display:grid;grid-template-columns:78px 1fr 30px;gap:10px;align-items:center;padding:6px 0}
+.slider label{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:7px}
+.slider label i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.slider output{text-align:right;font-family:var(--font-display);font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+input[type=range].unset{opacity:.4}
+
+/* week rings */
+.weekrings{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wr{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;padding:4px 0;border-radius:12px}
+.wr .a{font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.wr .b{font-size:11px;color:var(--ink-3)}
+.wr.today{background:var(--card-2)}
+.bigpct{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.bigpct b{font-family:var(--font-display);font-size:40px;font-weight:800;line-height:1}
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .ax{fill:var(--ink-3);font-size:10.5px;font-family:var(--font-body)}
+.chart .lab{font-size:11px;font-weight:700;font-family:var(--font-body);fill:var(--ink-2)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:12px;height:3px;border-radius:2px;display:inline-block}
+.legend i.sq{height:10px;width:10px;border-radius:3px}
+.tip{position:fixed;z-index:20;pointer-events:none;background:#0f1c18;border:1px solid #2f4a40;border-radius:10px;padding:8px 10px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:220px}
+.tip b{display:block;margin-bottom:2px}
+.rows{display:grid;gap:0}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border-bottom:0}
+.row b{font-variant-numeric:tabular-nums}
+
+/* habit grid */
+.gridwrap{overflow-x:auto;margin:0 -14px;padding:0 14px}
+table.hg{border-collapse:separate;border-spacing:3px;font-size:11px}
+table.hg th{font-weight:600;color:var(--ink-3);text-align:center;padding:0 0 2px}
+table.hg th.rowh{text-align:left;color:var(--ink-2);font-size:12px;padding-right:6px;white-space:nowrap;position:sticky;left:-14px;background:var(--card);z-index:1}
+table.hg th.tcol{color:var(--accent)}
+table.hg td{width:24px;min-width:24px;height:24px;border-radius:6px;text-align:center;vertical-align:middle;padding:0;font-weight:700;font-variant-numeric:tabular-nums}
+td.c0{border:1px solid var(--line)}
+td.c1{background:var(--s3)}
+td.fut{opacity:.25}
+td button{width:100%;height:100%;border:0;background:transparent;padding:0;border-radius:6px;color:var(--ink);font-weight:700;font-size:11px}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--s3)}
+
+/* goals */
+.goal{padding:12px 0;border-bottom:1px solid var(--line);display:grid;gap:8px}
+.goal:last-child{border-bottom:0}
+.goal .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.goal .title{font-weight:700;overflow-wrap:anywhere}
+.goal .next{font-size:13px;color:var(--ink-2)}
+.area{font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;background:var(--card-2);color:var(--ink-2);white-space:nowrap}
+.gctl{display:flex;align-items:center;gap:8px}
+.gctl .bar{flex:1}
+.gctl b{min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.minibtn{border:1px solid var(--line);background:var(--card-2);border-radius:9px;min-width:38px;height:32px;font-weight:700;font-size:13px;padding:0 8px}
+.minibtn.danger{color:#f3a3a3}
+a.minibtn{display:inline-flex;align-items:center;color:var(--ink);text-decoration:none}
+.stack{display:grid;gap:8px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.formgrid .full{grid-column:1/-1}
+select.field{appearance:none;-webkit-appearance:none}
+.focusgrp h3{font-size:13px;margin:12px 0 2px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em}
+.focusgrp h3:first-child{margin-top:0}
+.empty{color:var(--ink-3);font-size:13.5px;padding:6px 0}
+
+/* coach */
+.msgs{display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;border-radius:16px;padding:10px 13px;font-size:14.5px;overflow-wrap:anywhere}
+.msg.u{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:5px;white-space:pre-wrap}
+.msg.a{align-self:flex-start;background:var(--card-2);border:1px solid var(--line);border-bottom-left-radius:5px}
+.msg.a p{margin:0 0 6px}.msg.a p:last-child{margin:0}
+.msg.a ul{margin:4px 0 6px;padding-left:18px}
+.msg.a .mh{font-weight:700}
+.msg.err{background:#2a1515;border-color:#4d2222;color:#f2b8b8}
+.coachform{display:flex;gap:8px;align-items:flex-end}
+.coachform textarea{flex:1;min-height:46px;max-height:140px;font-size:16px}
+.hint{font-size:12.5px;color:var(--ink-3)}
+/* login */
+.giris{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;padding:calc(env(safe-area-inset-top) + 32px) 20px 32px}
+.giris[hidden]{display:none}
+.giris-kart{max-width:480px;margin:0 auto;display:grid;gap:12px}
+.giris-kart h1{margin-bottom:4px}
+.giris-kart textarea{width:100%;font-size:15px;word-break:break-all}
+/* inbox */
+.msg .when{display:block;font-size:11px;opacity:.65;margin-top:4px;text-align:right}
+.msg.a .who{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin:0 0 4px}
+.msg.a.pending{border-style:dashed;color:var(--ink-2)}
+.calchk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.calchk input{width:18px;height:18px;accent-color:var(--accent)}
+#abMic.on{background:var(--crit);color:#fff;border-color:var(--crit)}
+#abMic[hidden]{display:none}
+/* bottom bar: talk to Claude from every tab */
+#agentbar{flex:none;background:#0d1915;border-top:1px solid var(--line);padding:8px 12px}
+#agentbar[hidden]{display:none}
+.ab-inner{max-width:560px;margin:0 auto;display:grid;gap:8px}
+.ab-panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;max-height:38vh;overflow:auto;font-size:14.5px}
+.ab-panel[hidden]{display:none}
+.ab-you{color:var(--ink-3);font-size:12.5px;margin-bottom:4px;overflow-wrap:anywhere}
+.ab-reply p{margin:0 0 6px}.ab-reply p:last-child{margin:0}
+.ab-reply ul{margin:4px 0;padding-left:18px}
+.ab-reply.err{color:#f2b8b8}
+.ab-acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.ab-row{display:flex;gap:8px;align-items:flex-end}
+.ab-row textarea{flex:1;min-height:44px;max-height:120px;resize:none;line-height:1.35;font-size:16px}
+.ab-row .btn{height:44px;min-width:44px;padding:0 12px;display:grid;place-items:center}
+.ab-row .btn.ghost{background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.ab-row .btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</head>
+<body>
+<main id="main"><div class="wrap" id="view"></div></main>
+<div id="agentbar"><div class="ab-inner">
+  <div class="ab-panel" id="abPanel" hidden aria-live="polite"></div>
+  <form class="ab-row" id="f-agent">
+    <button type="button" class="btn ghost" id="abMic" data-act="mic" aria-label="Sesle söyle" hidden><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <textarea class="field" id="abInput" rows="1" enterkeyhint="send" placeholder="Yaz ya da klavyedeki 🎤 ile söyle…" aria-label="Claude'a söyle"></textarea>
+    <button class="btn" id="abSend" aria-label="Gönder"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </form>
+</div></div>
+<nav class="tabs" id="tabs" aria-label="Bölümler">
+  <a href="#bugun" data-tab="bugun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Bugün</a>
+  <a href="#hafta" data-tab="hafta"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Hafta</a>
+  <a href="#aliskanlik" data-tab="aliskanlik"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M15 17.5l2 2 4-4"/></svg>Alışkanlık</a>
+  <a href="#hedefler" data-tab="hedefler"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Hedefler</a>
+  <a href="#koc" data-tab="koc"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Claude</a>
+</nav>
+<div class="tip" id="tip" hidden></div>
+<div id="giris" class="giris" hidden><div class="giris-kart">
+  <div class="eyebrow">Hayat Paneli</div>
+  <h1>Giriş</h1>
+  <div id="gEkle" class="banner info" hidden><b>Önce ana ekrana ekle:</b> alttaki Paylaş düğmesi (kare ve ok) → “Ana Ekrana Ekle”. Sonra uygulamayı ana ekrandaki ikondan açıp burada giriş yap.</div>
+  <label for="gLink" class="small muted">Kurulumda çıkan link</label>
+  <textarea id="gLink" class="field" rows="4" placeholder="https://script.google.com/macros/s/…/exec?k=…" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+  <div class="chiprow"><button class="btn" id="gBtn" data-act="giris">Giriş yap</button><button class="btn ghost" data-act="yapistir">Panodan yapıştır</button></div>
+  <p id="gHata" class="small" style="color:#f2b8b8;margin:0"></p>
+  <p class="small muted" style="margin:0">Verilerin sadece senin Google Drive'ında durur. Bu link senin anahtarın; kimseyle paylaşma.</p>
+</div></div>
+
+<script>
+"use strict";
+/* ---------- constants ---------- */
+const TZ = "Europe/Rome";
+const GUN = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+const GUN_K = ["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
+const AY = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+const AY_K = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+const DEFAULT_HABITS = [
+  {key:"spor", label:"Spor", type:"check"},
+  {key:"okuma", label:"Okuma", type:"check"},
+  {key:"sigara", label:"Sigara", type:"count", lower:true},
+  {key:"su", label:"Su (bardak)", type:"count"},
+  {key:"cis", label:"Çiş", type:"count"},
+  {key:"buyuk", label:"Büyük tuvalet", type:"count"}
+];
+const AREAS = {is:"İş", saglik:"Sağlık", para:"Para", kisisel:"Kişisel"};
+const FOCUS = {konus:"Konuşulacak kişiler", gelistir:"Geliştirilecekler", calis:"Daha çok çalış"};
+const MOODS = [["energy","Enerji","var(--s1)"],["mood","Ruh hali","var(--s2)"],["focus","Odak","var(--s3)"]];
+
+/* ---------- date helpers (all dates are YYYY-MM-DD in Rome time) ---------- */
+const fmtYMD = new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"});
+const fmtHM = new Intl.DateTimeFormat("en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit",hour12:false});
+const todayStr = () => fmtYMD.format(new Date());
+const nowHM = () => fmtHM.format(new Date());
+const d2u = s => { const [y,m,d] = s.split("-").map(Number); return new Date(Date.UTC(y,m-1,d)); };
+const u2d = dt => dt.toISOString().slice(0,10);
+const addDays = (s,n) => { const d = d2u(s); d.setUTCDate(d.getUTCDate()+n); return u2d(d); };
+const dow = s => d2u(s).getUTCDay();
+const weekStart = s => addDays(s, -((dow(s)+6)%7));
+const weekDays = s => { const st = weekStart(s); return [0,1,2,3,4,5,6].map(i => addDays(st,i)); };
+const daysBetween = (a,b) => Math.round((d2u(b)-d2u(a))/864e5);
+const fmtLong = s => { const d = d2u(s); return `${GUN[d.getUTCDay()]}, ${d.getUTCDate()} ${AY[d.getUTCMonth()]}`; };
+const fmtShort = s => { const d = d2u(s); return `${d.getUTCDate()} ${AY_K[d.getUTCMonth()]}`; };
+const relLabel = s => { const n = daysBetween(S.today, s); return n===0?"Bugün":n===1?"Yarın":n===-1?"Dün":(n>0?`${n} gün sonra`:`${-n} gün önce`); };
+const monthDays = ym => { const [y,m] = ym.split("-").map(Number); const n = new Date(Date.UTC(y,m,0)).getUTCDate(); return Array.from({length:n},(_,i)=>`${ym}-${String(i+1).padStart(2,"0")}`); };
+const addMonths = (ym,n) => { const [y,m] = ym.split("-").map(Number); const d = new Date(Date.UTC(y,m-1+n,1)); return d.toISOString().slice(0,7); };
+const monthName = ym => { const [y,m] = ym.split("-").map(Number); return `${AY[m-1]} ${y}`; };
+
+/* ---------- small utils ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2,10);
+const clone = o => JSON.parse(JSON.stringify(o));
+const nf1 = new Intl.NumberFormat("tr-TR",{maximumFractionDigits:1});
+const nfEur = new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0});
+const eur = v => "€" + nfEur.format(v || 0);
+const pctTxt = p => p==null ? "—" : Math.round(p*100) + "%";
+
+/* ---------- state ---------- */
+const S = {
+  mode: "loading",           // loading | live | mock
+  banner: null, bannerKind: null, note: null,
+  days: {}, goals: {}, notes: {}, settings: null, gelen: [],
+  today: todayStr(), sel: null, month: null, tab: "bugun",
+  loaded: false,
+  tours: {cache: {}, status: "idle", err: null, key: ""},
+  habitEdit: false, confirmDel: null,
+  agent: {you:"", reply:"", error:null, undo:null, open:false, pending:false, gelenId:null}
+};
+S.sel = S.today; S.month = S.today.slice(0,7);
+const habits = () => (S.settings && Array.isArray(S.settings.habits) && S.settings.habits.length) ? S.settings.habits : DEFAULT_HABITS;
+const blankDay = date => ({date, plan:[], checks:{}, counts:{}, sleep:null, energy:null, mood:null, focus:null, health:[], wins:[], note:""});
+const getDay = date => S.days[date] || blankDay(date);
+const dayPct = d => { const p = (d && d.plan) || []; return p.length ? p.filter(x=>x.done).length/p.length : null; };
+
+/* ---------- Google connection (your Apps Script) ---------- */
+const LS = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k){ try { localStorage.removeItem(k); } catch (e) {} }
+};
+const K_OTURUM = "hayat.oturum", K_ONBELLEK = "hayat.onbellek", K_BEKLEYEN = "hayat.bekleyen", K_GELEN_KUYRUK = "hayat.gelenKuyruk";
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const STANDALONE = !!(window.navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches));
+let OTURUM = LS.get(K_OTURUM);
+function linkCoz(text){
+  let s = String(text || "");
+  try { s = decodeURIComponent(s); } catch (e) {}
+  const m = s.match(/https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec\?k=([A-Za-z0-9]{20,})/);
+  return m ? {adres: m[0].split("?")[0], k: m[1]} : null;
+}
+async function api(op, body, sure){
+  if (window.HAYAT_TEST_API) return window.HAYAT_TEST_API(op, body || {});
+  if (!OTURUM) throw {kod: "oturum"};
+  const ac = new AbortController(); const z = setTimeout(() => ac.abort(), (sure || 30) * 1000);
+  try {
+    const r = await fetch(OTURUM.adres, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(Object.assign({k: OTURUM.k, op}, body || {})), redirect: "follow", credentials: "omit", signal: ac.signal});
+    const t = await r.text(); let j;
+    try { j = JSON.parse(t); } catch (e) { throw {kod: "cevap"}; }
+    if (j.hata === "yetki") throw {kod: "yetki"};
+    if (j.hata) throw {kod: "sunucu", mesaj: j.hata};
+    return j;
+  } catch (e) {
+    if (e && e.kod) throw e;
+    if (e && e.name === "AbortError") throw {kod: "zaman"};
+    throw {kod: "ag"};
+  } finally { clearTimeout(z); }
+}
+function hataMetni(e){
+  switch (e && e.kod) {
+    case "yetki": return "Giriş linki geçersiz. Sunucuda yeniAnahtar'ı çalıştırıp yeni linki yapıştır.";
+    case "ag": return "İnternet yok ya da Google'a ulaşılamadı. Yazdıkların telefonda bekliyor, bağlanınca gönderilir.";
+    case "zaman": return "Google geç cevap verdi; birazdan tekrar denenecek.";
+    case "cevap": return "Sunucu beklenmedik cevap verdi. Apps Script dağıtımında “Erişimi olan: Herkes” seçili mi?";
+    case "sunucu": return "Sunucu hatası: " + (e.mesaj || "bilinmiyor");
+    default: return "Bağlantı sorunu.";
+  }
+}
+
+/* writes wait in the phone until Google confirms them (they survive closing the app) */
+let bekleyen = LS.get(K_BEKLEYEN) || {};
+let flushTimer = null, flushing = false;
+function queueSave(path, data, delay){
+  bekleyen[path] = data; LS.set(K_BEKLEYEN, bekleyen);
+  clearTimeout(flushTimer); flushTimer = setTimeout(flush, delay == null ? 700 : delay);
+}
+async function flush(){
+  if (S.mode === "mock") { bekleyen = {}; LS.set(K_BEKLEYEN, bekleyen); return; }
+  if (flushing || !OTURUM) return;
+  const paths = Object.keys(bekleyen); if (!paths.length) return;
+  flushing = true;
+  const sent = {}; paths.forEach(p => { sent[p] = bekleyen[p]; });
+  let ok = false;
+  try {
+    await api("kaydet", {belgeler: paths.map(p => ({yol: p, veri: sent[p]}))});
+    ok = true;
+    paths.forEach(p => { if (bekleyen[p] === sent[p]) delete bekleyen[p]; });
+    LS.set(K_BEKLEYEN, bekleyen);
+    if (S.bannerKind === "kayit") { S.banner = null; S.bannerKind = null; scheduleRender(); }
+    cacheSave();
+  } catch (e) {
+    if (e.kod === "yetki") cikis(true);
+    else { S.banner = hataMetni(e); S.bannerKind = "kayit"; scheduleRender(); clearTimeout(flushTimer); flushTimer = setTimeout(flush, 20000); }
+  } finally {
+    flushing = false;
+    if (ok && Object.keys(bekleyen).length) { clearTimeout(flushTimer); flushTimer = setTimeout(flush, 700); }
+  }
+}
+function saveDay(date){
+  const d = S.days[date]; if (!d) return;
+  d.updatedAt = new Date().toISOString();
+  queueSave("days/" + date, clone(d));
+}
+function editDay(date, fn){ const d = S.days[date] ? S.days[date] : (S.days[date] = blankDay(date)); fn(d); saveDay(date); }
+function saveGoal(id){ queueSave("goals/" + id, clone(S.goals[id]), 300); }
+function delGoal(id){ delete S.goals[id]; queueSave("goals/" + id, null, 0); }
+function saveNote(id){ queueSave("notes/" + id, clone(S.notes[id]), 300); }
+function delNote(id){ delete S.notes[id]; queueSave("notes/" + id, null, 0); }
+function saveSettings(){ queueSave("meta/settings", clone(S.settings), 300); }
+
+/* loading */
+let lastLoad = 0, loading = null;
+function load(){
+  if (!OTURUM || S.mode === "mock") return Promise.resolve(false);
+  if (loading) return loading;
+  loading = (async () => {
+    try {
+      const r = await api("yukle", {hafta: weekStart(S.sel)}, 45);
+      applyServer(r); S.loaded = true; S.mode = "live"; lastLoad = Date.now();
+      if (S.bannerKind === "yukle") { S.banner = null; S.bannerKind = null; }
+      cacheSave();
+      return true;
+    } catch (e) {
+      if (e.kod === "yetki") { cikis(true); return false; }
+      S.banner = (S.loaded ? "Son durum alınamadı. " : "") + hataMetni(e); S.bannerKind = "yukle";
+      return false;
+    } finally {
+      loading = null; scheduleRender(); flush(); gelenKuyrukGonder();
+    }
+  })();
+  return loading;
+}
+function applyServer(r){
+  S.days = Object.assign({}, r.days || {});
+  S.goals = Object.assign({}, r.goals || {});
+  S.notes = Object.assign({}, r.notes || {});
+  S.settings = r.settings || null;
+  for (const [p, v] of Object.entries(bekleyen)) {
+    if (p === "meta/settings") { S.settings = v ? clone(v) : null; continue; }
+    const [col, id] = p.split("/");
+    const t = col === "days" ? S.days : col === "goals" ? S.goals : col === "notes" ? S.notes : null;
+    if (!t) continue;
+    if (v === null) delete t[id]; else t[id] = clone(v);
+  }
+  const sv = r.gelen || [], kuyruk = LS.get(K_GELEN_KUYRUK) || [];
+  S.gelen = sv.concat(kuyruk.filter(q => !sv.some(g => g.id === q.id)));
+  if (r.hafta && Array.isArray(r.turlar)) storeTours(r.hafta, r.turlar);
+  else if (r.turHata) { S.tours.err = {kod: "takvim", mesaj: r.turHata}; S.tours.status = "error"; }
+}
+function cacheSave(){ LS.set(K_ONBELLEK, {days: S.days, goals: S.goals, notes: S.notes, settings: S.settings, gelen: S.gelen, tours: S.tours.cache, at: Date.now()}); }
+function cacheLoad(){
+  const c = LS.get(K_ONBELLEK); if (!c) return false;
+  S.days = c.days || {}; S.goals = c.goals || {}; S.notes = c.notes || {}; S.settings = c.settings || null;
+  S.gelen = c.gelen || []; S.tours.cache = c.tours || {}; S.loaded = true; S.mode = "live";
+  return true;
+}
+
+/* inbox: what you told Claude (queued on the phone until Google has it) */
+let gelenBusy = false;
+function gelenGonder(kayit){
+  const kuyruk = LS.get(K_GELEN_KUYRUK) || []; kuyruk.push(kayit); LS.set(K_GELEN_KUYRUK, kuyruk);
+  gelenKuyrukGonder();
+}
+async function gelenKuyrukGonder(){
+  if (gelenBusy || S.mode === "mock" || !OTURUM) return;
+  gelenBusy = true;
+  try {
+    let kuyruk = LS.get(K_GELEN_KUYRUK) || [];
+    while (kuyruk.length) {
+      const k = kuyruk[0];
+      await api("gelen", {kayit: {id: k.id, metin: k.metin, durum: k.durum, sonuc: k.sonuc}});
+      kuyruk = (LS.get(K_GELEN_KUYRUK) || []).filter(x => x.id !== k.id); LS.set(K_GELEN_KUYRUK, kuyruk);
+      const g = S.gelen.find(x => x.id === k.id); if (g) g.gonderildi = true;
+    }
+  } catch (e) { setTimeout(gelenKuyrukGonder, 30000); }
+  finally { gelenBusy = false; cacheSave(); scheduleRender(); }
+}
+
+/* ---------- tours (Tur Programı calendar, read by your Google script) ---------- */
+function parseTour(ev){
+  if (!ev || !ev.tarih || !ev.saat) return null;
+  const sum = ev.baslik || "", desc = ev.aciklama || "";
+  const cancelled = /^\s*(IPTAL|İPTAL|iptal)/.test(sum);
+  const external = /^\s*(DIŞ|DİŞ|Dış|DIS)/.test(sum);
+  let pax = 0; const mp = sum.match(/\((\d+)\)/) || desc.match(/Ki[sş]i:\s*(\d+)/i); if (mp) pax = +mp[1];
+  let net = 0; const mn = desc.match(/Net:\s*EUR\s*([\d.,]+)/i); if (mn) net = parseFloat(mn[1].replace(/\./g,"").replace(",", ".")) || 0;
+  const platform = /\bGYG\b/.test(sum) ? "GYG" : /\bVIA\b/.test(sum) ? "VIA" : "";
+  const name = sum.replace(/^\s*(IPTAL|İPTAL)\s*-\s*/i,"").replace(/^\s*\d{1,2}:\d{2}\s*/,"").replace(/\(\d+\)/,"").replace(/\b(GYG|VIA)\b/,"").replace(/\s+/g," ").trim();
+  const guide = (desc.match(/Guide:\s*([^\n]+)/) || [])[1] || "";
+  const closed = /Kapan[ıi][sş]:\s*yap[ıi]ld[ıi]/i.test(desc);
+  return {date: ev.tarih, time: ev.saat, name, pax, net, platform, guide: guide.trim(), closed, cancelled, external};
+}
+function storeTours(key, list){
+  S.tours.cache[key] = {events: (list || []).map(parseTour).filter(Boolean), storedAt: Date.now()};
+  if (key === S.tours.key) { S.tours.err = null; S.tours.status = "ok"; }
+}
+function toursFor(date){
+  const c = S.tours.cache[weekStart(date)];
+  return c ? toursFromEvents(c.events, date) : null;
+}
+function toursFromEvents(events, date){
+  const all = events.filter(t => t.date === date);
+  const real = all.filter(t => !t.cancelled && !t.external);
+  return {list: real, count: real.length, pax: real.reduce((a,t)=>a+t.pax,0), net: real.reduce((a,t)=>a+t.net,0),
+          closed: real.filter(t=>t.closed).length, external: all.filter(t=>t.external && !t.cancelled).length,
+          cancelled: all.filter(t=>t.cancelled).length};
+}
+async function watchTours(force){
+  const key = weekStart(S.sel); S.tours.key = key;
+  if (S.mode === "mock" || !OTURUM) return;
+  const c = S.tours.cache[key];
+  if (c && !force && Date.now() - c.storedAt < 10*60e3) return;
+  S.tours.status = c ? "ok" : "loading"; if (!c) scheduleRender();
+  try { const r = await api("turlar", {hafta: key}); storeTours(key, r.turlar || []); }
+  catch (e) { if (key === S.tours.key) { S.tours.err = e; S.tours.status = S.tours.cache[key] ? "ok" : "error"; } }
+  cacheSave(); scheduleRender();
+}
+function tourErrorText(err){
+  return [err && err.kod === "takvim" ? "Tur Programı takvimi okunamadı: " + (err.mesaj || "") : hataMetni(err), "Tekrar dene"];
+}
+
+/* ---------- charts (hand-built SVG) ---------- */
+function ringColor(p){ return p == null ? "var(--line)" : p >= .7 ? "var(--good)" : p >= .4 ? "var(--warn)" : "var(--serious)"; }
+function ring(p, size, sw, fontSize, label){
+  const r = (size - sw)/2, c = 2*Math.PI*r, cx = size/2;
+  const v = p == null ? 0 : Math.max(0, Math.min(1, p));
+  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(label)}">
+    <circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${sw}"/>
+    ${v > 0 ? `<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${ringColor(p)}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${(c*v).toFixed(2)} ${c.toFixed(2)}" transform="rotate(-90 ${cx} ${cx})"/>` : ""}
+    <text x="${cx}" y="${cx}" dominant-baseline="central" text-anchor="middle" font-size="${fontSize}">${pctTxt(p)}</text></svg>`;
+}
+function niceMax(v){ if (v <= 4) return 4; if (v <= 6) return 6; if (v <= 8) return 8; if (v <= 10) return 10; return Math.ceil(v/5)*5; }
+function topRounded(x, y, w, h, r){
+  if (h <= 0) return "";
+  r = Math.min(r, h, w/2);
+  return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`;
+}
+/* stacked bars: done vs remaining per day */
+function planBars(days){
+  const W = 340, H = 160, L = 26, R = 6, T = 10, B = 24, pw = W-L-R, ph = H-T-B;
+  const vals = days.map(d => { const p = getDay(d).plan || []; return {d, done: p.filter(x=>x.done).length, total: p.length}; });
+  const max = niceMax(Math.max(1, ...vals.map(v=>v.total)));
+  const y = v => T + ph - v/max*ph, cw = pw/7, bw = Math.min(26, cw*.56);
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Günlük plan tamamlama">`;
+  for (const g of [0, max/2, max]) s += `<line class="grid" x1="${L}" x2="${W-R}" y1="${y(g)}" y2="${y(g)}"/><text class="ax" x="${L-6}" y="${y(g)}" text-anchor="end" dominant-baseline="central">${g}</text>`;
+  vals.forEach((v,i) => {
+    const x = L + i*cw + (cw-bw)/2, base = y(0);
+    const hd = base - y(v.done), hr = base - y(v.total) - hd;
+    if (v.total > 0) {
+      if (v.done > 0) s += `<path d="${v.done === v.total ? topRounded(x, y(v.done), bw, hd, 4) : `M${x},${base}V${y(v.done)}H${x+bw}V${base}Z`}" fill="var(--s3)"/>`;
+      if (hr > 2) s += `<path d="${topRounded(x, y(v.total), bw, hr - (v.done>0?2:0), 4)}" fill="#2c453c"/>`;
+    }
+    const isT = v.d === S.today;
+    s += `<text class="ax" x="${x+bw/2}" y="${H-8}" text-anchor="middle" ${isT?'style="fill:var(--accent);font-weight:700"':''}>${GUN_K[dow(v.d)]}</text>`;
+    s += `<rect x="${L+i*cw}" y="${T}" width="${cw}" height="${ph+B}" fill="transparent" data-tip="${esc(`<b>${GUN_K[dow(v.d)]} ${fmtShort(v.d)}</b>${v.total ? `${v.done} / ${v.total} tamamlandı` : "Plan yok"}`)}"/>`;
+  });
+  return s + `</svg>`;
+}
+/* single-series bars: tours per day */
+function tourBars(days){
+  const W = 340, H = 150, L = 26, R = 6, T = 10, B = 24, pw = W-L-R, ph = H-T-B;
+  const vals = days.map(d => ({d, t: toursFor(d)}));
+  const max = niceMax(Math.max(1, ...vals.map(v=>v.t ? v.t.count : 0)));
+  const y = v => T + ph - v/max*ph, cw = pw/7, bw = Math.min(26, cw*.56);
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Günlük tur sayısı">`;
+  for (const g of [0, max/2, max]) s += `<line class="grid" x1="${L}" x2="${W-R}" y1="${y(g)}" y2="${y(g)}"/><text class="ax" x="${L-6}" y="${y(g)}" text-anchor="end" dominant-baseline="central">${g}</text>`;
+  vals.forEach((v,i) => {
+    const x = L + i*cw + (cw-bw)/2, n = v.t ? v.t.count : 0;
+    if (n > 0) s += `<path d="${topRounded(x, y(n), bw, y(0)-y(n), 4)}" fill="var(--s1)"/>`;
+    const isT = v.d === S.today;
+    s += `<text class="ax" x="${x+bw/2}" y="${H-8}" text-anchor="middle" ${isT?'style="fill:var(--accent);font-weight:700"':''}>${GUN_K[dow(v.d)]}</text>`;
+    const tip = v.t ? `<b>${GUN_K[dow(v.d)]} ${fmtShort(v.d)}</b>${n} tur · ${v.t.pax} kişi · ${eur(v.t.net)} net${v.t.cancelled ? ` · ${v.t.cancelled} iptal` : ""}` : `<b>${fmtShort(v.d)}</b>Veri yok`;
+    s += `<rect x="${L+i*cw}" y="${T}" width="${cw}" height="${ph+B}" fill="transparent" data-tip="${esc(tip)}"/>`;
+  });
+  return s + `</svg>`;
+}
+/* line chart: energy / mood / focus, 1-10 */
+function moodLines(days){
+  const W = 340, H = 170, L = 22, R = 64, T = 10, B = 24, pw = W-L-R, ph = H-T-B;
+  const cw = pw/6, x = i => L + i*cw, y = v => T + ph - (v-1)/9*ph;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Enerji, ruh hali ve odak">`;
+  for (const g of [1,5,10]) s += `<line class="grid" x1="${L}" x2="${W-R+8}" y1="${y(g)}" y2="${y(g)}"/><text class="ax" x="${L-6}" y="${y(g)}" text-anchor="end" dominant-baseline="central">${g}</text>`;
+  const ends = [];
+  for (const [k, label, col] of MOODS) {
+    const pts = days.map((d,i) => { const v = getDay(d)[k]; return v == null ? null : [x(i), y(v), v]; });
+    let path = "", pen = false;
+    pts.forEach(p => { if (!p) { pen = false; return; } path += (pen ? "L" : "M") + p[0].toFixed(1) + "," + p[1].toFixed(1); pen = true; });
+    if (path) s += `<path d="${path}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    pts.forEach(p => { if (p) s += `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${col}" stroke="var(--card)" stroke-width="2"/>`; });
+    const last = [...pts].reverse().find(Boolean);
+    if (last) ends.push({x: last[0], y: last[1], label: `${label} ${last[2]}`, col});
+  }
+  ends.sort((a,b)=>a.y-b.y);
+  for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i-1].y < 13) ends[i].y = ends[i-1].y + 13;
+  for (const e of ends) s += `<text class="lab" x="${e.x+10}" y="${e.y}" dominant-baseline="central">${esc(e.label)}</text>`;
+  days.forEach((d,i) => {
+    const isT = d === S.today, dd = getDay(d);
+    s += `<text class="ax" x="${x(i)}" y="${H-8}" text-anchor="middle" ${isT?'style="fill:var(--accent);font-weight:700"':''}>${GUN_K[dow(d)]}</text>`;
+    const tip = `<b>${GUN_K[dow(d)]} ${fmtShort(d)}</b>` + MOODS.map(([k,l]) => `${l}: ${dd[k] ?? "—"}`).join("<br>");
+    s += `<rect x="${x(i)-cw/2}" y="${T}" width="${cw}" height="${ph+B}" fill="transparent" data-tip="${esc(tip)}"/>`;
+  });
+  return s + `</svg>`;
+}
+
+/* ---------- views ---------- */
+const ICON_L = `<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>`, ICON_R = `<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>`;
+const ICON_CHECK = `<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+function banners(){
+  let h = "";
+  if (S.mode === "mock") h += `<div class="banner info">Önizleme: örnek verilerle gösteriliyor.</div>`;
+  if (OTURUM && IOS && !STANDALONE) h += `<div class="banner info"><b>Ana ekrana ekle:</b> Paylaş → “Ana Ekrana Ekle”. İkondan ilk açışta bu giriş linkini yapıştırman gerekecek. <button class="minibtn" data-act="linkkopyala">${S.kopyalandi ? "Kopyalandı ✓" : "Giriş linkini kopyala"}</button></div>`;
+  if (S.note) h += `<div class="banner info">${esc(S.note)}</div>`;
+  if (S.banner) h += `<div class="banner">${esc(S.banner)}</div>`;
+  return h;
+}
+function viewBugun(){
+  const date = S.sel, d = getDay(date), plan = (d.plan || []).slice().sort((a,b) => (a.time||"99") < (b.time||"99") ? -1 : (a.time||"99") > (b.time||"99") ? 1 : 0);
+  const p = dayPct(d), done = plan.filter(x=>x.done).length;
+  const t = toursFor(date);
+  const rel = relLabel(date);
+  let h = banners();
+  h += `<div class="head"><div><div class="eyebrow">${esc(rel)}</div><h1>${esc(fmtLong(date))}</h1></div>
+    <div class="navbtns"><button class="iconbtn" data-act="day" data-n="-1" aria-label="Önceki gün">${ICON_L}</button><button class="iconbtn" data-act="day" data-n="1" aria-label="Sonraki gün">${ICON_R}</button></div></div>`;
+  h += `<div class="chiprow">${date !== S.today ? `<button class="chip" data-act="goday" data-d="${S.today}">Bugüne dön</button>` : ""}${date !== addDays(S.today,1) ? `<button class="chip" data-act="goday" data-d="${addDays(S.today,1)}">Yarını planla</button>` : ""}</div>`;
+
+  // hero
+  const tourStat = t ? `<div class="stat"><span>Turlar</span><b class="num">${t.count} tur · ${t.pax} kişi</b></div>
+      <div class="stat"><span>${t.closed}/${t.count} kapandı</span><b class="num">${eur(t.net)} net</b></div>`
+    : `<div class="stat"><span>Turlar</span><b class="muted small">${S.tours.status === "loading" ? "yükleniyor…" : "—"}</b></div>`;
+  h += `<section class="card hero">${ring(p, 104, 11, 22, "Plan tamamlama")}
+    <div class="stats"><div class="stat"><span>Plan</span><b class="num">${plan.length ? `${done} / ${plan.length}` : "boş"}</b></div>${tourStat}</div></section>`;
+
+  // plan
+  h += `<section class="card"><h2>Program <span class="meta">${plan.length ? `${done}/${plan.length} tamam` : ""}</span></h2>`;
+  h += plan.length ? `<ul class="list">${plan.map(it => `<li class="${it.done?"done":""}">
+      <button class="check" data-act="plantoggle" data-id="${esc(it.id)}" aria-pressed="${!!it.done}" aria-label="Tamamlandı işaretle">${ICON_CHECK}</button>
+      <span class="li-time">${esc(it.time || "")}</span><span class="li-text">${esc(it.title)}</span>
+      <button class="x" data-act="plandel" data-id="${esc(it.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>`
+    : `<p class="empty">${daysBetween(S.today,date) >= 0 ? "Bu gün için plan yok. Aşağıdan ekle ya da Koç'a “yarınımı planla” de." : "Bu gün için plan girilmemiş."}</p>`;
+  h += `<form class="add" id="f-plan"><input class="field" type="time" id="planTime" aria-label="Saat"><input class="field grow" id="planTitle" placeholder="Plana ekle…" autocomplete="off" aria-label="Plan maddesi"><button class="btn">Ekle</button></form>
+    <label class="calchk"><input type="checkbox" id="planCal"> Saatliyse Google Takvim'e de ekle (60 ve 15 dk önce hatırlatma)</label></section>`;
+
+  // tours
+  h += `<section class="card"><h2>Turlar <span class="meta">${S.tours.cache[S.tours.key] && S.tours.cache[S.tours.key].storedAt ? "Takvim · " + fmtHM.format(new Date(S.tours.cache[S.tours.key].storedAt)) : "Tur Programı takvimi"}</span></h2>`;
+  if (S.tours.err && !t) {
+    const [msg, btn] = tourErrorText(S.tours.err);
+    h += `<p class="empty">${esc(msg)}</p>${btn ? `<button class="btn ghost" data-act="tourretry">${btn}</button>` : ""}`;
+  } else if (!t) {
+    h += `<p class="empty">Takvim yükleniyor…</p>`;
+  } else {
+    h += `<div class="tourtot"><div class="kpi"><b class="num">${t.count}</b><span>tur</span></div><div class="kpi"><b class="num">${t.pax}</b><span>kişi</span></div><div class="kpi"><b class="num">${eur(t.net)}</b><span>net</span></div></div>`;
+    h += t.list.length ? t.list.map(x => `<div class="tour"><span class="t">${esc(x.time)}</span>
+        <div><div class="n">${esc(x.name)} <span class="muted">(${x.pax})</span></div><div class="d">${x.platform ? `<span class="pill ${x.platform==="GYG"?"gyg":"via"}">${x.platform==="GYG"?"GYG":"Viator"}</span> ` : ""}${x.guide ? "Rehber: " + esc(x.guide) : ""}</div></div>
+        <span class="pill ${x.closed?"ok":"wait"}">${x.closed?"✓ kapandı":"bekliyor"}</span></div>`).join("") : `<p class="empty">Bu gün tur yok.</p>`;
+    const extra = [t.external ? `${t.external} dış (Vahit)` : "", t.cancelled ? `${t.cancelled} iptal` : ""].filter(Boolean).join(" · ");
+    if (extra) h += `<p class="small muted" style="margin:8px 0 0">${extra}</p>`;
+    if (S.tours.err) h += `<p class="small muted" style="margin:6px 0 0">Son güncelleme alınamadı; gösterilen veri eski olabilir.</p>`;
+  }
+  h += `</section>`;
+
+  // habits
+  const hs = habits();
+  h += `<section class="card"><h2>Alışkanlıklar</h2><div class="habchecks">` +
+    hs.filter(x=>x.type==="check").map(x => `<button class="habchip" data-act="habcheck" data-k="${esc(x.key)}" aria-pressed="${!!(d.checks||{})[x.key]}"><span class="dot"></span>${esc(x.label)}</button>`).join("") + `</div>
+    <div class="counters">` +
+    hs.filter(x=>x.type==="count").map(x => `<div class="counter"><span class="lbl">${esc(x.label)}</span><span class="stepper">
+      <button data-act="cnt" data-k="${esc(x.key)}" data-n="-1" aria-label="${esc(x.label)} azalt">−</button><output>${(d.counts||{})[x.key] ?? 0}</output>
+      <button data-act="cnt" data-k="${esc(x.key)}" data-n="1" aria-label="${esc(x.label)} artır">+</button></span></div>`).join("") +
+    `<div class="counter"><span class="lbl">Uyku (saat)</span><span class="stepper">
+      <button data-act="sleep" data-n="-0.5" aria-label="Uyku azalt">−</button><output>${d.sleep == null ? "—" : nf1.format(d.sleep)}</output>
+      <button data-act="sleep" data-n="0.5" aria-label="Uyku artır">+</button></span></div></div></section>`;
+
+  // mood
+  h += `<section class="card"><h2>Ruh hali <span class="meta">1–10</span></h2>` + MOODS.map(([k,l,c]) => `<div class="slider">
+      <label for="r-${k}"><i style="background:${c}"></i>${l}</label>
+      <input type="range" min="1" max="10" step="1" id="r-${k}" data-mood="${k}" value="${d[k] ?? 5}" class="${d[k]==null?"unset":""}">
+      <output id="o-${k}">${d[k] ?? "—"}</output></div>`).join("") + `</section>`;
+
+  // health
+  const health = d.health || [];
+  h += `<section class="card"><h2>Sağlık</h2>` + (health.length ? `<ul class="list">${health.map(x => `<li><span class="li-time">${esc(x.time||"")}</span><span class="li-text">${esc(x.text)}</span><button class="x" data-act="healthdel" data-id="${esc(x.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>` : `<p class="empty">Kayıt yok. Ağrı, ilaç, belirti… ne olursa yaz.</p>`) +
+    `<form class="add" id="f-health"><input class="field grow" id="healthText" placeholder="Örn. baş ağrısı, sırt" autocomplete="off" aria-label="Sağlık notu"><button class="btn">Ekle</button></form></section>`;
+
+  // wins + note
+  const wins = d.wins || [];
+  h += `<section class="card"><h2>Günün kazanımları</h2>` + (wins.length ? `<ul class="list">${wins.map(x => `<li><span class="li-text">${esc(x.text)}</span><button class="x" data-act="windel" data-id="${esc(x.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>` : `<p class="empty">Bugün neyi başardın?</p>`) +
+    `<form class="add" id="f-win"><input class="field grow" id="winText" placeholder="Başardığın bir şey…" autocomplete="off" aria-label="Kazanım"><button class="btn">Ekle</button></form>
+    <label for="dayNote" class="small muted" style="display:block;margin:12px 0 6px">Günlük not</label>
+    <textarea class="field" id="dayNote" placeholder="Kimle konuştun, ne öğrendin, aklında ne var…">${esc(d.note || "")}</textarea></section>`;
+  return h;
+}
+
+function viewHafta(){
+  const days = weekDays(S.sel), st = days[0], en = days[6];
+  let h = banners();
+  const range = d2u(st).getUTCMonth() === d2u(en).getUTCMonth() ? `${d2u(st).getUTCDate()}–${d2u(en).getUTCDate()} ${AY[d2u(en).getUTCMonth()]}` : `${fmtShort(st)} – ${fmtShort(en)}`;
+  h += `<div class="head"><div><div class="eyebrow">${days.includes(S.today) ? "Bu hafta" : "Hafta"}</div><h1>${esc(range)}</h1></div>
+    <div class="navbtns"><button class="iconbtn" data-act="week" data-n="-1" aria-label="Önceki hafta">${ICON_L}</button><button class="iconbtn" data-act="week" data-n="1" aria-label="Sonraki hafta">${ICON_R}</button></div></div>`;
+  h += `<section class="card"><div class="weekrings">` + days.map(d => `<button class="wr ${d===S.today?"today":""}" data-act="opendate" data-d="${d}" aria-label="${esc(fmtLong(d))}">
+      <span class="a">${GUN_K[dow(d)]}</span>${ring(dayPct(getDay(d)), 42, 5, 10.5, fmtLong(d))}<span class="b">${d2u(d).getUTCDate()}</span></button>`).join("") + `</div></section>`;
+
+  let dn = 0, tot = 0; days.forEach(d => { const p = getDay(d).plan || []; tot += p.length; dn += p.filter(x=>x.done).length; });
+  h += `<section class="card"><h2>Haftalık ilerleme</h2><div class="bigpct"><b class="num">${tot ? Math.round(dn/tot*100) + "%" : "—"}</b><span class="muted">${dn} / ${tot} plan maddesi tamamlandı</span></div>
+    <div class="legend"><span><i class="sq" style="background:var(--s3)"></i>Tamamlanan</span><span><i class="sq" style="background:#2c453c"></i>Kalan</span></div>${planBars(days)}</section>`;
+
+  const tw = days.map(toursFor);
+  h += `<section class="card"><h2>Turlar <span class="meta">Tur Programı</span></h2>`;
+  if (tw.every(x => !x)) {
+    const [msg, btn] = S.tours.err ? tourErrorText(S.tours.err) : ["Takvim yükleniyor…", null];
+    h += `<p class="empty">${esc(msg)}</p>${btn ? `<button class="btn ghost" data-act="tourretry">${btn}</button>` : ""}`;
+  } else {
+    const sum = tw.reduce((a,x) => x ? {c:a.c+x.count, p:a.p+x.pax, n:a.n+x.net, x:a.x+x.cancelled} : a, {c:0,p:0,n:0,x:0});
+    h += `<div class="tourtot"><div class="kpi"><b class="num">${sum.c}</b><span>tur</span></div><div class="kpi"><b class="num">${sum.p}</b><span>kişi</span></div><div class="kpi"><b class="num">${eur(sum.n)}</b><span>net</span></div></div>${tourBars(days)}${sum.x ? `<p class="small muted" style="margin:6px 0 0">${sum.x} iptal sayıya dahil değil.</p>` : ""}`;
+  }
+  h += `</section>`;
+
+  h += `<section class="card"><h2>Zihin takibi</h2><div class="legend">${MOODS.map(([,l,c]) => `<span><i style="background:${c}"></i>${l}</span>`).join("")}</div>${moodLines(days)}</section>`;
+
+  const past = days.filter(d => d <= S.today), n = past.length || 1;
+  const rows = habits().map(x => {
+    if (x.type === "check") { const c = past.filter(d => (getDay(d).checks||{})[x.key]).length; return [x.label, `${c} / ${past.length} gün`]; }
+    const vals = past.map(d => (getDay(d).counts||{})[x.key]).filter(v => v != null);
+    const s = vals.reduce((a,b)=>a+b,0);
+    return [x.label, vals.length ? `toplam ${s} · ort ${nf1.format(s/vals.length)}/gün` : "—"];
+  });
+  const sl = past.map(d => getDay(d).sleep).filter(v => v != null);
+  rows.push(["Uyku", sl.length ? `ort ${nf1.format(sl.reduce((a,b)=>a+b,0)/sl.length)} saat` : "—"]);
+  h += `<section class="card"><h2>Alışkanlık özeti <span class="meta">bugüne kadar</span></h2><div class="rows">${rows.map(([a,b]) => `<div class="row"><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join("")}</div></section>`;
+  return h;
+}
+
+function viewAliskanlik(){
+  const ym = S.month, md = monthDays(ym), past = md.filter(d => d <= S.today);
+  const hs = habits();
+  let h = banners();
+  h += `<div class="head"><div><div class="eyebrow">Alışkanlık takibi</div><h1>${esc(monthName(ym))}</h1></div>
+    <div class="navbtns"><button class="iconbtn" data-act="month" data-n="-1" aria-label="Önceki ay">${ICON_L}</button><button class="iconbtn" data-act="month" data-n="1" aria-label="Sonraki ay">${ICON_R}</button></div></div>`;
+  const checks = hs.filter(x => x.type === "check");
+  const rates = checks.map(x => past.length ? past.filter(d => (getDay(d).checks||{})[x.key]).length / past.length : null);
+  const valid = rates.filter(r => r != null);
+  const overall = valid.length ? valid.reduce((a,b)=>a+b,0)/valid.length : null;
+  h += `<section class="card"><div class="bigpct"><b class="num">${overall == null ? "—" : Math.round(overall*100) + "%"}</b><span class="muted">alışkanlık başarısı (${checks.map(x=>x.label).join(", ") || "işaretli alışkanlık yok"})</span></div><div class="rows">` +
+    hs.map(x => {
+      if (x.type === "check") { const c = past.filter(d => (getDay(d).checks||{})[x.key]).length; const r = past.length ? c/past.length : 0;
+        return `<div class="row" style="align-items:center"><span style="min-width:96px">${esc(x.label)}</span><span class="bar" style="flex:1"><i style="width:${Math.round(r*100)}%"></i></span><b>${c}/${past.length}</b></div>`; }
+      const vals = past.map(d => (getDay(d).counts||{})[x.key]).filter(v => v != null); const s = vals.reduce((a,b)=>a+b,0);
+      return `<div class="row"><span>${esc(x.label)}</span><b>${vals.length ? `ort ${nf1.format(s/vals.length)}/gün · toplam ${s}` : "—"}</b></div>`;
+    }).join("") + `</div></section>`;
+
+  // grid
+  h += `<section class="card"><h2>Aylık tablo <span class="meta">kutuya dokun: işaretle</span></h2><div class="gridwrap"><table class="hg"><thead><tr><th class="rowh"></th>` +
+    md.map(d => `<th class="${d===S.today?"tcol":""}">${d2u(d).getUTCDate()}</th>`).join("") + `</tr></thead><tbody>`;
+  for (const x of hs) {
+    let maxC = 1; if (x.type === "count") md.forEach(d => { const v = (getDay(d).counts||{})[x.key]; if (v > maxC) maxC = v; });
+    h += `<tr><th class="rowh" scope="row">${esc(x.label)}</th>` + md.map(d => {
+      const fut = d > S.today;
+      if (x.type === "check") { const on = !!(getDay(d).checks||{})[x.key];
+        return `<td class="${on?"c1":"c0"} ${fut?"fut":""}">${fut ? "" : `<button data-act="gridcheck" data-k="${esc(x.key)}" data-d="${d}" aria-label="${esc(x.label)} ${d}" aria-pressed="${on}"></button>`}</td>`; }
+      const v = (getDay(d).counts||{})[x.key];
+      const a = v == null ? 0 : .15 + .7*(v/maxC);
+      return `<td class="${fut?"fut":""}" style="${v==null?"border:1px solid var(--line)":`background:rgba(57,135,229,${a.toFixed(2)})`}">${fut ? "" : `<button data-act="opendate" data-d="${d}" aria-label="${esc(x.label)} ${d}">${v ?? ""}</button>`}</td>`;
+    }).join("") + `</tr>`;
+  }
+  h += `<tr><th class="rowh" scope="row">Uyku</th>` + md.map(d => { const v = getDay(d).sleep; return `<td class="${d>S.today?"fut":""}" style="${v==null?"border:1px solid var(--line)":`background:rgba(57,135,229,${(.15+.7*Math.min(1,v/10)).toFixed(2)})`}">${d>S.today?"":`<button data-act="opendate" data-d="${d}" aria-label="Uyku ${d}">${v==null?"":Math.round(v)}</button>`}</td>`; }).join("") + `</tr>`;
+  h += `</tbody></table></div></section>`;
+
+  // edit habits
+  h += `<section class="card"><h2>Alışkanlıklarım <button class="chip ${S.habitEdit?"on":""}" data-act="habedit">${S.habitEdit ? "Bitti" : "Düzenle"}</button></h2>`;
+  if (S.habitEdit) {
+    h += `<ul class="list">${hs.map(x => `<li><span class="li-text">${esc(x.label)} <span class="muted small">· ${x.type==="check"?"yapıldı/yapılmadı":"sayaç"}</span></span><button class="minibtn danger" data-act="habdel" data-k="${esc(x.key)}">${S.confirmDel === "hab:"+x.key ? "Emin misin?" : "Sil"}</button></li>`).join("")}</ul>
+      <form class="formgrid" id="f-habit"><input class="field full" id="habName" placeholder="Yeni alışkanlık (örn. Meditasyon)" autocomplete="off" aria-label="Alışkanlık adı">
+      <select class="field" id="habType" aria-label="Tür"><option value="check">Yapıldı / yapılmadı</option><option value="count">Sayaç</option></select><button class="btn">Ekle</button></form>`;
+  } else {
+    h += `<p class="small muted" style="margin:0">${hs.map(x=>esc(x.label)).join(" · ")}</p>`;
+  }
+  return h + `</section>`;
+}
+
+function goalBlock(list){
+  if (!list.length) return `<p class="empty">Henüz hedef yok.</p>`;
+  return list.map(g => `<div class="goal"><div class="top"><span class="title">${esc(g.title)}</span><span class="area">${esc(AREAS[g.area] || "Genel")}</span></div>
+    ${g.next ? `<div class="next">Sonraki adım: ${esc(g.next)}</div>` : ""}
+    <div class="gctl"><button class="minibtn" data-act="gprog" data-id="${esc(g.id)}" data-n="-10" aria-label="İlerlemeyi azalt">−10</button><span class="bar"><i style="width:${g.progress||0}%"></i></span><b>${g.progress||0}%</b><button class="minibtn" data-act="gprog" data-id="${esc(g.id)}" data-n="10" aria-label="İlerlemeyi artır">+10</button>
+    <button class="minibtn danger" data-act="gdel" data-id="${esc(g.id)}">${S.confirmDel === "g:"+g.id ? "Emin?" : "Sil"}</button></div></div>`).join("");
+}
+function viewHedefler(){
+  const gl = Object.entries(S.goals).map(([id,g]) => Object.assign({id}, g)).sort((a,b) => (a.createdAt||"") < (b.createdAt||"") ? -1 : 1);
+  const left = daysBetween(S.today, "2026-12-31");
+  const y2 = String(Number(S.today.slice(0,4)) + 2);
+  let h = banners();
+  h += `<div class="head"><div><div class="eyebrow">${left >= 0 ? `Yıl sonuna ${left} gün` : "Hedefler"}</div><h1>Hedefler</h1></div></div>`;
+  h += `<section class="card"><h2>2026 sonu <span class="meta">31 Aralık</span></h2>${goalBlock(gl.filter(g => g.horizon === "2026"))}</section>`;
+  h += `<section class="card"><h2>2 yıl <span class="meta">${AY[d2u(S.today).getUTCMonth()]} ${y2}</span></h2>${goalBlock(gl.filter(g => g.horizon !== "2026"))}</section>`;
+  h += `<section class="card"><h2>Yeni hedef</h2><form class="formgrid" id="f-goal" style="margin-top:0">
+      <input class="field full" id="gTitle" placeholder="Hedef (örn. Hello Rides'ı açmak)" autocomplete="off" aria-label="Hedef">
+      <select class="field" id="gHorizon" aria-label="Süre"><option value="2026">2026 sonu</option><option value="${y2}">2 yıl (${y2})</option></select>
+      <select class="field" id="gArea" aria-label="Alan">${Object.entries(AREAS).map(([k,v]) => `<option value="${k}">${v}</option>`).join("")}</select>
+      <input class="field full" id="gNext" placeholder="Sonraki somut adım (isteğe bağlı)" autocomplete="off" aria-label="Sonraki adım">
+      <button class="btn full">Hedefi ekle</button></form>
+      <p class="hint" style="margin:10px 0 0">Ne istediğinden emin değilsen: <button class="chip" data-act="ask" data-q="Hedeflerimi birlikte yazalım: 2026 sonu ve 2 yıl için iş, sağlık, para ve kişisel hayat. Bana sorular sor.">Koç'la birlikte yaz</button></p></section>`;
+
+  const nl = Object.entries(S.notes).map(([id,n]) => Object.assign({id}, n)).sort((a,b) => (a.createdAt||"") < (b.createdAt||"") ? -1 : 1);
+  h += `<section class="card"><h2>Odak listesi</h2><div class="focusgrp">` + Object.entries(FOCUS).map(([k,label]) => {
+    const items = nl.filter(n => n.kind === k);
+    return `<h3>${label}</h3>` + (items.length ? `<ul class="list">${items.map(n => `<li class="${n.done?"done":""}"><button class="check" data-act="ntoggle" data-id="${esc(n.id)}" aria-pressed="${!!n.done}" aria-label="Tamamlandı">${ICON_CHECK}</button><span class="li-text">${esc(n.text)}</span><button class="x" data-act="ndel" data-id="${esc(n.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>` : `<p class="empty">Boş.</p>`);
+  }).join("") + `</div><form class="formgrid" id="f-note"><select class="field" id="nKind" aria-label="Liste">${Object.entries(FOCUS).map(([k,v]) => `<option value="${k}">${v}</option>`).join("")}</select>
+    <input class="field" id="nText" placeholder="Örn. Paolo'yu ara" autocomplete="off" aria-label="Madde"><button class="btn full">Listeye ekle</button></form></section>`;
+  return h;
+}
+
+function md(t){
+  const inl = s => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  let out = "", inList = false;
+  for (const l of esc(t).split("\n")) {
+    const m = l.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)/);
+    if (m) { if (!inList) { out += "<ul>"; inList = true; } out += `<li>${inl(m[1])}</li>`; continue; }
+    if (inList) { out += "</ul>"; inList = false; }
+    if (!l.trim()) continue;
+    out += /^#{1,4}\s/.test(l) ? `<p class="mh">${inl(l.replace(/^#+\s/,""))}</p>` : `<p>${inl(l)}</p>`;
+  }
+  return out + (inList ? "</ul>" : "");
+}
+const QUICK = ["Yarınımı planla", "Bugünü değerlendir", "Bu hafta nasıldı?", "Bu hafta kaç tur yaptık?", "Sigarayı azaltmak için plan", "Bu hafta için antrenman programı"];
+const claudeLink = t => "https://claude.ai/new?q=" + encodeURIComponent("Hayat Paneli: " + t);
+function viewClaude(){
+  let h = banners();
+  h += `<div class="head"><div><div class="eyebrow">Gelen kutusu</div><h1>Claude</h1></div></div>`;
+  h += `<section class="card"><p style="margin:0 0 10px">Alttaki kutuya söylediğin her şey buraya düşer. Basit kayıtları (sigara, su, spor, çiş, uyku…) uygulama hemen işler. Randevu, plan, hedef ve soruları Claude 08:00–23:00 arası her saat işler, cevabı buraya yazar ve bildirim gönderir.</p>
+    <div class="chiprow">${QUICK.map(q => `<button class="chip" data-act="ask" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div></section>`;
+  const list = (S.gelen || []).filter(g => g.durum !== "iptal").slice().reverse().slice(0, 40);
+  if (!list.length) h += `<p class="empty">Henüz bir şey söylemedin.</p>`;
+  h += `<section class="msgs">` + list.map(g => {
+    const t = g.zaman ? new Date(g.zaman) : null;
+    const when = t && !isNaN(t) ? `${fmtShort(fmtYMD.format(t))} · ${fmtHM.format(t)}` : "";
+    let out = `<div class="msg u">${esc(g.metin)}<span class="when">${esc(when)}</span></div>`;
+    if (g.durum === "bekliyor") out += `<div class="msg a pending"><p>${g.gonderildi === false ? "Telefonda bekliyor; internet gelince gönderilecek." : "Claude işleyecek (en geç 1 saat)."}</p>
+        <div class="ab-acts"><a class="minibtn" href="${claudeLink(g.metin)}" target="_blank" rel="noopener">Claude'da hemen aç</a><button class="minibtn" data-act="gelenIptal" data-id="${esc(g.id)}">İptal et</button></div></div>`;
+    else if (g.durum === "uygulama") out += `<div class="msg a"><p class="who">Uygulama kaydetti</p>${md(g.sonuc || "")}</div>`;
+    else out += `<div class="msg a"><p class="who">Claude</p>${md(g.sonuc || "Tamam.")}</div>`;
+    return out;
+  }).join("") + `</section>`;
+  h += `<section class="card"><h2>Bu telefon</h2><p class="small muted" style="margin:0 0 10px">${OTURUM ? "Google'daki verilerine bağlı." : "Bağlı değil."}</p>${OTURUM ? `<button class="minibtn danger" data-act="cikis">${S.confirmDel === "cikis" ? "Emin misin? Tekrar bas" : "Bu telefondan çıkış yap"}</button>` : ""}</section>`;
+  return h;
+}
+
+/* ---------- logging helpers (also used by undo) ---------- */
+let undoRec = null;
+function curVal(path){
+  if (path === "meta/settings") return S.settings;
+  const [col, id] = path.split("/");
+  const t = col === "days" ? S.days : col === "goals" ? S.goals : col === "notes" ? S.notes : null;
+  return t ? t[id] : undefined;
+}
+function touch(path){ if (undoRec && !(path in undoRec)) { const v = curVal(path); undoRec[path] = v ? clone(v) : null; } }
+const trLow = s => String(s || "").toLocaleLowerCase("tr").trim();
+const SYN = {"çiş":"cis","cis":"cis","küçük tuvalet":"cis","idrar":"cis","kaka":"buyuk","büyük":"buyuk","büyük tuvalet":"buyuk","buyuk":"buyuk","sigara":"sigara","su":"su","spor":"spor","gym":"spor","antrenman":"spor","okuma":"okuma","kitap":"okuma"};
+function habitKey(k){
+  const l = trLow(k); if (SYN[l]) return SYN[l];
+  const h = habits().find(x => x.key === l || trLow(x.label) === l); if (h) return h.key;
+  return l.replace(/[^a-z0-9çğıöşü]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || "diger";
+}
+const habitLabel = k => (habits().find(h => h.key === k) || {label: k}).label;
+function logDay(i){
+  const date = S.today, done = [];
+  touch("days/" + date);
+  const d = S.days[date] || (S.days[date] = blankDay(date));
+  d.counts = d.counts || {}; d.checks = d.checks || {};
+  for (const [k0, v] of Object.entries(i.sayac_ekle || {})) { const n = Math.round(Number(v)); if (!isFinite(n)) continue; const k = habitKey(k0); d.counts[k] = Math.max(0, (d.counts[k] || 0) + n); done.push(`${habitLabel(k)} +${n} (bugün ${d.counts[k]})`); }
+  for (const [k0, v] of Object.entries(i.isaretle || {})) { const k = habitKey(k0); d.checks[k] = !!v; done.push(`${habitLabel(k)} ✓`); }
+  if (i.uyku != null) { d.sleep = Math.max(0, Math.min(16, Math.round(Number(i.uyku) * 2) / 2)); done.push(`uyku ${nf1.format(d.sleep)} sa`); }
+  saveDay(date); scheduleRender();
+  return {yapilan: done};
+}
+
+/* ---------- instant parser for simple Turkish logs; anything else goes to Claude ---------- */
+const SAYI = {"bir":1,"iki":2,"üç":3,"uç":3,"dört":4,"beş":5,"altı":6,"yedi":7,"sekiz":8,"dokuz":9,"on":10,"yarım":0.5};
+const NUMRE = "(\\d+(?:[.,]\\d+)?|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on|yarım)";
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const sayiOku = s => s == null ? null : (SAYI[s] != null ? SAYI[s] : Number(String(s).replace(",", ".")));
+function localParse(text){
+  const t = trLow(text).replace(/[.!]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!t) return null;
+  if (/(\?|\bdün\b|yarın|geçen|haftaya|pazartesi|salı|çarşamba|perşembe|\bcuma\b|cumartesi|\bpazar\b|\d{1,2}[:.]\d{2}|\bsaat \d|randevu|toplantı|hedef|plan|\bkaç\b|nasıl|ne zaman|neden|hatırlat|ekle|yaz\b)/.test(t)) return null;
+  const parts = t.split(/\s*(?:,|;|\bve\b|\bsonra\b|\bayrıca\b|\bbir de\b)\s*/).filter(Boolean);
+  const op = {sayac_ekle: {}, isaretle: {}}; let any = false, m;
+  const add = (k, n) => { op.sayac_ekle[k] = (op.sayac_ekle[k] || 0) + n; any = true; };
+  const re = s => new RegExp("^" + s + "$");
+  for (const p of parts) {
+    if (/(m[ae]d[ıi]m|m[ae]d[ıi]k|\byok\b|değil|olmadı|azalt|\bsil\b|yanlış|iptal|geri al)/.test(p)) return null;
+    if ((m = p.match(re("(?:" + NUMRE + "\\s*(?:tane|adet|dal)?\\s*)?sigara(?:\\s+(?:içtim|yaktım))?")))) { add("sigara", m[1] ? sayiOku(m[1]) : 1); continue; }
+    if ((m = p.match(re("(?:" + NUMRE + "\\s*(?:bardak|tane)?\\s*)?su(?:\\s+içtim)?")))) { add("su", m[1] ? sayiOku(m[1]) : 1); continue; }
+    if ((m = p.match(re("(?:" + NUMRE + "\\s*(?:kez|kere|defa)\\s*)?(?:çiş(?:e gittim|imi yaptım| yaptım)?|küçük tuvalet(?:e gittim)?)")))) { add("cis", m[1] ? sayiOku(m[1]) : 1); continue; }
+    if ((m = p.match(re("(?:" + NUMRE + "\\s*(?:kez|kere|defa)\\s*)?(?:kaka(?: yaptım)?|büyük tuvalet(?:e gittim)?|büyük abdest(?:imi yaptım)?)")))) { add("buyuk", m[1] ? sayiOku(m[1]) : 1); continue; }
+    if (/^(spor(?: yaptım)?|gym(?:e gittim)?|salona gittim|antrenman(?: yaptım)?|koştum|koşu(?: yaptım)?|yüzdüm|fitness(?: yaptım)?)$/.test(p)) { op.isaretle.spor = true; any = true; continue; }
+    if (/^(kitap okudum|kitap|okudum|okuma(?: yaptım)?)$/.test(p)) { op.isaretle.okuma = true; any = true; continue; }
+    if ((m = p.match(re(NUMRE + "\\s*saat\\s*(?:uyudum|uyku)"))) || (m = p.match(re("uyku\\s*" + NUMRE + "(?:\\s*saat)?")))) { op.uyku = sayiOku(m[1]); any = true; continue; }
+    const cnt = habits().filter(h => h.type === "count" && !["sigara","su","cis","buyuk"].includes(h.key));
+    const hit = cnt.find(h => (m = p.match(re("(?:" + NUMRE + "\\s*(?:tane|bardak|fincan|kez|kere)?\\s*)?" + escRe(trLow(h.label)) + "(?:\\s+\\S+)?"))));
+    if (hit) { add(hit.key, m[1] ? sayiOku(m[1]) : 1); continue; }
+    const hitC = habits().find(h => h.type === "check" && p === trLow(h.label));
+    if (hitC) { op.isaretle[hitC.key] = true; any = true; continue; }
+    return null;
+  }
+  if (!any) return null;
+  for (const k in op.sayac_ekle) { const n = Math.round(op.sayac_ekle[k]); if (!isFinite(n) || n <= 0 || n > 60) return null; op.sayac_ekle[k] = n; }
+  if (op.uyku != null && !(op.uyku > 0 && op.uyku <= 16)) return null;
+  return op;
+}
+
+/* ---------- bottom bar ---------- */
+const abPanel = document.getElementById("abPanel"), abInput = document.getElementById("abInput");
+function renderAgent(){
+  const a = S.agent;
+  document.getElementById("agentbar").hidden = !OTURUM && S.mode !== "mock";
+  micUI();
+  if (!a.open) { abPanel.hidden = true; return; }
+  abPanel.hidden = false;
+  let h = a.you ? `<div class="ab-you">Sen: ${esc(a.you)}</div>` : "";
+  if (a.reply) h += `<div class="ab-reply">${md(a.reply)}</div>`;
+  if (a.error) h += `<div class="ab-reply err"><p>${esc(a.error)}</p></div>`;
+  h += `<div class="ab-acts">${a.undo ? `<button class="minibtn" data-act="abundo">Geri al</button>` : ""}${a.pending ? `<a class="minibtn" href="${claudeLink(a.you)}" target="_blank" rel="noopener">Claude'da hemen aç</a><button class="minibtn" data-act="gelenIptal" data-id="${esc(a.gelenId)}">İptal et</button>` : ""}<button class="minibtn" data-act="abclose">Kapat</button></div>`;
+  abPanel.innerHTML = h;
+}
+function growInput(){ abInput.style.height = "auto"; abInput.style.height = Math.min(120, abInput.scrollHeight) + "px"; }
+function runAgent(text){
+  text = String(text || "").trim(); const a = S.agent;
+  if (!text) return;
+  abInput.value = ""; growInput();
+  a.open = true; a.you = text; a.reply = ""; a.error = null; a.undo = null; a.pending = false;
+  const id = "g" + uid(), zaman = new Date().toISOString();
+  a.gelenId = id;
+  const op = localParse(text);
+  if (op) {
+    undoRec = {};
+    let r; try { r = logDay(op); } finally { a.undo = undoRec && Object.keys(undoRec).length ? undoRec : null; undoRec = null; }
+    const ozet = "Kaydettim: " + r.yapilan.join(", ") + ".";
+    a.reply = ozet;
+    const k = {id, metin: text, durum: "uygulama", sonuc: ozet, zaman, gonderildi: false};
+    S.gelen.push(k); gelenGonder(k);
+  } else {
+    a.pending = true;
+    a.reply = "Claude'a ilettim. En geç 1 saat içinde işler ve bildirim gönderir; cevabı Claude sekmesinde görürsün.";
+    const k = {id, metin: text, durum: "bekliyor", sonuc: "", zaman, gonderildi: false};
+    S.gelen.push(k); gelenGonder(k);
+  }
+  render();
+}
+function undoAgent(){
+  const a = S.agent, u = a.undo; if (!u) return;
+  for (const [path, prev] of Object.entries(u)) {
+    if (path === "meta/settings") { S.settings = prev ? clone(prev) : null; queueSave(path, prev ? clone(prev) : null, 0); continue; }
+    const [col, id] = path.split("/");
+    const t = col === "days" ? S.days : col === "goals" ? S.goals : S.notes;
+    if (prev === null) { delete t[id]; queueSave(path, null, 0); } else { t[id] = clone(prev); queueSave(path, clone(prev), 0); }
+  }
+  gelenIptal(a.gelenId);
+  a.undo = null; a.reply += "\n\n(Geri alındı.)"; render();
+}
+function gelenIptal(id){
+  const g = S.gelen.find(x => x.id === id); if (!g) return;
+  g.durum = "iptal";
+  const kuyruk = (LS.get(K_GELEN_KUYRUK) || []).filter(x => x.id !== id);
+  const queued = kuyruk.length !== (LS.get(K_GELEN_KUYRUK) || []).length;
+  LS.set(K_GELEN_KUYRUK, kuyruk);
+  if (!queued && S.mode !== "mock") api("gelenIptal", {id}).catch(() => {});
+  if (S.agent.gelenId === id) { S.agent.pending = false; S.agent.reply = "İptal edildi."; }
+  cacheSave(); render();
+}
+
+/* voice: Safari's speech recognition when available, otherwise the keyboard mic */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, recOn = false;
+function micUI(){
+  const b = document.getElementById("abMic"); if (!b) return;
+  b.hidden = !SR; b.classList.toggle("on", recOn);
+  b.setAttribute("aria-label", recOn ? "Dinlemeyi durdur" : "Sesle söyle");
+  abInput.placeholder = recOn ? "Dinliyorum…" : SR ? "Söyle ya da yaz…" : "Yaz ya da klavyedeki 🎤 ile söyle…";
+}
+function micToggle(){
+  if (!SR) return;
+  if (recOn) { try { rec.stop(); } catch (e) {} return; }
+  let final = "";
+  rec = new SR(); rec.lang = "tr-TR"; rec.interimResults = true; rec.continuous = false;
+  rec.onresult = e => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; abInput.value = t; growInput(); final = t; };
+  rec.onerror = e => {
+    recOn = false; micUI();
+    if (e.error === "not-allowed" || e.error === "service-not-allowed") { S.agent.open = true; S.agent.you = ""; S.agent.reply = ""; S.agent.error = "Mikrofon izni yok. Klavyedeki 🎤 ile söyleyebilirsin."; renderAgent(); }
+  };
+  rec.onend = () => { recOn = false; micUI(); if (final.trim()) runAgent(final); };
+  try { rec.start(); recOn = true; micUI(); } catch (e) { recOn = false; micUI(); }
+}
+
+function scrollChat(){ if (S.tab === "koc") { const m = document.getElementById("main"); m.scrollTop = m.scrollHeight; } }
+
+/* ---------- render ---------- */
+const view = document.getElementById("view");
+let renderPending = false;
+function typing(){ const a = document.activeElement; return a && view.contains(a) && (a.tagName === "TEXTAREA" || a.tagName === "SELECT" || (a.tagName === "INPUT" && a.type !== "range")); }
+function scheduleRender(){ if (typing()) { renderPending = true; return; } render(); }
+view.addEventListener("focusout", () => { if (renderPending) setTimeout(() => { if (!typing() && renderPending) { renderPending = false; render(); } }, 60); });
+function render(focusId){
+  renderPending = false;
+  const fn = {bugun: viewBugun, hafta: viewHafta, aliskanlik: viewAliskanlik, hedefler: viewHedefler, koc: viewClaude}[S.tab] || viewBugun;
+  view.innerHTML = fn();
+  document.querySelectorAll("#tabs a").forEach(a => a.setAttribute("aria-current", a.dataset.tab === S.tab ? "page" : "false"));
+  if (focusId) { const el = document.getElementById(focusId); if (el) el.focus({preventScroll:true}); }
+  renderAgent();
+}
+
+/* ---------- events ---------- */
+function readHash(){ const h = location.hash.replace("#",""); S.tab = ["bugun","hafta","aliskanlik","hedefler","koc"].includes(h) ? h : "bugun"; }
+window.addEventListener("hashchange", () => { if (/^#giris=/.test(location.hash)) { const l = location.hash.slice(7); try { history.replaceState(null, "", location.pathname + "#bugun"); } catch (e) {} girisYap(l); } readHash(); hideTip(); render(); document.getElementById("main").scrollTop = 0; });
+function setSel(d){ S.sel = d; S.month = d.slice(0,7); watchTours(); render(); }
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!e.target.closest("[data-tip]")) hideTip();
+  if (!b) return;
+  const a = b.dataset.act, n = Number(b.dataset.n), id = b.dataset.id, k = b.dataset.k;
+  if (a !== "gdel" && a !== "habdel" && a !== "ndel" && a !== "cikis") S.confirmDel = null;
+  switch (a) {
+    case "day": setSel(addDays(S.sel, n)); document.getElementById("main").scrollTop = 0; break;
+    case "goday": setSel(b.dataset.d); break;
+    case "week": setSel(addDays(S.sel, 7*n)); break;
+    case "month": S.month = addMonths(S.month, n); render(); break;
+    case "opendate": setSel(b.dataset.d); location.hash = "#bugun"; break;
+    case "plantoggle": editDay(S.sel, d => { const it = (d.plan||[]).find(x => x.id === id); if (it) it.done = !it.done; }); render(); break;
+    case "plandel": editDay(S.sel, d => { d.plan = (d.plan||[]).filter(x => x.id !== id); }); render(); break;
+    case "healthdel": editDay(S.sel, d => { d.health = (d.health||[]).filter(x => x.id !== id); }); render(); break;
+    case "windel": editDay(S.sel, d => { d.wins = (d.wins||[]).filter(x => x.id !== id); }); render(); break;
+    case "habcheck": editDay(S.sel, d => { d.checks = d.checks || {}; d.checks[k] = !d.checks[k]; }); render(); break;
+    case "gridcheck": editDay(b.dataset.d, d => { d.checks = d.checks || {}; d.checks[k] = !d.checks[k]; }); render(); break;
+    case "cnt": editDay(S.sel, d => { d.counts = d.counts || {}; d.counts[k] = Math.max(0, (d.counts[k] || 0) + n); }); render(); break;
+    case "sleep": editDay(S.sel, d => { const v = d.sleep == null ? (n > 0 ? 7 : 7) : d.sleep + n; d.sleep = Math.max(0, Math.min(16, v)); }); render(); break;
+    case "tourretry": watchTours(true); break;
+    case "habedit": S.habitEdit = !S.habitEdit; render(); break;
+    case "habdel":
+      if (S.confirmDel !== "hab:" + k) { S.confirmDel = "hab:" + k; render(); break; }
+      S.confirmDel = null; S.settings = {habits: habits().filter(x => x.key !== k)}; saveSettings(); render(); break;
+    case "gprog": { const g = S.goals[id]; if (g) { g.progress = Math.max(0, Math.min(100, (g.progress||0) + n)); saveGoal(id); render(); } break; }
+    case "gdel": if (S.confirmDel !== "g:" + id) { S.confirmDel = "g:" + id; render(); } else { S.confirmDel = null; delGoal(id); render(); } break;
+    case "ntoggle": { const nn = S.notes[id]; if (nn) { nn.done = !nn.done; saveNote(id); render(); } break; }
+    case "ndel": delNote(id); render(); break;
+    case "ask": runAgent(b.dataset.q); break;
+    case "abundo": undoAgent(); break;
+    case "abclose": S.agent.open = false; renderAgent(); break;
+    case "gelenIptal": gelenIptal(id); break;
+    case "mic": micToggle(); break;
+    case "giris": girisYap(document.getElementById("gLink").value); break;
+    case "yapistir": if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(t => { document.getElementById("gLink").value = t; girisYap(t); }).catch(() => { document.getElementById("gHata").textContent = "Pano okunamadı; linki uzun basıp yapıştır."; }); break;
+    case "linkkopyala": if (OTURUM && navigator.clipboard) navigator.clipboard.writeText(OTURUM.adres + "?k=" + OTURUM.k).then(() => { S.kopyalandi = true; render(); }).catch(() => {}); break;
+    case "cikis": if (S.confirmDel !== "cikis") { S.confirmDel = "cikis"; render(); } else { S.confirmDel = null; cikis(false); } break;
+  }
+});
+
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target, val = id => (document.getElementById(id) || {}).value || "";
+  switch (f.id) {
+    case "f-plan": { const title = val("planTitle").trim(); if (!title) return; const time = val("planTime"); const cal = (document.getElementById("planCal") || {}).checked; const date = S.sel;
+      editDay(date, d => { d.plan = (d.plan||[]).concat([{id: uid(), time, title, done:false}]); }); render("planTitle");
+      if (cal && time && S.mode !== "mock") api("randevu", {baslik: title, tarih: date, saat: time}).then(() => { S.note = `“${title}” Google Takvim'e eklendi.`; render(); setTimeout(() => { S.note = null; scheduleRender(); }, 6000); }).catch(e => { S.banner = "Takvime eklenemedi: " + hataMetni(e); render(); });
+      break; }
+    case "f-health": { const text = val("healthText").trim(); if (!text) return;
+      editDay(S.sel, d => { d.health = (d.health||[]).concat([{id: uid(), time: S.sel === S.today ? nowHM() : "", text}]); }); render("healthText"); break; }
+    case "f-win": { const text = val("winText").trim(); if (!text) return;
+      editDay(S.sel, d => { d.wins = (d.wins||[]).concat([{id: uid(), text}]); }); render("winText"); break; }
+    case "f-goal": { const title = val("gTitle").trim(); if (!title) return; const id = uid();
+      S.goals[id] = {title, horizon: val("gHorizon"), area: val("gArea"), next: val("gNext").trim(), progress: 0, createdAt: new Date().toISOString()}; saveGoal(id); render(); break; }
+    case "f-note": { const text = val("nText").trim(); if (!text) return; const id = uid();
+      S.notes[id] = {kind: val("nKind"), text, done: false, createdAt: new Date().toISOString()}; saveNote(id); render("nText"); break; }
+    case "f-habit": { const label = val("habName").trim(); if (!label) return;
+      const key = label.toLocaleLowerCase("tr").replace(/[^a-z0-9çğıöşü]+/g, "").slice(0,16) + "_" + uid().slice(0,3);
+      S.settings = {habits: habits().concat([{key, label, type: val("habType") === "count" ? "count" : "check"}])}; saveSettings(); render("habName"); break; }
+    case "f-agent": runAgent(abInput.value); break;
+  }
+});
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.mood) { const o = document.getElementById("o-" + t.dataset.mood); if (o) o.textContent = t.value; t.classList.remove("unset"); }
+  if (t.id === "dayNote") { const date = S.sel; const d = S.days[date] || (S.days[date] = blankDay(date)); d.note = t.value; d.updatedAt = new Date().toISOString(); queueSave("days/" + date, clone(d), 900); }
+});
+abInput.addEventListener("input", growInput);
+abInput.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); runAgent(abInput.value); } });
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.mood) { const k = t.dataset.mood, v = Number(t.value); editDay(S.sel, d => { d[k] = v; }); }
+});
+
+/* tooltips for charts */
+const tip = document.getElementById("tip");
+function hideTip(){ tip.hidden = true; }
+function showTip(el, x, y){
+  tip.innerHTML = el.getAttribute("data-tip"); tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, x - w/2)) + "px";
+  tip.style.top = Math.max(8, y - h - 14) + "px";
+}
+document.addEventListener("pointerover", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el && e.pointerType === "mouse") showTip(el, e.clientX, e.clientY); });
+document.addEventListener("pointerout", e => { if (e.pointerType === "mouse" && e.target.closest && e.target.closest("[data-tip]")) hideTip(); });
+document.addEventListener("pointerup", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el && e.pointerType !== "mouse") showTip(el, e.clientX, e.clientY); });
+document.getElementById("main").addEventListener("scroll", hideTip, {passive:true});
+
+/* day rollover */
+setInterval(() => { const t = todayStr(); if (t !== S.today) { const wasToday = S.sel === S.today; S.today = t; if (wasToday) setSel(t); else scheduleRender(); } }, 60000);
+
+/* ---------- preview data (only when opened as a local file) ---------- */
+function loadMock(){
+  S.mode = "mock"; S.loaded = true;
+  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const titles = ["Ortaklarla haftalık toplantı","Paolo'yu ara (şirket evrakı)","GYG ilan fotoğraflarını güncelle","Spor salonu","20 sayfa kitap","Muhasebe kontrolü","Vespa bakımı"];
+  for (let i = -12; i <= 1; i++) {
+    const date = addDays(S.today, i), d = blankDay(date), n = 3 + Math.floor(rnd()*4);
+    d.plan = Array.from({length:n}, (_,j) => ({id: uid(), time: j < 2 ? ["09:30","12:00","16:00"][j] : "", title: titles[(j + i + 20) % titles.length], done: i < 0 ? rnd() > .3 : i === 0 ? j < 2 : false}));
+    if (i <= 0) {
+      d.checks = {spor: rnd() > .45, okuma: rnd() > .5};
+      d.counts = {sigara: 2 + Math.floor(rnd()*6), su: 4 + Math.floor(rnd()*5), cis: 5 + Math.floor(rnd()*4), buyuk: 1 + Math.floor(rnd()*2)};
+      d.sleep = 6 + Math.round(rnd()*4)/2; d.energy = 4 + Math.floor(rnd()*6); d.mood = 4 + Math.floor(rnd()*6); d.focus = 3 + Math.floor(rnd()*7);
+    }
+    if (i === 0) { d.health = [{id: uid(), time: "11:20", text: "Hafif baş ağrısı"}]; d.wins = [{id: uid(), text: "8 turun hepsi rehberli çıktı"}]; }
+    S.days[date] = d;
+  }
+  S.goals = {g1: {title: "Hello Rides S.r.l. kuruluşunu bitirmek", horizon: "2026", area: "is", progress: 60, next: "Paolo ile noter randevusu", createdAt: "1"},
+             g2: {title: "Sigarayı günde 3'ün altına indirmek", horizon: "2026", area: "saglik", progress: 30, next: "Sabah ilk sigarayı kahveden sonraya at", createdAt: "2"}};
+  S.notes = {n1: {kind: "konus", text: "Paolo — şirket evrakı", done: false, createdAt: "1"}};
+  S.gelen = [{id: "m1", zaman: new Date(Date.now() - 3600e3).toISOString(), metin: "Salı 10:00 dişçi", durum: "islendi", sonuc: "Salı 10:00 dişçi randevunu Google Takvim'e ekledim (60 ve 15 dk önce hatırlatma)."},
+             {id: "m2", zaman: new Date(Date.now() - 600e3).toISOString(), metin: "2 sigara, spor yaptım", durum: "uygulama", sonuc: "Kaydettim: Sigara +2 (bugün 6), Spor ✓."},
+             {id: "m3", zaman: new Date().toISOString(), metin: "Bu hafta kaç tur yaptık?", durum: "bekliyor", sonuc: ""}];
+  const key = weekStart(S.sel); S.tours.key = key;
+  const ev = []; weekDays(S.sel).forEach((d, i) => { const n = [6,5,8,7,9,11,10][i]; for (let j = 0; j < n; j++) ev.push({date: d, time: `${String(9 + j).padStart(2,"0")}:00`, name: ["Örnek Müşteri","Demo Misafir","Test Grubu"][j%3], pax: 1 + (j%3), net: 38.5 + (j%3)*40, platform: j%2 ? "GYG" : "VIA", guide: ["Ata","Enes","Ruslan"][j%3], closed: d < S.today || (d === S.today && j < 4), cancelled: j === 7, external: false}); });
+  S.tours.cache[key] = {events: ev, storedAt: Date.now()}; S.tours.status = "ok";
+}
+
+/* ---------- login ---------- */
+const girisEl = document.getElementById("giris");
+function girisGoster(hata){
+  girisEl.hidden = false;
+  document.getElementById("gHata").textContent = hata || "";
+  document.getElementById("gEkle").hidden = !(IOS && !STANDALONE);
+  renderAgent();
+}
+async function girisYap(text){
+  const o = linkCoz(text);
+  if (!o) { girisGoster("Bu link tanınmadı. Kurulumda çıkan linkin tamamını yapıştır."); return false; }
+  OTURUM = o; LS.set(K_OTURUM, o);
+  const btn = document.getElementById("gBtn"); btn.disabled = true; btn.textContent = "Bağlanıyor…";
+  const ok = await load();
+  btn.disabled = false; btn.textContent = "Giriş yap";
+  if (ok) { girisEl.hidden = true; watchTours(); render(); return true; }
+  if (OTURUM) { const msg = S.banner || "Bağlanılamadı."; OTURUM = null; LS.del(K_OTURUM); S.banner = null; S.bannerKind = null; girisGoster(msg); }
+  return false;
+}
+function cikis(yetkiHatasi){
+  OTURUM = null; [K_OTURUM, K_ONBELLEK, K_BEKLEYEN, K_GELEN_KUYRUK].forEach(k => LS.del(k)); bekleyen = {};
+  S.days = {}; S.goals = {}; S.notes = {}; S.settings = null; S.gelen = []; S.tours.cache = {}; S.loaded = false; S.mode = "loading"; S.banner = null; S.bannerKind = null;
+  girisGoster(yetkiHatasi ? "Giriş linki artık geçerli değil. Yeni linki yapıştır." : ""); render();
+}
+
+/* ---------- boot ---------- */
+readHash();
+let girisLinki = null;
+(function(){ const m = location.hash.match(/^#giris=(.+)$/); if (m) { girisLinki = m[1]; try { history.replaceState(null, "", location.pathname + "#bugun"); } catch (e) {} S.tab = "bugun"; } })();
+const LOCAL = location.protocol === "file:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+if (girisLinki) { render(); girisYap(girisLinki); }
+else if (OTURUM) { cacheLoad(); render(); load().then(() => watchTours()); }
+else if (LOCAL && !window.HAYAT_TEST_API) { loadMock(); render(); }
+else { render(); girisGoster(); }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && OTURUM && Date.now() - lastLoad > 30000) load().then(() => watchTours()); });
+setInterval(() => { if (document.visibilityState === "visible" && OTURUM) load(); }, 3 * 60e3);
+window.addEventListener("online", () => { flush(); gelenKuyrukGonder(); });
+if ("serviceWorker" in navigator && !LOCAL) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
