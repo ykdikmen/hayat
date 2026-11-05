@@ -306,6 +306,8 @@ input[type=range].unset{opacity:.35}
 .formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .formgrid .field{width:100%}
 .formgrid .full{grid-column:1/-1}
+.lbl{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.lbl .field{width:100%;font-weight:500;color:var(--ink)}
 .catrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:7px 0;align-items:center}
 .catrow .nm{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;min-width:0}
 .catrow .nm i{width:10px;height:10px;border-radius:3px;flex:none}
@@ -472,7 +474,7 @@ td.c1 button{color:var(--on-mint)}
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.1.0";
+const SURUM = "2.3.0";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -789,7 +791,9 @@ function kanalBakim(force){
 }
 const sonucTemiz = s => String(s || "").replace(/\[\[[a-zçğıöşü]+\s[\s\S]*?\]\]/gi, "").trim();
 const gZaman = g => { const t = Date.parse(g.islenme || g.zaman || ""); return isNaN(t) ? 0 : t; };
-function sonKanal(kod){ return S.gelen.filter(g => kanalOf(g) === kod && g.durum === "islendi" && g.sonuc).sort((a,b) => gZaman(b) - gZaman(a)); }
+/* newest answered briefing / digest; skips the "Yeni brifing yukarıda." placeholders a run gives extra requests */
+const YER_TUTUCU = /^\s*Yeni (brifing|özet)[^\n]{0,40}yukarıda\.?\s*$/i;
+function sonKanal(kod){ return S.gelen.filter(g => kanalOf(g) === kod && g.durum === "islendi" && g.sonuc && !YER_TUTUCU.test(sonucTemiz(g.sonuc))).sort((a,b) => gZaman(b) - gZaman(a)); }
 
 /* Claude can ask the app to write things only the app stores (money, journal) with a [[uygula {...}]] block */
 function claudeUygula(){
@@ -966,6 +970,17 @@ function toast(text){
   el.textContent = text; el.hidden = false; el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3800);
 }
+
+/* ---------- voice settings: live only on this phone (the Google key never goes to Drive) ---------- */
+const K_TTS = "hayat.tts";
+const ttsAyar = () => { const a = Object.assign({kaynak: "cihaz", anahtar: "", ses: "Achird", uslup: "nese", hiz: 1, cihazSes: ""}, LS.get(K_TTS) || {});
+  if (a.kaynak === "google") a.kaynak = a.anahtar ? "gemini" : "cihaz";   /* 2.2 Cloud setting -> Gemini */
+  if (!GEMINI_SESLER.some(s => s[0] === a.ses)) a.ses = "Achird";
+  return a; };
+const GEMINI_SESLER = [["Achird","erkek, samimi"],["Puck","erkek, neşeli"],["Sadachbia","erkek, canlı"],["Zubenelgenubi","erkek, rahat"],["Charon","erkek, bilgili"],["Algieba","erkek, yumuşak"],["Iapetus","erkek, net"],
+  ["Sulafat","kadın, sıcak"],["Laomedeia","kadın, neşeli"],["Aoede","kadın, ferah"],["Vindemiatrix","kadın, nazik"],["Despina","kadın, yumuşak"],["Kore","kadın, kararlı"],["Leda","kadın, genç"]];
+let ttsSonHata = "";   /* last Google voice problem, shown on the Ses card until a call works */
+function trSesler(){ try { return (window.speechSynthesis ? window.speechSynthesis.getVoices() : []).filter(v => /^tr/i.test(v.lang)); } catch (e) { return []; } }
 
 /* ---------- icons ---------- */
 const I = {
@@ -1594,12 +1609,32 @@ function claudeSohbet(){
   }).join("") + `</section>`;
   return h;
 }
+function sesAyarKart(){
+  const t = ttsAyar(), g = t.kaynak === "gemini" && t.anahtar, tr = trSesler();
+  const opt = (v, l, sec) => `<option value="${esc(v)}"${sec ? " selected" : ""}>${esc(l)}</option>`;
+  return `<section class="card" id="sesAyar"><div class="card-h"><h2>Ses</h2><span class="chip ${g ? "ok" : ""}">${g ? "Doğal ses açık" : "Telefonun sesi"}</span></div>
+    <p class="small" style="margin:0 0 12px;color:var(--ink-2)">Telefonun hazır Türkçe sesi robotik gelebilir. Gemini'nin sesi doğal ve ücretsiz: Google AI Studio'dan kart istemeyen bir anahtar alıp buraya yapıştırman yeterli.</p>
+    <form id="f-tts" class="formstack">
+      <label class="lbl" for="ttsKaynak">Hangi ses?<select class="field" id="ttsKaynak">${opt("gemini", "Gemini doğal ses (ücretsiz, önerilen)", t.kaynak === "gemini")}${opt("cihaz", "Telefonun sesi", t.kaynak !== "gemini")}</select></label>
+      <label class="lbl" for="ttsKey">Gemini API anahtarı<input class="field" id="ttsKey" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="AIza… ile başlar" value="${esc(t.anahtar || "")}"></label>
+      <label class="lbl" for="ttsSes">Koçun sesi<select class="field" id="ttsSes">${GEMINI_SESLER.map(([v, l]) => opt(v, `${v} · ${l}`, t.ses === v)).join("")}</select></label>
+      <div class="formgrid">
+        <label class="lbl" for="ttsUslup">Üslup<select class="field" id="ttsUslup">${[["nese","Neşeli koç"],["sakin","Sakin"],["net","Net, ciddi"]].map(([v, l]) => opt(v, l, t.uslup === v)).join("")}</select></label>
+        <label class="lbl" for="ttsHiz">Hız<select class="field" id="ttsHiz">${[["0.9","Yavaş"],["1","Normal"],["1.1","Hızlı"]].map(([v, l]) => opt(v, l, String(t.hiz) === v)).join("")}</select></label>
+      </div>
+      <label class="lbl" for="ttsCihaz">Telefonun sesi (yedek)<select class="field" id="ttsCihaz">${opt("", "Otomatik (en iyisini seç)", !t.cihazSes)}${tr.map(v => opt(v.name, v.name + (/premium|enhanced|gelişmiş|geliştirilmiş|iyileştirilmiş/i.test(v.name) ? " ★" : ""), t.cihazSes === v.name)).join("")}</select></label>
+      <p class="small muted" style="margin:0">Gemini'ye ulaşılamazsa (internet, günlük ücretsiz hak) yedek sesle devam eder. Yedeği iyileştirmek için iPhone Ayarlar → Erişilebilirlik → Seslendirilen İçerik → Sesler → Türkçe → “Gelişmiş” bir ses indir. Anahtar yalnızca bu telefonda saklanır. Ücretsiz kullanımda Google okunan metni hizmetini geliştirmek için kullanabilir.</p>
+      ${ttsSonHata ? `<p class="small" style="margin:0;color:var(--amber)">Son denemede: ${esc(ttsSonHata)}</p>` : ""}
+      <div class="acts" style="margin:0"><button class="btn">Kaydet</button><button type="button" class="btn soft" data-act="sesdene">Sesi dene</button></div>
+    </form></section>`;
+}
 function claudeAyarlar(){
   const a = ayar(), tema = LS.get(K_TEMA) || "sistem";
   const izin = "Notification" in window ? Notification.permission : "yok";
   let h = `<section class="card"><div class="card-h"><h2>Hatırlatmalar</h2></div>
-    <p class="small" style="margin:0 0 10px;color:var(--ink-2)">Sesli brifingler her gün 08:00, 12:30 ve 22:30'da hazır olur; Bugün ekranındaki “Dinle”ye bas. Daha iyi bir Türkçe ses için iPhone Ayarlar → Erişilebilirlik → Seslendirilen İçerik → Sesler → Türkçe\'den “Gelişmiş” bir ses indir. Uygulama açıkken plan maddelerinin saatinden 5 dk önce bildirim gelir; kapalıyken de çalsın istiyorsan maddedeki zile dokun (Google Takvim).</p>
+    <p class="small" style="margin:0 0 10px;color:var(--ink-2)">Sesli brifingler her gün 08:00, 12:30 ve 22:30'da hazır olur; Bugün ekranındaki “Dinle”ye bas. Uygulama açıkken plan maddelerinin saatinden 5 dk önce bildirim gelir; kapalıyken de çalsın istiyorsan maddedeki zile dokun (Google Takvim).</p>
     ${izin === "granted" ? `<span class="chip ok">Bildirim izni açık</span>` : izin === "denied" ? `<span class="chip warn wrap">Bildirim izni kapalı. Açmak için: iPhone Ayarlar → Bildirimler → Hayat</span>` : izin === "yok" ? `<span class="chip wrap">Bu tarayıcı bildirim desteklemiyor${IOS && !STANDALONE ? " (önce ana ekrana ekle)" : ""}</span>` : `<button class="btn" data-act="izin">Bildirimlere izin ver</button>`}</section>`;
+  h += sesAyarKart();
   h += `<section class="card"><div class="card-h"><h2>Para</h2></div><form id="f-ayar" class="formgrid">
       <label class="small" style="display:grid;gap:5px;font-weight:700;color:var(--ink-2)" for="aButce">Aylık bütçe (€)<input class="field" id="aButce" inputmode="decimal" value="${a.butce ?? ""}" placeholder="örn. 1200"></label>
       <label class="small" style="display:grid;gap:5px;font-weight:700;color:var(--ink-2)" for="aPaket">Sigara paketi (€)<input class="field" id="aPaket" inputmode="decimal" value="${a.paket ?? ""}" placeholder="6,50"></label>
@@ -1814,7 +1849,7 @@ function render(focusId){
 }
 
 /* ---------- routing ---------- */
-const ESKI = {hafta: ["ilerleme","hafta"], aliskanlik: ["ilerleme","aliskanlik"], hedefler: ["ilerleme","hedefler"], koc: ["claude","sohbet"]};
+const ESKI = {hafta: ["ilerleme","hafta"], aliskanlik: ["ilerleme","aliskanlik"], hedefler: ["ilerleme","hedefler"], koc: ["claude","sohbet"], ayarlar: ["claude","ayarlar"], ses: ["claude","ayarlar"]};
 function readHash(){
   const h = location.hash.replace("#", "");
   if (ESKI[h]) { S.tab = ESKI[h][0]; S.ui.seg[ESKI[h][0]] = ESKI[h][1]; return; }
@@ -2068,12 +2103,11 @@ if ("serviceWorker" in navigator && !LOCAL && !window.HAYAT_ONIZLEME) navigator.
 /* ---------- Dinle: read the latest briefing aloud, then listen and pass what he says on ---------- */
 const TTS = window.speechSynthesis || null;
 let SES = {acik: false};
-let sesSesler = [];
-function sesleriYukle(){ try { sesSesler = TTS ? TTS.getVoices() : []; } catch (e) { sesSesler = []; } }
-if (TTS) { sesleriYukle(); try { TTS.onvoiceschanged = sesleriYukle; } catch (e) {} }
+/* voices often arrive late (iOS/Chrome): refresh the Ses settings list once they do */
+if (TTS) { try { TTS.onvoiceschanged = () => { const s = document.getElementById("ttsCihaz"); if (s && s.options.length <= 1 && trSesler().length) render(); }; } catch (e) {} }
 function trSes(){
-  const tr = sesSesler.filter(v => /^tr/i.test(v.lang));
-  return tr.find(v => /premium|enhanced|gelişmiş|geliştirilmiş/i.test(v.name)) || tr.find(v => v.localService) || tr[0] || null;
+  const tr = trSesler(), sec = ttsAyar().cihazSes;
+  return (sec && tr.find(v => v.name === sec)) || tr.find(v => /premium|enhanced|gelişmiş|geliştirilmiş|iyileştirilmiş/i.test(v.name)) || tr.find(v => v.localService) || tr[0] || null;
 }
 /* make a written briefing speakable */
 function sesTemiz(t){
@@ -2097,7 +2131,154 @@ function parcala(text){
   }
   return out.filter(Boolean);
 }
-function seslendir(text, bitince){
+function seslendir(text, bitince, zorla){
+  const a = ttsAyar();
+  if (a.kaynak === "gemini" && a.anahtar) {
+    if (!zorla && kotaDolu()) { if (SES.acik && !SES.hata) { SES.hata = "Bugünkü ücretsiz doğal ses hakkı doldu; telefonun sesiyle okuyorum."; renderSes(); } cihazSeslendir(text, bitince); }
+    else geminiSeslendir(text, bitince);
+  } else cihazSeslendir(text, bitince);
+}
+/* the free daily quota resets at midnight Pacific (about 09:00 in Rome); don't knock again before that */
+const K_KOTA = "hayat.ttsKota";
+function kotaDolu(){ const k = LS.get(K_KOTA); return !!k && Date.now() < k; }
+function kotaIsaretle(){ const d = new Date(); d.setUTCHours(8, 5, 0, 0); if (d.getTime() <= Date.now()) d.setUTCDate(d.getUTCDate() + 1); LS.set(K_KOTA, d.getTime()); }
+/* ---- Gemini natural voice (free AI Studio key, no billing) ---- */
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/";
+const USLUP = {
+  nese: "warm, friendly and playful life coach talking to a close friend; natural conversational pace, smiling",
+  sakin: "calm, gentle and reassuring; relaxed pace, soft and warm",
+  net: "clear, confident and professional; steady pace, friendly but focused"
+};
+const ttsCache = new Map();   /* text -> object URL, this session */
+let sesAudio = null;
+const SESSIZ = (() => { const n = 800, b = new Uint8Array(44 + n), v = new DataView(b.buffer), w = (o, s) => { for (let i = 0; i < s.length; i++) b[o+i] = s.charCodeAt(i); };
+  w(0,"RIFF"); v.setUint32(4, 36 + n, true); w(8,"WAVE"); w(12,"fmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,8000,true); v.setUint32(28,8000,true); v.setUint16(32,1,true); v.setUint16(34,8,true); w(36,"data"); v.setUint32(40,n,true); b.fill(128, 44);
+  let s = ""; b.forEach(x => { s += String.fromCharCode(x); }); return "data:audio/wav;base64," + btoa(s); })();
+/* must run inside the tap, so iOS lets this element play later */
+function sesAudioHazirla(){
+  if (!sesAudio) { sesAudio = new Audio(); sesAudio.preload = "auto"; }
+  if (ttsAyar().kaynak !== "gemini") return;
+  try { sesAudio.onended = null; sesAudio.onerror = null; sesAudio.src = SESSIZ; const p = sesAudio.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+}
+function sesDurdur(){ try { if (TTS) TTS.cancel(); } catch (e) {} try { if (sesAudio) { sesAudio.onended = null; sesAudio.onerror = null; sesAudio.pause(); } } catch (e) {} }
+function parcalaUzun(text, max){
+  const out = []; let buf = "";
+  for (const s of parcala(text)) { if ((buf + " " + s).length > max && buf) { out.push(buf.trim()); buf = ""; } buf += " " + s; }
+  if (buf.trim()) out.push(buf.trim());
+  return out;
+}
+/* a short first piece so the voice starts fast, then bigger pieces */
+function sesParcalari(text){
+  const c = parcala(text), out = []; let buf = "";
+  while (c.length && (buf + " " + c[0]).length <= 260) buf += " " + c.shift();
+  if (!buf && c.length) buf = c.shift();
+  if (buf.trim()) out.push(buf.trim());
+  return out.concat(c.length ? parcalaUzun(c.join("\n"), 1400) : []);
+}
+function hashSes(s){ let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + s.length.toString(36); }
+function b64Bytes(b64){ const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+function pcmWav(pcm, rate){
+  const b = new Uint8Array(44 + pcm.length), v = new DataView(b.buffer), w = (o, s) => { for (let i = 0; i < s.length; i++) b[o+i] = s.charCodeAt(i); };
+  w(0,"RIFF"); v.setUint32(4, 36 + pcm.length, true); w(8,"WAVE"); w(12,"fmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,rate,true); v.setUint32(28,rate*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,"data"); v.setUint32(40,pcm.length,true); b.set(pcm, 44);
+  return b;
+}
+/* find the audio in either response shape (Interactions: steps[].content[]; generateContent: candidates[].content.parts[].inlineData) */
+function sesBul(o){
+  let bulunan = null;
+  const gez = x => {
+    if (!x || typeof x !== "object") return;
+    if (Array.isArray(x)) { x.forEach(gez); return; }
+    const mime = x.mime_type || x.mimeType || "";
+    if (typeof x.data === "string" && x.data.length > 200 && (x.type === "audio" || /audio/i.test(mime))) bulunan = {data: x.data, mime, rate: x.sample_rate || x.sampleRate};
+    for (const k in x) if (k !== "data") gez(x[k]);
+  };
+  gez(o);
+  return bulunan;
+}
+function sesBlob(s){
+  const bytes = b64Bytes(s.data);
+  const wav = /^UklGR/.test(s.data) || /wav/i.test(s.mime);
+  const mp3 = /mpeg|mp3/i.test(s.mime);
+  if (wav || mp3) return new Blob([bytes], {type: mp3 ? "audio/mpeg" : "audio/wav"});
+  const rate = Number((/rate=(\d+)/.exec(s.mime) || [])[1]) || Number(s.rate) || 24000;   /* headerless L16 */
+  return new Blob([pcmWav(bytes, rate)], {type: "audio/wav"});
+}
+async function sesOnbellek(anahtar, blob){
+  try {
+    if (!("caches" in window)) return null;
+    const c = await caches.open("hayat-ses"), req = new Request("./__ses/" + anahtar);
+    if (blob) { await c.put(req, new Response(blob, {headers: {"Content-Type": blob.type}})); return blob; }
+    const r = await c.match(req); return r ? await r.blob() : null;
+  } catch (e) { return null; }
+}
+async function geminiIste(text, a){
+  const hdr = {"Content-Type": "application/json", "x-goog-api-key": a.anahtar};
+  const hata = async r => { let m = ""; try { const j = await r.json(); m = (j.error && ((j.error.message || j.error.status || "") + " " + JSON.stringify(j.error.details || "").slice(0, 400))) || ""; } catch (e) {} return new Error(`${r.status} ${m}`.trim()); };
+  const yollar = [
+    () => ({url: GEMINI_URL + "interactions", body: {model: "gemini-3.8-flash-tts", store: false,
+      input: [{type: "user_input", content: [{type: "text", text, annotations: [{type: "speech_metadata", style: USLUP[a.uslup] || USLUP.nese}]}]}],
+      response_format: {type: "audio"}, generation_config: {speech_config: [{voice: a.ses}]}}}),
+    () => ({url: GEMINI_URL + "interactions", body: {model: "gemini-3.8-flash-tts",
+      input: [{type: "user_input", content: [{type: "text", text}]}], response_format: {type: "audio"}, generation_config: {speech_config: [{voice: a.ses}]}}}),
+    () => ({url: GEMINI_URL + "models/gemini-2.5-flash-preview-tts:generateContent", body: {contents: [{parts: [{text}]}],
+      generationConfig: {responseModalities: ["AUDIO"], speechConfig: {voiceConfig: {prebuiltVoiceConfig: {voiceName: a.ses}}}}}})
+  ];
+  let son;
+  for (const y of yollar) {
+    const {url, body} = y();
+    const r = await fetch(url, {method: "POST", headers: hdr, body: JSON.stringify(body)});
+    if (r.ok) { const s = sesBul(await r.json()); if (s) return sesBlob(s); son = new Error("200 ses gelmedi"); continue; }
+    son = await hata(r);
+    /* key, permission, quota or network trouble: trying another request shape won't help */
+    if (r.status === 401 || r.status === 403 || r.status === 429 || r.status >= 500 || /API key|API_KEY|PERMISSION|quota|RESOURCE_EXHAUSTED|location/i.test(son.message)) throw son;
+  }
+  throw son;
+}
+async function geminiSes(text){
+  const a = ttsAyar(), anahtar = hashSes([a.ses, a.uslup, text].join("|"));
+  if (ttsCache.has(anahtar)) return ttsCache.get(anahtar);
+  let blob = await sesOnbellek(anahtar);
+  if (!blob) { blob = await geminiIste(text, a); sesOnbellek(anahtar, blob); }
+  const url = URL.createObjectURL(blob);
+  if (ttsCache.size > 40) { const [k, u] = ttsCache.entries().next().value; ttsCache.delete(k); try { URL.revokeObjectURL(u); } catch (e) {} }
+  ttsCache.set(anahtar, url);
+  return url;
+}
+function geminiSeslendir(text, bitince){
+  if (!sesAudio) sesAudio = new Audio();
+  const parts = sesParcalari(text), oturum = SES.oturum, istekler = [];
+  const iste = k => { if (k < parts.length && !istekler[k]) { istekler[k] = geminiSes(parts[k]); istekler[k].catch(() => {}); } return istekler[k]; };
+  iste(0); iste(1);
+  let i = 0;
+  const sonraki = async () => {
+    if (!SES.acik || SES.oturum !== oturum) return;
+    if (i >= parts.length) { if (bitince) bitince(); return; }
+    let url, bekliyor = true;
+    const t = setTimeout(() => { if (bekliyor && SES.acik && SES.oturum === oturum && !SES.yukleniyor) { SES.yukleniyor = true; renderSes(); } }, 350);
+    try { url = await iste(i); }
+    catch (e) {
+      bekliyor = false; clearTimeout(t);
+      if (!SES.acik || SES.oturum !== oturum) return;
+      const m = String(e.message || e);
+      if (/^429/.test(m) && /PerDay|per day|daily/i.test(m)) kotaIsaretle();
+      ttsSonHata = googleHata(m); SES.yukleniyor = false;
+      SES.hata = ttsSonHata + " Telefonun sesiyle devam ediyorum."; renderSes();
+      cihazSeslendir(parts.slice(i).join(" "), bitince); return;
+    }
+    bekliyor = false; clearTimeout(t);
+    if (!SES.acik || SES.oturum !== oturum) return;
+    ttsSonHata = ""; i++; iste(i + 1);
+    if (SES.yukleniyor) { SES.yukleniyor = false; renderSes(); }
+    sesAudio.onended = sonraki; sesAudio.onerror = sonraki;
+    sesAudio.src = url;
+    try { sesAudio.preservesPitch = true; sesAudio.playbackRate = ttsAyar().hiz || 1; } catch (e) {}
+    const p = sesAudio.play();
+    if (p && p.catch) p.catch(() => { if (SES.oturum !== oturum) return; SES.durum = "bekle"; SES.hata = "Ses başlatılamadı; “Baştan oku”ya dokun."; renderSes(); });
+  };
+  sonraki();
+}
+function cihazSeslendir(text, bitince){
   if (!TTS) { if (bitince) bitince(); return; }
   try { TTS.cancel(); } catch (e) {}
   const parts = parcala(text), v = trSes(), oturum = SES.oturum;
@@ -2137,6 +2318,7 @@ function sesBaslat(gid){
     kaynak = `${kanalOf(g) === "posta" ? "Posta özeti" : "Claude"} · ${fmtShort(fmtYMD.format(new Date(gZaman(g))))} ${fmtHM.format(new Date(gZaman(g)))}`;
   } else { metin = yerelOzet(); kaynak = "Uygulamadan kısa özet"; }
   if (S.agent.open) { S.agent.open = false; renderSheet(); }
+  sesAudioHazirla();
   SES = {acik: true, oturum: uid(), durum: "okuyor", metin, kaynak, tur: 0, cevaplar: [], ara: "", hata: ""};
   renderSes();
   seslendir(metin + "\nSen ne dersin? Dinliyorum.", () => sesDinle(false));
@@ -2145,7 +2327,7 @@ let sesRec = null;
 function sesDinle(eldenBasildi){
   if (!SES.acik) return;
   if (!SR) { SES.durum = "bekle"; SES.hata = "Bu telefonda sesli dinleme yok; aşağıya yazabilirsin."; renderSes(); return; }
-  try { if (TTS) TTS.cancel(); } catch (e) {}
+  sesDurdur();
   let final = "";
   const r = new SR(); r.lang = "tr-TR"; r.interimResults = true; r.continuous = false;
   sesRec = r; SES.durum = "dinliyor"; SES.ara = ""; SES.hata = ""; renderSes();
@@ -2178,12 +2360,12 @@ function sesBitir(son){
   if (son) { SES.durum = "bitti"; renderSes(); const o = SES.oturum; seslendir(son, () => { if (SES.oturum === o) sesKapat(); }); }
   else sesKapat();
 }
-function sesKapat(){ try { if (TTS) TTS.cancel(); } catch (e) {} try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; SES = {acik: false}; renderSes(); }
+function sesKapat(){ sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; SES = {acik: false}; renderSes(); }
 function renderSes(){
   const el = document.getElementById("ses"); if (!el) return;
   if (!SES.acik) { el.hidden = true; el.innerHTML = ""; return; }
   const d = SES.durum;
-  const etiket = d === "okuyor" ? "Okuyorum…" : d === "dinliyor" ? "Dinliyorum, konuş…" : d === "bitti" ? "Görüşürüz" : "Konuşmak için dokun";
+  const etiket = d === "okuyor" ? (SES.yukleniyor ? "Sesim hazırlanıyor…" : "Okuyorum…") : d === "dinliyor" ? "Dinliyorum, konuş…" : d === "bitti" ? "Görüşürüz" : "Konuşmak için dokun";
   el.innerHTML = `<div class="sheet-bg" data-act="sesbitir"></div><div class="sheet sesk" role="dialog" aria-modal="true" aria-labelledby="sesT"><div class="sheet-in">
     <div class="grab"></div>
     <div class="card-h" style="margin:0"><div><h2 id="sesT">Sesli brifing</h2><span class="small muted">${esc(SES.kaynak || "")}</span></div><button class="x" data-act="sesbitir" aria-label="Kapat">×</button></div>
@@ -2203,13 +2385,50 @@ document.addEventListener("click", e => {
   switch (b.dataset.act) {
     case "dinle": sesBaslat(b.dataset.id || null); break;
     case "seskonus": sesDinle(true); break;
-    case "sesatla": try { if (TTS) TTS.cancel(); } catch (er) {} SES.oturum = uid(); sesDinle(true); break;
+    case "sesatla": sesDurdur(); SES.oturum = uid(); sesDinle(true); break;
     case "sesdur": try { if (sesRec) sesRec.stop(); } catch (er) {} break;
-    case "sestekrar": { const k = SES.kaynak, m = SES.metin; SES.oturum = uid(); SES.durum = "okuyor"; renderSes(); SES.kaynak = k; seslendir(m + "\nSen ne dersin? Dinliyorum.", () => sesDinle(false)); break; }
+    case "sestekrar": { sesDurdur(); sesAudioHazirla(); const m = SES.metin; SES.oturum = uid(); SES.durum = "okuyor"; SES.hata = ""; renderSes(); seslendir(m + "\nSen ne dersin? Dinliyorum.", () => sesDinle(false)); break; }
+    case "sesdene": ttsFormKaydet(); sesDene(); break;
     case "sesbitir": sesKapat(); break;
   }
 });
+/* save the Ses form (also used by "Sesi dene", so he can try before saving) */
+function ttsFormKaydet(){
+  const f = document.getElementById("f-tts"); if (!f) return "yok";
+  const v = id => (document.getElementById(id) || {}).value || "";
+  const anahtar = v("ttsKey").replace(/\s+/g, ""), istek = v("ttsKaynak");
+  const once = ttsAyar();
+  const yeni = Object.assign({}, once, {kaynak: istek === "gemini" && anahtar ? "gemini" : "cihaz", anahtar, ses: v("ttsSes") || "Achird", uslup: v("ttsUslup") || "nese", hiz: Number(v("ttsHiz")) || 1, cihazSes: v("ttsCihaz")});
+  LS.set(K_TTS, yeni);
+  if (once.anahtar !== yeni.anahtar) ttsSonHata = "";
+  return istek === "gemini" && !anahtar ? "anahtarsiz" : "ok";
+}
+/* turn Google's English error into what to fix */
+function googleHata(m){
+  m = String(m || "");
+  if (/API key not valid|API_KEY_INVALID/i.test(m)) return "Anahtar geçersiz görünüyor; AI Studio'dan tekrar kopyalayıp yapıştır.";
+  if (/^429/.test(m) && /PerDay|per day|daily/i.test(m)) return "Bugünkü ücretsiz doğal ses hakkı doldu; yarın sabah yenilenir.";
+  if (/^429|quota|RESOURCE_EXHAUSTED/i.test(m)) return "Kısa sürede çok istek oldu; bir dakika sonra yine doğal sesle.";
+  if (/location is not supported|not available in your country/i.test(m)) return "Google bu konumda ücretsiz Gemini sesine izin vermiyor.";
+  if (/referer|referrer/i.test(m)) return "Anahtarın site kısıtlaması tutmuyor; kısıtlamayı kaldır ya da “https://ykdikmen.github.io/*” ekle.";
+  if (/has not been used|is disabled|SERVICE_DISABLED|not enabled|blocked/i.test(m)) return "Bu anahtarda Gemini API kapalı; AI Studio'dan yeni bir anahtar oluştur.";
+  if (/^5\d\d/.test(m)) return "Google'ın ses servisi şu an yanıt vermiyor.";
+  if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return "İnternet yok gibi.";
+  return "Doğal ses alınamadı (" + m.slice(0, 80) + ").";
+}
+function sesDene(){
+  sesAudioHazirla();
+  const ornek = "Selam Kerem! Ben senin hayat koçunum. Bugün su bardağıyla barışıyor muyuz? Turlar yoğun ama sen halledersin, ben de buradayım.";
+  SES = {acik: true, oturum: uid(), durum: "okuyor", metin: ornek, kaynak: "Ses denemesi", tur: 0, cevaplar: [], ara: "", hata: ""};
+  renderSes();
+  seslendir(ornek, () => { sesBitir(); render(); }, true);
+}
 document.addEventListener("submit", e => {
+  if (e.target.id === "f-tts") {
+    e.preventDefault(); e.stopImmediatePropagation();
+    const r = ttsFormKaydet();
+    toast(r === "anahtarsiz" ? "Doğal ses için anahtar gerekli; şimdilik telefonun sesi." : "Ses ayarı kaydedildi."); render(); return;
+  }
   if (e.target.id !== "f-ses") return;
   e.preventDefault(); e.stopImmediatePropagation();
   const el = document.getElementById("sesYaz"), t = el ? el.value.trim() : ""; if (!t) return;
