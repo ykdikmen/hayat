@@ -64,7 +64,8 @@
 }
 
 *{box-sizing:border-box}
-html,body{height:100%;margin:0}
+html{height:calc(100% + var(--alt-fark, 0px));margin:0}
+body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;overflow:hidden;-webkit-tap-highlight-color:transparent}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -78,13 +79,13 @@ button{cursor:pointer}
 .wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 
 /* ---------- tab bar ---------- */
-nav.tabs{flex:none;position:relative;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;background:var(--bg-2);border-top:1px solid var(--line);padding:6px max(6px, env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 6px) max(6px, env(safe-area-inset-left))}
-nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 4px;color:var(--ink-3);text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.01em;border-radius:12px}
-nav.tabs a svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs{flex:none;position:relative;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;background:var(--bg-2);border-top:1px solid var(--line);padding:3px max(6px, env(safe-area-inset-right)) max(4px, calc(env(safe-area-inset-bottom) - 13px)) max(6px, env(safe-area-inset-left))}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 1px;color:var(--ink-3);text-decoration:none;font-size:10.5px;font-weight:700;letter-spacing:.01em;border-radius:12px}
+nav.tabs a svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav.tabs a[aria-current="page"]{color:var(--ink)}
 nav.tabs a[aria-current="page"] svg{stroke:var(--mint)}
-.say{justify-self:center;width:58px;height:58px;margin-top:-26px;border-radius:50%;border:0;background:var(--mint);color:var(--on-mint);display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.35),0 0 0 5px var(--bg-2)}
-.say svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.say{justify-self:center;width:50px;height:50px;margin-top:-16px;border-radius:50%;border:0;background:var(--mint);color:var(--on-mint);display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.35),0 0 0 5px var(--bg-2)}
+.say svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .say:active{transform:scale(.96)}
 
 /* ---------- headers ---------- */
@@ -413,7 +414,7 @@ td.c1 button{color:var(--on-mint)}
 .hint{font-size:12.5px;color:var(--ink-3);margin:0}
 
 /* ---------- misc ---------- */
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 92px);z-index:50;background:var(--ink);color:var(--bg);font-weight:700;font-size:14px;padding:10px 16px;border-radius:14px;box-shadow:var(--shadow);max-width:min(92vw,480px);text-align:center;animation:pop .25s ease-out}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 72px);z-index:50;background:var(--ink);color:var(--bg);font-weight:700;font-size:14px;padding:10px 16px;border-radius:14px;box-shadow:var(--shadow);max-width:min(92vw,480px);text-align:center;animation:pop .25s ease-out}
 @keyframes pop{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
 .tip{position:fixed;z-index:30;pointer-events:none;background:var(--surface-3);border:1px solid var(--line-2);border-radius:10px;padding:8px 10px;font-size:12.5px;box-shadow:var(--shadow);max-width:220px}
 .tip b{display:block;margin-bottom:2px}
@@ -475,7 +476,7 @@ td.c1 button{color:var(--on-mint)}
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.4.0";
+const SURUM = "2.5.0";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -753,9 +754,25 @@ function cacheLoad(){
   return true;
 }
 /* everything that should happen whenever fresh data arrives */
+/* "Her gün": routine items (settings.rutin) are put into today's and tomorrow's plan once, so they can be ticked and reminded */
+const rutinler = () => (S.settings && Array.isArray(S.settings.rutin)) ? S.settings.rutin : [];
+const planSira = (a, b) => (a.time || "99") < (b.time || "99") ? -1 : (a.time || "99") > (b.time || "99") ? 1 : 0;
+function rutinUygula(){
+  const r = rutinler(); if (!S.loaded || !r.length) return;
+  for (const t of [S.today, addDays(S.today, 1)]) {
+    const d0 = getDay(t), eklendi = d0.rutin || [], eksik = r.filter(x => !eklendi.includes(x.id));
+    if (!eksik.length) continue;
+    editDay(t, d => {
+      const var_ = new Set((d.plan || []).map(p => trLow(p.title || "")));
+      d.plan = (d.plan || []).concat(eksik.filter(x => !var_.has(trLow(x.baslik))).map(x => ({id: uid(), time: x.saat || "", title: x.baslik, done: false, rutin: x.id}))).sort(planSira);
+      d.rutin = eklendi.concat(eksik.map(x => x.id)).slice(-40);
+    });
+  }
+}
 function afterData(fromServer){
   claudeUygula();
-  if (fromServer) { kanalBakim(); yeniCevaplar(); }
+  rutinUygula();
+  if (fromServer) { kanalBakim(); yeniCevaplar(); if (typeof sesHazirla === "function") setTimeout(sesHazirla, 1500); }
   hatirlatKur();
   if (typeof profilKontrol === "function") profilKontrol();
 }
@@ -811,6 +828,13 @@ function claudeUygula(){
     yapildi.add(g.id);
     let j; try { j = JSON.parse(m[1]); } catch (e) { continue; }
     (Array.isArray(j.ops) ? j.ops : []).forEach((o, i) => {
+      if (o.op === "rutin") {   /* add or remove "every day" items */
+        let r = rutinler().slice();
+        [].concat(o.ekle || []).forEach(x => { const b = String((x && x.baslik) || "").trim().slice(0, 120); if (b && !r.some(y => trLow(y.baslik) === trLow(b))) { r.push({id: uid(), saat: /^\d{2}:\d{2}$/.test(x.saat || "") ? x.saat : "", baslik: b}); n++; } });
+        [].concat(o.sil || []).forEach(t => { const k = trLow(String(t)); const once = r.length; r = r.filter(y => !trLow(y.baslik).includes(k)); if (r.length < once) n++; });
+        S.settings = Object.assign({}, S.settings || {}, {habits: habits(), rutin: r}); saveSettings();
+        return;
+      }
       const tarih = /^\d{4}-\d{2}-\d{2}$/.test(o.tarih || "") ? o.tarih : S.today, key = g.id + "_" + i;
       const d = S.days[tarih] || blankDay(tarih);
       d.cu = d.cu || []; if (d.cu.includes(key)) return;
@@ -824,6 +848,13 @@ function claudeUygula(){
         if (["niyet","iyi","gelistir"].includes(o.alan)) d.gunluk[o.alan] = metin;
         else if (o.alan === "sukur") d.gunluk.sukur = (d.gunluk.sukur || []).filter(Boolean).concat([metin]).slice(-3);
         else d.note = (d.note ? d.note + "\n" : "") + metin;
+      } else if (o.op === "plan" && Array.isArray(o.plan)) {
+        /* replace the day's plan (Claude rearranged it); keep ticks and calendar marks of items that stay */
+        const eski = d.plan || [], ayni = t => eski.find(x => trLow(x.title || "") === trLow(t));
+        d.plan = o.plan.filter(x => x && (x.baslik || x.title)).slice(0, 20).map(x => {
+          const title = String(x.baslik || x.title).slice(0, 120), time = /^\d{2}:\d{2}$/.test(x.saat || x.time || "") ? (x.saat || x.time) : "", e = ayni(title);
+          return Object.assign({id: e ? e.id : uid(), time, title, done: e ? !!e.done : false}, e && e.takvim ? {takvim: true} : {});
+        }).sort((a, b) => (a.time || "99") < (b.time || "99") ? -1 : 1);
       } else if (o.op === "uyku") {
         if (/^\d{2}:\d{2}$/.test(o.yatis || "") && /^\d{2}:\d{2}$/.test(o.kalkis || "")) { d.uykuSaat = {yatis: o.yatis, kalkis: o.kalkis}; d.sleep = uykuHesap(o.yatis, o.kalkis); }
       } else return;
@@ -1654,10 +1685,17 @@ function profilKart(){
     <p class="small muted" style="margin:10px 0 0">Görevler senin Claude hesabında çalışır; verilerin yalnız senin Drive'ında kalır. Claude hiçbir maili göndermez; istersen sadece taslak hazırlar.</p></section>`;
   return h;
 }
+function rutinKart(){
+  const r = rutinler().slice().sort((a, b) => (a.saat || "99") < (b.saat || "99") ? -1 : 1);
+  return `<section class="card" id="rutinKart"><div class="card-h"><h2>Her gün</h2><span class="chip">rutin</span></div>
+    <p class="small" style="margin:0 0 10px;color:var(--ink-2)">Buradakiler her sabah günün planına kendiliğinden eklenir; Bugün'de işaretlersin, uygulama açıkken 5 dk önce hatırlatır.</p>
+    ${r.length ? `<ul class="list" style="margin:0 0 10px">${r.map(x => `<li class="row" style="display:flex;align-items:center;gap:10px;padding:6px 0"><span class="num" style="min-width:46px;color:var(--ink-3)">${esc(x.saat || "—")}</span><span style="flex:1">${esc(x.baslik)}</span><button class="minibtn" data-act="rutinsil" data-id="${esc(x.id)}" aria-label="${esc(x.baslik)} sil">Sil</button></li>`).join("")}</ul>` : ""}
+    <form id="f-rutin" class="add"><input class="field" id="rtSaat" type="time" style="max-width:110px" aria-label="Saat"><input class="field grow" id="rtBaslik" placeholder="örn. Dişlerini fırçala" aria-label="Her gün yapılacak"><button class="btn">Ekle</button></form></section>`;
+}
 function claudeAyarlar(){
   const a = ayar(), tema = LS.get(K_TEMA) || "sistem";
   const izin = "Notification" in window ? Notification.permission : "yok";
-  let h = profilKart() + `<section class="card"><div class="card-h"><h2>Hatırlatmalar</h2></div>
+  let h = profilKart() + rutinKart() + `<section class="card"><div class="card-h"><h2>Hatırlatmalar</h2></div>
     <p class="small" style="margin:0 0 10px;color:var(--ink-2)">${claudeVar() ? "Sesli brifingler her gün 08:00, 12:30 ve 22:30'da hazır olur; Bugün ekranındaki “Dinle”ye bas." : "Bugün ekranındaki “Dinle”ye basınca uygulama günün kısa özetini okur."} Uygulama açıkken plan maddelerinin saatinden 5 dk önce bildirim gelir; kapalıyken de çalsın istiyorsan maddedeki zile dokun (Google Takvim).</p>
     ${izin === "granted" ? `<span class="chip ok">Bildirim izni açık</span>` : izin === "denied" ? `<span class="chip warn wrap">Bildirim izni kapalı. Açmak için: iPhone Ayarlar → Bildirimler → Hayat</span>` : izin === "yok" ? `<span class="chip wrap">Bu tarayıcı bildirim desteklemiyor${IOS && !STANDALONE ? " (önce ana ekrana ekle)" : ""}</span>` : `<button class="btn" data-act="izin">Bildirimlere izin ver</button>`}</section>`;
   h += sesAyarKart();
@@ -1849,6 +1887,14 @@ function habitKey(k){
   return l.replace(/[^a-z0-9çğıöşü]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || "diger";
 }
 const habitLabel = k => (habits().find(h => h.key === k) || {label: k}).label;
+/* "dişimi fırçaladım" also ticks the matching tooth-brushing item of today's plan (morning before 15:00, otherwise the night one) */
+function disPlanIsaretle(d){
+  const acik = (d.plan || []).filter(p => !p.done && /diş/i.test(p.title || "") && /fırça/i.test(p.title || ""));
+  if (!acik.length) return;
+  const simdi = nowHM(), sabah = simdi < "15:00";
+  const sec = acik.find(p => sabah ? (p.time || "") < "15:00" : (p.time || "99") >= "15:00") || acik[0];
+  sec.done = true;
+}
 function logDay(i){
   const date = S.today, done = [];
   touch("days/" + date);
@@ -1856,7 +1902,7 @@ function logDay(i){
   d.counts = d.counts || {}; d.checks = d.checks || {};
   for (const [k0, v] of Object.entries(i.sayac_ekle || {})) { const n = Math.round(Number(v)); if (!isFinite(n)) continue; const k = habitKey(k0); d.counts[k] = Math.max(0, (d.counts[k] || 0) + n); done.push(`${habitLabel(k)} +${n} (bugün ${d.counts[k]})`); }
   for (const k of Object.keys(i.isaretle || {})) if (!habits().some(h => h.key === habitKey(k))) { touch("meta/settings"); setHabits(habits().concat([{key: habitKey(k), label: k === "dis" ? "Diş fırçalama" : k, type: "check"}])); }
-  for (const [k0, v] of Object.entries(i.isaretle || {})) { const k = habitKey(k0); d.checks[k] = !!v; done.push(`${habitLabel(k)} ✓`); }
+  for (const [k0, v] of Object.entries(i.isaretle || {})) { const k = habitKey(k0); d.checks[k] = !!v; done.push(`${habitLabel(k)} ✓`); if (k === "dis" && v) disPlanIsaretle(d); }
   if (i.uyku != null) { d.sleep = Math.max(0, Math.min(16, Math.round(Number(i.uyku) * 2) / 2)); done.push(`uyku ${nf1.format(d.sleep)} sa`); }
   for (const [k, f, l] of [["ruh_hali","mood","ruh hali"],["enerji","energy","enerji"],["odak","focus","odak"]]) if (i[k] != null) { d[f] = i[k]; done.push(`${l} ${i[k]}`); }
   for (const p of i.para || []) {
@@ -1959,7 +2005,7 @@ const ANLAMADIM = "Bunu anlayamadım. Şunları hemen yazarım: “2 sigara”, 
 
 /* ---------- composer / agent ---------- */
 function growInput(){ const el = document.getElementById("abInput"); if (!el) return; el.style.height = "auto"; el.style.height = Math.min(150, el.scrollHeight) + "px"; }
-function openComposer(){ S.agent.open = true; if (!S.agent.pending && !S.agent.undo) { S.agent.you = ""; S.agent.reply = ""; S.agent.error = null; } renderSheet(); setTimeout(() => { const el = document.getElementById("abInput"); if (el && !IOS) el.focus(); }, 60); }
+function openComposer(){ if (SES.acik) sesKapat(); else sesDurdur(); S.agent.open = true; if (!S.agent.pending && !S.agent.undo) { S.agent.you = ""; S.agent.reply = ""; S.agent.error = null; } renderSheet(); setTimeout(() => { const el = document.getElementById("abInput"); if (el && !IOS) el.focus(); }, 60); }
 /* log it here if the app understands it, otherwise hand it to Claude's inbox */
 function gonder(text){
   const id = "g" + uid(), zaman = new Date().toISOString();
@@ -2025,11 +2071,27 @@ function gelenIptal(id){
 }
 
 /* voice: Safari's speech recognition when available, otherwise the keyboard mic */
+/* iPhone home-screen mode: some iOS versions report the screen shorter by the status bar height,
+   which leaves an empty strip under the menu; measure it and let the page fill the whole screen */
+function tamEkran(){
+  let fark = 0;
+  try {
+    const ana = window.navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+    const h = window.innerHeight, w = window.innerWidth;
+    if (ana && h > w) { fark = Math.max(screen.width, screen.height) - h; if (fark < 0 || fark > 80) fark = 0; }
+  } catch (e) { fark = 0; }
+  document.documentElement.style.setProperty("--alt-fark", fark + "px");
+}
+tamEkran(); window.addEventListener("resize", tamEkran); window.addEventListener("orientationchange", () => setTimeout(tamEkran, 300));
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null, recOn = false;
+/* stop the composer's microphone (used when a voice session starts) */
+function micKapat(){ if (recOn && rec) { try { rec.abort(); } catch (e) {} recOn = false; renderSheet(); } }
 function micToggle(){
   if (!SR) return;
   if (recOn) { try { rec.stop(); } catch (e) {} return; }
+  /* he wants to talk: silence the app first, otherwise the microphone hears the app's own voice */
+  sesDurdur(); if (SES.acik) sesKapat();
   let final = "";
   rec = new SR(); rec.lang = "tr-TR"; rec.interimResults = true; rec.continuous = false;
   rec.onresult = e => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; const el = document.getElementById("abInput"); if (el) { el.value = t; growInput(); } final = t; };
@@ -2037,8 +2099,12 @@ function micToggle(){
     recOn = false; renderSheet();
     if (e.error === "not-allowed" || e.error === "service-not-allowed") { S.agent.error = "Mikrofon izni yok. Klavyedeki 🎤 ile söyleyebilirsin."; renderSheet(); }
   };
-  rec.onend = () => { recOn = false; renderSheet(); if (final.trim()) runAgent(final); };
-  try { rec.start(); recOn = true; renderSheet(); } catch (e) { recOn = false; renderSheet(); }
+  rec.onend = () => {
+    recOn = false;
+    if (final.trim() && yankiMi(final)) { const el = document.getElementById("abInput"); if (el) el.value = ""; S.agent.error = YANKI; renderSheet(); return; }
+    renderSheet(); if (final.trim()) runAgent(final);
+  };
+  try { rec.start(); recOn = true; renderSheet(); } catch (e) { recOn = false; renderSheet(); }   /* must start inside the tap on iPhone */
 }
 
 /* ---------- render ---------- */
@@ -2131,6 +2197,9 @@ document.addEventListener("click", e => {
     case "giris": girisYap(document.getElementById("gLink").value); break;
     case "yapistir": if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(t => { document.getElementById("gLink").value = t; girisYap(t); }).catch(() => { document.getElementById("gHata").textContent = "Pano okunamadı; linki uzun basıp yapıştır."; }); break;
     case "linkkopyala": if (OTURUM && navigator.clipboard) navigator.clipboard.writeText(OTURUM.adres + "?k=" + OTURUM.k).then(() => { S.kopyalandi = true; render(); }).catch(() => {}); break;
+    case "rutinsil": { const id = b.dataset.id; touch("meta/settings"); S.settings = Object.assign({}, S.settings || {}, {habits: habits(), rutin: rutinler().filter(x => x.id !== id)}); saveSettings();
+      for (const t of [S.today, addDays(S.today, 1)]) if ((getDay(t).plan || []).some(p => p.rutin === id && !p.done)) editDay(t, d => { d.plan = d.plan.filter(p => !(p.rutin === id && !p.done)); });
+      hatirlatKur(); render(); break; }
     case "pclaude": S.ui.profilClaude = b.dataset.v === "1"; profilCiz(); break;
     case "profilkaydet": profilKaydet(); break;
     case "claudemod": { const v = b.dataset.v === "1"; if (v !== claudeVar()) claudeModu(v); break; }
@@ -2183,6 +2252,10 @@ document.addEventListener("submit", e => {
       const bt = Number(val("aButce").replace(",", ".")), pk = Number(val("aPaket").replace(",", "."));
       setAyar({butce: bt > 0 ? Math.round(bt) : null, paket: pk > 0 ? Math.round(pk*100)/100 : 6.5}); toast("Kaydedildi."); render(); break; }
     case "f-agent": runAgent((document.getElementById("abInput") || {}).value); break;
+    case "f-rutin": { const b = val("rtBaslik").trim().slice(0, 120), sa = val("rtSaat"); if (!b) { toast("Ne yapılacak, yaz."); return; }
+      if (rutinler().some(y => trLow(y.baslik) === trLow(b))) { toast("Bu zaten listede."); return; }
+      touch("meta/settings"); S.settings = Object.assign({}, S.settings || {}, {habits: habits(), rutin: rutinler().concat([{id: uid(), saat: /^\d{2}:\d{2}$/.test(sa) ? sa : "", baslik: b}])}); saveSettings();
+      rutinUygula(); hatirlatKur(); toast("Her güne eklendi; bugünün planında da var."); render(); break; }
     case "f-profil": { const ad = val("prAd").trim().replace(/\s+/g, " ").slice(0, 40); if (!ad) { toast("Adını yaz."); return; } setAyar({ad}); toast("Kaydedildi."); render(); break; }
   }
 });
@@ -2348,9 +2421,23 @@ function parcala(text){
   }
   return out.filter(Boolean);
 }
-function seslendir(text, bitince, zorla){
+/* what the app said in the last minutes: if the microphone hears it back, it is our own voice, not him */
+const SOYLENEN = [];
+function soyledi(text){ SOYLENEN.push({t: kelimeler(text), at: Date.now()}); while (SOYLENEN.length > 12) SOYLENEN.shift(); }
+function kelimeler(t){ return trLow(String(t || "")).replace(/[^a-zçğıöşü0-9\s]/g, " ").split(/\s+/).filter(w => w.length >= 3); }
+function yankiMi(text){
+  const w = kelimeler(text); if (w.length < 6) return false;   /* his commands are short; an echo of a briefing is a long run of its words */
+  const yakin = new Set(); SOYLENEN.filter(x => Date.now() - x.at < 5 * 60e3).forEach(x => x.t.forEach(k => yakin.add(k)));
+  if (!yakin.size) return false;
+  const tut = w.filter(k => yakin.has(k) || [...yakin].some(y => y.length >= 5 && k.length >= 5 && (y.startsWith(k.slice(0, 5)) || k.startsWith(y.slice(0, 5))))).length;
+  return tut / w.length >= 0.7;
+}
+const YANKI = "Kendi sesimi duydum, onu göndermedim. Şimdi sen söyle.";
+/* kisa: confirmations and goodbyes always use the phone's voice, so the free Gemini quota is kept for briefings */
+function seslendir(text, bitince, zorla, kisa){
   const a = ttsAyar();
-  if (a.kaynak === "gemini" && a.anahtar) {
+  soyledi(text);
+  if (a.kaynak === "gemini" && a.anahtar && !kisa) {
     if (!zorla && kotaDolu()) { if (SES.acik && !SES.hata) { SES.hata = "Bugünkü ücretsiz doğal ses hakkı doldu; telefonun sesiyle okuyorum."; renderSes(); } cihazSeslendir(text, bitince); }
     else geminiSeslendir(text, bitince);
   } else cihazSeslendir(text, bitince);
@@ -2377,7 +2464,11 @@ function sesAudioHazirla(){
   if (ttsAyar().kaynak !== "gemini") return;
   try { sesAudio.onended = null; sesAudio.onerror = null; sesAudio.src = SESSIZ; const p = sesAudio.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
 }
-function sesDurdur(){ try { if (TTS) TTS.cancel(); } catch (e) {} try { if (sesAudio) { sesAudio.onended = null; sesAudio.onerror = null; sesAudio.pause(); } } catch (e) {} }
+function sesDurdur(){
+  /* iPhone can resume paused speech when the microphone takes over the audio, so stop AND unload everything */
+  try { if (TTS) { try { TTS.pause(); } catch (e) {} TTS.cancel(); setTimeout(() => { try { if (!SES.acik || SES.durum !== "okuyor") TTS.cancel(); } catch (e) {} }, 150); } } catch (e) {}
+  try { if (sesAudio) { sesAudio.onended = null; sesAudio.onerror = null; sesAudio.pause(); sesAudio.removeAttribute("src"); try { sesAudio.load(); } catch (e) {} } } catch (e) {}
+}
 function parcalaUzun(text, max){
   const out = []; let buf = "";
   for (const s of parcala(text)) { if ((buf + " " + s).length > max && buf) { out.push(buf.trim()); buf = ""; } buf += " " + s; }
@@ -2385,13 +2476,8 @@ function parcalaUzun(text, max){
   return out;
 }
 /* a short first piece so the voice starts fast, then bigger pieces */
-function sesParcalari(text){
-  const c = parcala(text), out = []; let buf = "";
-  while (c.length && (buf + " " + c[0]).length <= 260) buf += " " + c.shift();
-  if (!buf && c.length) buf = c.shift();
-  if (buf.trim()) out.push(buf.trim());
-  return out.concat(c.length ? parcalaUzun(c.join("\n"), 1400) : []);
-}
+/* the free Gemini voice allows only ~10 requests a day: a whole briefing is ONE request (prepared ahead, see sesHazirla) */
+function sesParcalari(text){ return String(text).length <= 4500 ? [String(text).trim()] : parcalaUzun(text, 4000); }
 function hashSes(s){ let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + s.length.toString(36); }
 function b64Bytes(b64){ const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
 function pcmWav(pcm, rate){
@@ -2452,11 +2538,16 @@ async function geminiIste(text, a){
   }
   throw son;
 }
+const sesYolda = new Map();   /* text hash -> pending request, so a prefetch and a tap never ask twice */
 async function geminiSes(text){
   const a = ttsAyar(), anahtar = hashSes([a.ses, a.uslup, text].join("|"));
   if (ttsCache.has(anahtar)) return ttsCache.get(anahtar);
   let blob = await sesOnbellek(anahtar);
-  if (!blob) { blob = await geminiIste(text, a); sesOnbellek(anahtar, blob); }
+  if (!blob) {
+    if (!sesYolda.has(anahtar)) sesYolda.set(anahtar, geminiIste(text, a).then(b => { sesOnbellek(anahtar, b); return b; }).finally(() => sesYolda.delete(anahtar)));
+    blob = await sesYolda.get(anahtar);
+  }
+  if (ttsCache.has(anahtar)) return ttsCache.get(anahtar);
   const url = URL.createObjectURL(blob);
   if (ttsCache.size > 40) { const [k, u] = ttsCache.entries().next().value; ttsCache.delete(k); try { URL.revokeObjectURL(u); } catch (e) {} }
   ttsCache.set(anahtar, url);
@@ -2497,7 +2588,7 @@ function geminiSeslendir(text, bitince){
 }
 function cihazSeslendir(text, bitince){
   if (!TTS) { if (bitince) bitince(); return; }
-  try { TTS.cancel(); } catch (e) {}
+  try { TTS.cancel(); if (TTS.paused) TTS.resume(); } catch (e) {}
   const parts = parcala(text), v = trSes(), oturum = SES.oturum;
   let i = 0;
   const sonraki = () => {
@@ -2535,16 +2626,29 @@ function sesBaslat(gid){
     kaynak = `${kanalOf(g) === "posta" ? "Posta özeti" : "Claude"} · ${fmtShort(fmtYMD.format(new Date(gZaman(g))))} ${fmtHM.format(new Date(gZaman(g)))}`;
   } else { metin = yerelOzet(); kaynak = "Uygulamadan kısa özet"; }
   if (S.agent.open) { S.agent.open = false; renderSheet(); }
+  micKapat();
   sesAudioHazirla();
-  SES = {acik: true, oturum: uid(), durum: "okuyor", metin, kaynak, tur: 0, cevaplar: [], ara: "", hata: ""};
+  SES = {acik: true, oturum: uid(), durum: "okuyor", metin, kaynak, tur: 0, cevaplar: [], ara: "", hata: "", yerel: !g || !g.sonuc || kaynak.startsWith("Uygulamadan")};
   renderSes();
-  seslendir(metin + "\nSen ne dersin? Dinliyorum.", () => sesDinle(false));
+  seslendir(metin + SES_SON, () => sesDinle(false), false, SES.yerel);
+}
+const SES_SON = "\nSen ne dersin? Dinliyorum.";
+/* prepare the newest briefing's voice in the background (one request), so "Dinle" starts at once */
+function sesHazirla(){
+  try {
+    const a = ttsAyar(); if (a.kaynak !== "gemini" || !a.anahtar || kotaDolu() || S.mode !== "live") return;
+    const g = sonKanal("brifing")[0]; if (!g || !g.sonuc || Date.now() - gZaman(g) > 16*3600e3) return;
+    const k = "hayat.sesHazir." + g.id; if (LS.get(k)) return; LS.set(k, 1);
+    geminiSes(sesTemiz(g.sonuc) + SES_SON).catch(e => { if (/^429/.test(String(e.message || e)) && /PerDay|per day|daily/i.test(String(e.message || e))) kotaIsaretle(); });
+  } catch (e) {}
 }
 let sesRec = null;
 function sesDinle(eldenBasildi){
-  if (!SES.acik) return;
+  if (!SES.acik || S.agent.open) return;
   if (!SR) { SES.durum = "bekle"; SES.hata = "Bu telefonda sesli dinleme yok; aşağıya yazabilirsin."; renderSes(); return; }
-  sesDurdur();
+  sesDurdur(); micKapat();
+  if (!eldenBasildi && !SES.bekledi) { const o = SES.oturum; SES.bekledi = true; setTimeout(() => { if (SES.acik && SES.oturum === o) sesDinle(false); }, 350); return; }   /* let the last word die out first */
+  SES.bekledi = false;
   let final = "";
   const r = new SR(); r.lang = "tr-TR"; r.interimResults = true; r.continuous = false;
   sesRec = r; SES.durum = "dinliyor"; SES.ara = ""; SES.hata = ""; renderSes();
@@ -2562,6 +2666,7 @@ const BITIS = /^(yok|hayır|hayır yok|bitti|bu kadar|tamam|tamamdır|teşekkür
 function sesCevap(t){
   if (!SES.acik) return;
   if (!t) { SES.durum = "bekle"; renderSes(); return; }
+  if (yankiMi(t)) { SES.durum = "bekle"; SES.hata = YANKI; renderSes(); return; }
   if (BITIS.test(trLow(t).replace(/[.!,]/g, "").trim())) { sesBitir("Tamamdır, görüşürüz!"); return; }
   const r = gonder(t);
   SES.cevaplar.push({t, yerel: r.yerel, ozet: r.ozet}); SES.tur++;
@@ -2569,12 +2674,12 @@ function sesCevap(t){
   const onay = r.yerel ? r.ozet : "Tamam, Claude'a ilettim; birazdan işler.";  /* Claude'suz modda her şey yerel: ya kaydeder ya "anlayamadım" der */
   if (SES.tur >= 6) { sesBitir(onay + " Şimdilik bu kadar, görüşürüz!"); return; }
   SES.durum = "okuyor"; renderSes();
-  seslendir(sesTemiz(onay).replace(/\s*✓/g, "") + "\nBaşka bir şey var mı?", () => sesDinle(false));
+  seslendir(sesTemiz(onay).replace(/\s*✓/g, "") + "\nBaşka bir şey var mı?", () => sesDinle(false), false, true);
 }
 function sesBitir(son){
   if (!SES.acik) return;
   try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null;
-  if (son) { SES.durum = "bitti"; renderSes(); const o = SES.oturum; seslendir(son, () => { if (SES.oturum === o) sesKapat(); }); }
+  if (son) { SES.durum = "bitti"; renderSes(); const o = SES.oturum; seslendir(son, () => { if (SES.oturum === o) sesKapat(); }, false, true); }
   else sesKapat();
 }
 function sesKapat(){ sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; SES = {acik: false}; renderSes(); }
@@ -2604,7 +2709,7 @@ document.addEventListener("click", e => {
     case "seskonus": sesDinle(true); break;
     case "sesatla": sesDurdur(); SES.oturum = uid(); sesDinle(true); break;
     case "sesdur": try { if (sesRec) sesRec.stop(); } catch (er) {} break;
-    case "sestekrar": { sesDurdur(); sesAudioHazirla(); const m = SES.metin; SES.oturum = uid(); SES.durum = "okuyor"; SES.hata = ""; renderSes(); seslendir(m + "\nSen ne dersin? Dinliyorum.", () => sesDinle(false)); break; }
+    case "sestekrar": { sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (er) {} sesRec = null; sesAudioHazirla(); const m = SES.metin; SES.oturum = uid(); SES.durum = "okuyor"; SES.hata = ""; renderSes(); seslendir(m + SES_SON, () => sesDinle(false), false, SES.yerel); break; }
     case "sesdene": ttsFormKaydet(); sesDene(); break;
     case "sesbitir": sesKapat(); break;
   }

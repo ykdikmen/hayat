@@ -16,7 +16,7 @@
  */
 
 const TZ = 'Europe/Rome';
-const SURUM = '2.0.0';
+const SURUM = '2.0.1';
 const UYGULAMA_ADRESI = 'https://ykdikmen.github.io/hayat/';
 // Şirketin Tur Programı takvimi. Seninle paylaşılmışsa turlar Bugün ekranında görünür; paylaşılmamışsa uygulama yine çalışır.
 // Tur görmek istemezsen tırnak içini boşalt: ''
@@ -234,13 +234,13 @@ function tabloSatiri_(d, habits) {
 
 function gelenEkle_(k) {
   const id = String(k.id || Utilities.getUuid().slice(0, 8)).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
-  const metin = String(k.metin || '').slice(0, 2000);
+  const metin = String(k.metin || '').slice(0, 9000);
   if (!metin) return;
   const durum = k.durum === 'uygulama' ? 'uygulama' : 'bekliyor';
   const s = gelenSayfasi_();
   const n = s.getLastRow();
   if (n > 1 && s.getRange(2, 1, n - 1, 1).getValues().some(r => r[0] === id)) return; // aynı kayıt iki kez gelmesin
-  s.appendRow([id, new Date().toISOString(), metin, durum, String(k.sonuc || '').slice(0, 2000), durum === 'uygulama' ? new Date().toISOString() : '']);
+  s.appendRow([id, new Date().toISOString(), metin, durum, String(k.sonuc || '').slice(0, 9000), durum === 'uygulama' ? new Date().toISOString() : '']);
   ozetYaz_();
 }
 function gelenOku_(adet) {
@@ -263,7 +263,7 @@ function gelenGuncelle_(id, alanlar) {
   if (i < 0) return false;
   const satir = i + 2;
   if (alanlar.durum) s.getRange(satir, 4).setValue(alanlar.durum);
-  if (alanlar.sonuc != null) s.getRange(satir, 5).setValue(String(alanlar.sonuc).slice(0, 2000));
+  if (alanlar.sonuc != null) s.getRange(satir, 5).setValue(String(alanlar.sonuc).slice(0, 9000));
   if (alanlar.durum === 'islendi') s.getRange(satir, 6).setValue(new Date().toISOString());
   return true;
 }
@@ -395,6 +395,12 @@ function gunUygula(durum, i, bugun, simdiSaat) {
   [].concat(i.saglik || []).forEach(t => { if (String(t).trim()) d.health = (d.health || []).concat([{id: kisaId(), time: tarih === bugun ? simdiSaat : '', text: String(t).trim().slice(0, 300)}]); });
   [].concat(i.kazanim || []).forEach(t => { if (String(t).trim()) d.wins = (d.wins || []).concat([{id: kisaId(), text: String(t).trim().slice(0, 300)}]); });
   if (i.not && String(i.not).trim()) d.note = (d.note ? d.note + '\n' : '') + String(i.not).trim().slice(0, 1000);
+  if (Array.isArray(i.plan_yaz)) {   /* replace the whole day's plan; keeps ticks of items that stay */
+    const eski = d.plan || [];
+    d.plan = i.plan_yaz.map(p => { const b = String((p && p.baslik) || '').trim().slice(0, 120); if (!b) return null; const e = eski.find(x => String(x.title || '').toLowerCase() === b.toLowerCase());
+      return {id: e ? e.id : kisaId(), time: /^\d{2}:\d{2}$/.test((p && p.saat) || '') ? p.saat : '', title: b, done: e ? !!e.done : false}; }).filter(Boolean)
+      .sort((a, b) => (a.time || '99') < (b.time || '99') ? -1 : 1);
+  }
   [].concat(i.plan_ekle || []).forEach(p => { const b = String((p && p.baslik) || '').trim(); if (b) d.plan = (d.plan || []).concat([{id: kisaId(), time: saatDuzelt(p.saat), title: b.slice(0, 200), done: false}]); });
   [].concat(i.plan_tamamla || []).forEach(q => {
     const ql = trKucuk(q); if (!ql) return;
