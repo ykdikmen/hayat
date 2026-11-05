@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hayat Paneli · Kurulum</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="ikon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Saira+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0c1118;--surface:#141c27;--surface-2:#1b2533;--line:#243042;--ink:#edf1f5;--ink-2:#a9b4c3;--ink-3:#717e90;--mint:#7bdcb8;--on-mint:#05261a;--mint-soft:rgba(123,220,184,.14);--coral:#ff8d6b;--amber:#f5b94a;--amber-soft:rgba(245,185,74,.14);
+  --font-display:"Saira Semi Condensed","Arial Narrow",system-ui,sans-serif;--font-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme: light){:root{color-scheme:light;--bg:#edf0f4;--surface:#fff;--surface-2:#f2f4f7;--line:#dfe4eb;--ink:#111923;--ink-2:#465366;--ink-3:#77849a;--mint:#0c9a72;--on-mint:#fff;--mint-soft:rgba(12,154,114,.12);--coral:#dd5530;--amber:#b07214;--amber-soft:rgba(176,114,20,.12)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--font-body);-webkit-text-size-adjust:100%}
+.wrap{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 28px) 18px 60px}
+.eyebrow{font:700 12px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--mint)}
+h1{font:700 34px/1.1 var(--font-display);margin:8px 0 10px;letter-spacing:.01em}
+h2{font:700 21px/1.2 var(--font-display);margin:0;letter-spacing:.01em}
+.lead{color:var(--ink-2);margin:0 0 22px;max-width:56ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 18px 16px;margin:0 0 14px}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.num{width:34px;height:34px;border-radius:50%;background:var(--mint-soft);color:var(--mint);display:grid;place-items:center;font:700 16px/1 var(--font-display)}
+.step h2{margin:5px 0 8px}
+.step p,.step li{color:var(--ink-2);margin:0 0 8px}
+.step ol,.step ul{margin:0 0 8px;padding-left:20px}
+.step li{margin:0 0 5px}
+b,strong{color:var(--ink)}
+code,.k{font:600 13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:1px 6px;color:var(--ink);overflow-wrap:anywhere}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:13px;padding:11px 16px;font:700 15px/1 var(--font-body);background:var(--mint);color:var(--on-mint);cursor:pointer;text-decoration:none}
+.btn.soft{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.note{background:var(--amber-soft);border-radius:13px;padding:10px 12px;color:var(--ink);font-size:14px;margin:8px 0 4px}
+.tag{display:inline-block;font:700 11px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-left:6px;vertical-align:middle}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+.who .card{margin:0}
+.who h2{font-size:18px;margin-bottom:6px}
+.who p{margin:0;color:var(--ink-2);font-size:14px}
+.ok{color:var(--mint);font-weight:700}
+#durum{font-size:14px;color:var(--ink-3);margin-left:4px}
+textarea{width:100%;min-height:120px;margin-top:10px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:12px/1.4 ui-monospace,Menlo,monospace}
+footer{color:var(--ink-3);font-size:13px;margin-top:20px}
+@media (max-width:520px){.who{grid-template-columns:1fr}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Hayat Paneli</div>
+  <h1>Kendi panelini kur</h1>
+  <p class="lead">Herkesin paneli ayrı: verilerin sadece senin Google hesabında durur, kimse göremez. Kurulum yaklaşık 10 dakika; ilk 4 adım bilgisayardan en kolayı, sonrası telefonda.</p>
+
+  <div class="who">
+    <div class="card"><h2>Claude'suz</h2><p>Sigara, su, spor, uyku, para, günlük, hedefler, turlar ve hatırlatmalar. “yarın 10:00 dişçi” dersen plana ve Google Takvim'e ekler. Hiçbir ücret yok.</p></div>
+    <div class="card"><h2>Claude'lu</h2><p>Üstüne sabah, öğle, akşam sesli brifing, mail özeti ve söylediğin her şeyi Claude işler. Kendi Claude hesabın gerekir (6. adım).</p></div>
+  </div>
+
+  <div class="card step"><div class="num">0</div><div>
+    <h2>Turlar için takvim paylaşımı <span class="tag">Kerem yapar</span></h2>
+    <p>Bugün ekranında şirketin turlarını görmek için Kerem, Tur Programı takvimini senin Gmail adresinle paylaşır:</p>
+    <ol><li>Bilgisayarda Google Takvim → soldaki <b>Tur Programı</b> → üç nokta → <b>Ayarlar ve paylaşım</b>.</li>
+      <li><b>Belirli kişilerle paylaş</b> → <b>Kişi ekle</b> → ortağın Gmail adresi → izin: <b>Etkinliklerin tüm ayrıntılarını gör</b> → Gönder.</li>
+      <li>Ortağa gelen maildeki “Bu takvimi ekle” bağlantısına bir kez tıklaması yeter.</li></ol>
+    <p>Bu adım atlansa da panel çalışır; paylaşım gelince turlar kendiliğinden görünür.</p>
+  </div></div>
+
+  <div class="card step"><div class="num">1</div><div>
+    <h2>Sunucu kodunu kopyala</h2>
+    <p>Bu kod senin Google hesabında çalışacak küçük bir program; tabloyu ve klasörü kendisi açar.</p>
+    <div class="row"><button class="btn" id="kopyala" type="button">Kodu kopyala</button><a class="btn soft" href="sunucu/Code.js" target="_blank" rel="noopener">Kodu göster</a><span id="durum"></span></div>
+    <textarea id="yedek" hidden readonly aria-label="Sunucu kodu"></textarea>
+  </div></div>
+
+  <div class="card step"><div class="num">2</div><div>
+    <h2>Google Apps Script'e yapıştır</h2>
+    <ol><li><a href="https://script.new" target="_blank" rel="noopener"><b>script.new</b></a> adresini aç (Gmail hesabınla giriş yap).</li>
+      <li>Açılan sayfadaki kodun hepsini sil, kopyaladığın kodu yapıştır.</li>
+      <li>Soldaki üstte <b>Adsız proje</b> yazan yere tıkla, adını <b>Hayat Paneli</b> yap.</li>
+      <li><b>Kaydet</b>'e bas (disket simgesi ya da Ctrl/Cmd + S).</li></ol>
+  </div></div>
+
+  <div class="card step"><div class="num">3</div><div>
+    <h2>Web uygulaması olarak yayınla</h2>
+    <ol><li>Sağ üstte <b>Dağıt</b> → <b>Yeni dağıtım</b> <span class="tag" lang="en">Deploy → New deployment</span></li>
+      <li>“Tür seçin” yanındaki çark simgesi → <b>Web uygulaması</b> <span class="tag" lang="en">Web app</span></li>
+      <li>Çalıştıran kişi: <b>Ben</b> <span class="tag" lang="en">Execute as: Me</span> · Erişimi olan: <b>Herkes</b> <span class="tag" lang="en">Who has access: Anyone</span> → <b>Dağıt</b>.</li>
+      <li><b>Erişimi yetkilendir</b> <span class="tag" lang="en">Authorize access</span> → hesabını seç.</li></ol>
+    <div class="note">“Google bu uygulamayı doğrulamadı” çıkacak; normal, çünkü program senin. <b>Gelişmiş</b> <span class="tag" lang="en">Advanced</span> → <b>Hayat Paneli (güvenli değil) sayfasına git</b> → <b>İzin ver</b> <span class="tag" lang="en">Allow</span>. Program yalnızca senin hesabında, senin adına çalışır.</div>
+  </div></div>
+
+  <div class="card step"><div class="num">4</div><div>
+    <h2>Kurulumu başlat</h2>
+    <ol><li>Dağıtım bitince çıkan <b>Web uygulaması</b> adresini kopyala (<code>https://script.google.com/macros/s/…/exec</code>).</li>
+      <li>Adresi tarayıcıya yapıştır, sonuna <code>?kurulum=1</code> ekle, aç.</li>
+      <li>“Hayat Paneli kuruldu” sayfası çıkar: oradaki uzun <b>giriş linkini</b> kendine gönder (WhatsApp ya da mail). Bu link senin anahtarın; kimseyle paylaşma.</li></ol>
+  </div></div>
+
+  <div class="card step"><div class="num">5</div><div>
+    <h2>Telefona kur</h2>
+    <ol><li>iPhone'da giriş linkini <b>Safari</b>'de aç.</li>
+      <li>Alttaki Paylaş düğmesi → <b>Ana Ekrana Ekle</b>.</li>
+      <li>Ana ekrandaki <b>Hayat</b> ikonundan aç → <b>Panodan yapıştır</b> (linki bir kez daha ister).</li>
+      <li>Adını yaz, <b>Claude'lu</b> ya da <b>Claude'suz</b> seç. Bitti.</li></ol>
+    <p>Android'de Chrome → üç nokta → <b>Ana ekrana ekle</b>.</p>
+  </div></div>
+
+  <div class="card step"><div class="num">6</div><div>
+    <h2>Claude'u bağla <span class="tag">sadece Claude'lu</span></h2>
+    <ol><li>Claude uygulamasında <b>Google Drive</b>, <b>Gmail</b> ve <b>Google Takvim</b> bağlantılarını aç (panelin Google hesabıyla).</li>
+      <li>Panelde <b>zil → Ayarlar → Claude'u bağla → Kurulum mesajını kopyala</b>.</li>
+      <li>Claude'da yeni sohbet aç, yapıştır, gönder. Claude senin hesabına 4 zamanlanmış görev kurar: her saat gelen kutusu; 08:00, 12:30 ve 22:30'da sesli brifing.</li></ol>
+    <p>Claude hiçbir maili göndermez; istersen sadece Gmail'de taslak hazırlar, sen bakıp gönderirsin.</p>
+  </div></div>
+
+  <div class="card step"><div class="num">?</div><div>
+    <h2>Sorun olursa</h2>
+    <ul><li><b>Giriş linkini kaybettim:</b> script.google.com → Hayat Paneli projesi → üstteki listeden <code>yeniAnahtar</code> → Çalıştır. Yeni link “Yürütme günlüğü”nde çıkar; eskisi geçersiz olur.</li>
+      <li><b>Turlar görünmüyor:</b> 0. adımdaki paylaşım yapılmamış ya da maildeki bağlantıya tıklanmamış.</li>
+      <li><b>Kodu güncellemek gerekirse:</b> yeni kodu yapıştır, Kaydet → Dağıt → <b>Dağıtımları yönet</b> → kalem → Sürüm: <b>Yeni sürüm</b> → Dağıt. Link değişmez.</li></ul>
+  </div></div>
+
+  <footer>Uygulama: <a href="./" style="color:var(--mint)">ykdikmen.github.io/hayat</a></footer>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById("kopyala"), durum = document.getElementById("durum"), yedek = document.getElementById("yedek");
+  btn.addEventListener("click", function(){
+    durum.textContent = "Hazırlanıyor…";
+    var metin = fetch("sunucu/Code.js", {cache: "no-store"}).then(function(r){ if (!r.ok) throw new Error(r.status); return r.text(); });
+    /* Safari: panoya yazma, tıklamayla aynı anda başlamalı; ClipboardItem bir Promise kabul eder */
+    var is;
+    if (navigator.clipboard && window.ClipboardItem && navigator.clipboard.write) {
+      is = navigator.clipboard.write([new ClipboardItem({"text/plain": metin.then(function(t){ return new Blob([t], {type: "text/plain"}); })})]);
+    } else {
+      is = metin.then(function(t){ return navigator.clipboard.writeText(t); });
+    }
+    is.then(function(){ durum.innerHTML = '<span class="ok">Kopyalandı ✓</span> Şimdi 2. adım.'; btn.textContent = "Tekrar kopyala"; })
+      .catch(function(){
+        metin.then(function(t){ yedek.value = t; yedek.hidden = false; yedek.focus(); yedek.select(); durum.textContent = "Otomatik kopyalanamadı: kutudaki kodun hepsini seçip kopyala."; })
+          .catch(function(){ durum.textContent = "Kod yüklenemedi; “Kodu göster”den kopyala."; });
+      });
+  });
+})();
+</script>
+</body>
+</html>
