@@ -13,10 +13,13 @@
  *  4. Çıkan Web uygulaması adresini kopyala, sonuna  ?kurulum=1  ekleyip aç.
  *     Kurulum Drive'ında "Hayat Paneli" klasörünü ve tabloyu kendisi açar, sonra giriş linkini gösterir.
  *  Giriş linkini kaybedersen: bu editörde yukarıdan yeniAnahtar fonksiyonunu seç, Çalıştır; yeni link Yürütme günlüğünde çıkar.
+ *
+ * GÜNCELLEME (2.6 ve sonrası): kodun hepsini bununla değiştir → Kaydet → üstteki listeden kurulum26'yı seç → Çalıştır → izinleri onayla
+ *   (Google Dokümanlar, dış istek, zamanlayıcı). Sonra Dağıt → Dağıtımları yönet → kalem → Sürüm: Yeni sürüm → Dağıt. Adres değişmez.
  */
 
 const TZ = 'Europe/Rome';
-const SURUM = '2.0.1';
+const SURUM = '2.1.0';
 const UYGULAMA_ADRESI = 'https://ykdikmen.github.io/hayat/';
 // Şirketin Tur Programı takvimi. Seninle paylaşılmışsa turlar Bugün ekranında görünür; paylaşılmamışsa uygulama yine çalışır.
 // Tur görmek istemezsen tırnak içini boşalt: ''
@@ -84,6 +87,12 @@ function doPost(e) {
         return cevap_({hafta: govde.hafta, turlar: turlar_(govde.hafta)});
       case 'randevu':
         return cevap_(randevu_(govde));
+      case 'gunluk':
+        return cevap_(gunlukYaz_(govde));
+      case 'bildirim':
+        return cevap_(bildirim_(govde));
+      case 'bildirimAl':
+        return cevap_(bildirimAl_());
       default:
         return cevap_({hata: 'bilinmeyen işlem'});
     }
@@ -111,8 +120,8 @@ function kurulum_() {
   veriSayfasi_(); gelenSayfasi_(); tabloSayfasi_();
   const d = defter_(); const bos = d.getSheetByName('Sayfa1') || d.getSheetByName('Sheet1');
   if (bos && d.getSheets().length > 1 && bos.getLastRow() === 0) d.deleteSheet(bos);
-  ScriptApp.getProjectTriggers().forEach(t => { if (t.getHandlerFunction() === 'komutlariIceAktar') ScriptApp.deleteTrigger(t); });
-  ScriptApp.newTrigger('komutlariIceAktar').timeBased().everyMinutes(5).create();
+  ScriptApp.getProjectTriggers().forEach(t => { if (t.getHandlerFunction() === 'komutlariIceAktar' || t.getHandlerFunction() === 'bildirimTur') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('bildirimTur').timeBased().everyMinutes(5).create();   // Claude komutlarını içeri alır + bildirimleri yollar
   ozetYaz_();
   const url = ScriptApp.getService().getUrl();
   return UYGULAMA_ADRESI + '#giris=' + encodeURIComponent(url + '?k=' + anahtar);
@@ -352,7 +361,7 @@ function komutUygula_(komut) {
       if (op.op === 'gun') gunUygula(durum, op, bugun_(), Utilities.formatDate(new Date(), TZ, 'HH:mm'));
       else if (op.op === 'hedef') hedefUygula(durum, op, Utilities.getUuid().slice(0, 8));
       else if (op.op === 'odak') odakUygula(durum, op, Utilities.getUuid().slice(0, 8));
-      else if (op.op === 'gelen') gelenGuncelle_(String(op.id || ''), {durum: 'islendi', sonuc: op.sonuc || ''});
+      else if (op.op === 'gelen') { if (gelenGuncelle_(String(op.id || ''), {durum: 'islendi', sonuc: op.sonuc || ''})) bildirimClaude_(String(op.id || ''), op.sonuc); }
     });
     const belgeler = Object.keys(durum.degisen).map(y => ({yol: y, veri: durum.harita[y]}));
     if (belgeler.length) yazKilitsiz_(belgeler);
@@ -468,4 +477,232 @@ function randevu_(b) {
   ev.removeAllReminders();
   (Array.isArray(b.hatirlat_dk) && b.hatirlat_dk.length ? b.hatirlat_dk : [60, 15]).slice(0, 5).forEach(m => { const n = Math.round(Number(m)); if (n >= 0 && n <= 40320) ev.addPopupReminder(n); });
   return {tamam: true, baslik, tarih, saat};
+}
+
+/* ===================== 2.6: sesli günlük → Google Docs, uygulamadan bildirim ===================== */
+
+const AYLAR_ = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+const GUNLER_ = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+
+/**
+ * GÜNCELLEMEDEN SONRA BİR KEZ: yukarıdaki listeden kurulum26'yı seç → Çalıştır → izinleri onayla.
+ * Google Dokümanlar (günlük), dış istek (bildirim) ve zamanlayıcı izinlerini ister, 5 dakikalık bildirim zamanlayıcısını kurar.
+ */
+function kurulum26() {
+  const sonuc = [];
+  sonuc.push('Günlük klasörü: Hayat Paneli/' + gunlukKlasoru_().getName() + ' ✓');
+  sonuc.push(bildirimZamanlayici_());
+  try { UrlFetchApp.fetch('https://www.google.com/generate_204', {muteHttpExceptions: true}); sonuc.push('Bildirim gönderme izni ✓'); } catch (e) { sonuc.push('Bildirim gönderme izni yok: ' + e); }
+  sonuc.push('Google Dokümanlar izni ' + (DocumentApp.ParagraphHeading.HEADING2 ? '✓' : '?'));
+  console.log(sonuc.join('\n'));
+  return sonuc.join('\n');
+}
+function bildirimZamanlayici_() {
+  const ts = ScriptApp.getProjectTriggers();
+  ts.forEach(t => { if (t.getHandlerFunction() === 'komutlariIceAktar') ScriptApp.deleteTrigger(t); });   // bildirimTur onu da yapar
+  if (!ts.some(t => t.getHandlerFunction() === 'bildirimTur')) ScriptApp.newTrigger('bildirimTur').timeBased().everyMinutes(5).create();
+  return 'Bildirim zamanlayıcısı ✓';
+}
+
+/* ---- sesli günlük: her ay tek Google Dokümanı, her gün bir başlık ---- */
+function gunlukKlasoru_() {
+  try { defter_(); } catch (e) { /* ortak sürümde klasörü ilk kurulum açar */ }
+  let ust = null;
+  const kid = PropertiesService.getScriptProperties().getProperty('KLASOR_ID');
+  if (kid) { try { ust = DriveApp.getFolderById(kid); } catch (e) { ust = null; } }
+  if (!ust) { const it = DriveApp.getFoldersByName('Hayat Paneli'); ust = it.hasNext() ? it.next() : DriveApp.createFolder('Hayat Paneli'); }
+  const alt = ust.getFoldersByName('Günlük');
+  return alt.hasNext() ? alt.next() : ust.createFolder('Günlük');
+}
+function gunlukSayfasi_() { return sayfa_('gunluk', ['id', 'tarih', 'saat', 'belge', 'zaman']); }
+function gunlukBaslik_(tarih) {
+  const [y, m, g] = tarih.split('-').map(Number);
+  return g + ' ' + AYLAR_[m - 1] + ' ' + y + ', ' + GUNLER_[new Date(Date.UTC(y, m - 1, g, 12)).getUTCDay()];
+}
+function gunlukYaz_(b) {
+  const id = String(b.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  const tarih = String(b.tarih || ''), saat = String(b.saat || '').replace(/[^0-9:]/g, '').slice(0, 5);
+  const metin = String(b.metin || '').replace(/\r/g, '').trim().slice(0, 20000);
+  if (!id || !/^\d{4}-\d{2}-\d{2}$/.test(tarih) || !metin) return {hata: 'günlük eksik'};
+  const kilit = LockService.getScriptLock();
+  kilit.waitLock(30000);
+  try {
+    const s = gunlukSayfasi_(), n = s.getLastRow();
+    if (n > 1) {
+      const eski = s.getRange(2, 1, n - 1, 4).getValues().find(r => String(r[0]) === id);
+      if (eski) return {tamam: true, zaten: true, url: 'https://docs.google.com/document/d/' + eski[3] + '/edit'};
+    }
+    const [y, m] = tarih.split('-').map(Number);
+    const ad = 'Hayat Günlüğü – ' + AYLAR_[m - 1] + ' ' + y;
+    const klasor = gunlukKlasoru_(), dosyalar = klasor.getFilesByName(ad);
+    let doc;
+    if (dosyalar.hasNext()) doc = DocumentApp.openById(dosyalar.next().getId());
+    else {
+      doc = DocumentApp.create(ad);
+      DriveApp.getFileById(doc.getId()).moveTo(klasor);
+      doc.getBody().getParagraphs()[0].setText(ad).setHeading(DocumentApp.ParagraphHeading.TITLE);
+    }
+    gunlukEkle_(doc.getBody(), gunlukBaslik_(tarih), saat, metin);
+    doc.saveAndClose();
+    s.appendRow([id, tarih, saat, doc.getId(), new Date().toISOString()]);
+    return {tamam: true, url: 'https://docs.google.com/document/d/' + doc.getId() + '/edit'};
+  } finally { kilit.releaseLock(); }
+}
+/* Günün başlığı varsa o günün sonuna, yoksa belgenin sonuna yeni başlıkla ekler. */
+function gunlukEkle_(body, baslik, saat, metin) {
+  const H = DocumentApp.ParagraphHeading, ps = body.getParagraphs();
+  let bas = -1, son = ps.length;
+  for (let i = 0; i < ps.length; i++) {
+    const h = ps[i].getHeading();
+    if (bas < 0 && h === H.HEADING2 && ps[i].getText() === baslik) bas = i;
+    else if (bas >= 0 && (h === H.HEADING2 || h === H.HEADING1)) { son = i; break; }
+  }
+  const satirlar = [];
+  if (saat) satirlar.push({t: '🎙 ' + saat, h: H.HEADING4});
+  metin.split(/\n{2,}/).forEach(p => { if (p.trim()) satirlar.push({t: p.trim(), h: H.NORMAL}); });
+  if (bas < 0) {
+    body.appendParagraph(baslik).setHeading(H.HEADING2);
+    satirlar.forEach(x => body.appendParagraph(x.t).setHeading(x.h));
+  } else {
+    const yer = body.getChildIndex(son < ps.length ? ps[son] : ps[ps.length - 1]) + (son < ps.length ? 0 : 1);
+    satirlar.forEach((x, j) => {
+      if (yer + j >= body.getNumChildren()) body.appendParagraph(x.t).setHeading(x.h);
+      else body.insertParagraph(yer + j, x.t).setHeading(x.h);
+    });
+  }
+}
+
+/* ---- bildirimler: uygulama kendi anahtarıyla imzalar, sunucu zamanı gelince "dürtme" yollar ---- */
+function bildirimSayfasi_() { return sayfa_('bildirim', ['id', 'zaman', 'baslik', 'metin', 'hash', 'tur', 'durum', 'kaynak']); }
+function pushAyar_() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('PUSH') || 'null'); } catch (e) { return null; } }
+function pushAyarYaz_(o) { const p = PropertiesService.getScriptProperties(); if (o) p.setProperty('PUSH', JSON.stringify(o)); else p.deleteProperty('PUSH'); }
+function satirlar_(s) { const n = s.getLastRow(); return n > 1 ? s.getRange(2, 1, n - 1, 8).getValues() : []; }
+function satirlariYaz_(s, v) {
+  const n = s.getLastRow();
+  if (n > 1) s.getRange(2, 1, n - 1, 8).clearContent();
+  if (v.length) s.getRange(2, 1, v.length, 8).setValues(v);
+}
+
+function bildirim_(b) {
+  const kilit = LockService.getScriptLock();
+  kilit.waitLock(30000);
+  const cevap = {tamam: true};
+  try {
+    if (b.kapat) {
+      pushAyarYaz_(null);
+      const s = bildirimSayfasi_();
+      satirlariYaz_(s, satirlar_(s).filter(r => r[6] !== 'bekliyor'));
+      return cevap;
+    }
+    let ayar = pushAyar_();
+    if (b.abonelik && b.abonelik.endpoint) {
+      if (!/^https:\/\//.test(b.abonelik.endpoint)) return {hata: 'abonelik geçersiz'};
+      ayar = {endpoint: String(b.abonelik.endpoint), pub: String(b.pub || '').slice(0, 120), jwt: (Array.isArray(b.jwt) ? b.jwt : []).filter(x => x && x.t && x.exp).slice(0, 24), tercih: (ayar && ayar.tercih) || {}};
+      while (JSON.stringify(ayar).length > 8600 && ayar.jwt.length > 4) ayar.jwt.pop();
+      try { cevap.zamanlayici = bildirimZamanlayici_(); } catch (e) { cevap.zamanlayici = 'zamanlayıcı kurulamadı: Apps Script editöründe kurulum26 bir kez çalıştırılmalı'; }
+    }
+    if (!ayar) return {hata: 'bildirim aboneliği yok'};
+    if (b.tercih && typeof b.tercih === 'object') ayar.tercih = b.tercih;
+    pushAyarYaz_(ayar);
+    if (Array.isArray(b.liste)) bildirimListe_(b.liste);
+    if (b.test) {
+      bildirimEkle_({id: 't' + Date.now(), baslik: '🔔 Hayat bildirimi', metin: 'Bildirimler çalışıyor. Hatırlatmaları artık uygulama gönderecek.', hash: '#bugun', tur: 'test'}, 'gonderildi');
+    }
+  } finally { kilit.releaseLock(); }
+  if (b.test) cevap.test = pushGonder_();
+  return cevap;
+}
+/* Uygulamanın planladığı bildirimler: bekleyenler yenisiyle değişir; gönderilmiş olanlar tekrar eklenmez; 3 günden eskiler silinir. */
+function bildirimListe_(liste) {
+  const s = bildirimSayfasi_(), simdi = Date.now();
+  const v = satirlar_(s).filter(r => r[0] && !(r[7] === 'uygulama' && r[6] === 'bekliyor') && Number(r[1]) > simdi - 3 * 86400000);
+  const gorulen = {}; v.forEach(r => { gorulen[String(r[0])] = 1; });
+  liste.slice(0, 200).forEach(x => {
+    const id = String((x && x.id) || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60), z = Number(x && x.zaman);
+    if (!id || gorulen[id] || !(z > simdi - 600000 && z < simdi + 8 * 86400000)) return;
+    gorulen[id] = 1;
+    v.push([id, z, String(x.baslik || 'Hayat').slice(0, 120), String(x.metin || '').slice(0, 300), String(x.hash || '#bugun').slice(0, 20), String(x.tur || '').slice(0, 12), 'bekliyor', 'uygulama']);
+  });
+  satirlariYaz_(s, v);
+}
+function bildirimEkle_(x, durum) {
+  const s = bildirimSayfasi_(), id = String(x.id).slice(0, 60);
+  if (satirlar_(s).some(r => String(r[0]) === id)) return;
+  s.appendRow([id, Date.now(), String(x.baslik || 'Hayat').slice(0, 120), String(x.metin || '').slice(0, 300), x.hash || '#bugun', x.tur || '', durum || 'bekliyor', 'sunucu']);
+}
+/* Claude bir mesaja cevap verince (komut klasöründen) */
+function bildirimClaude_(id, sonuc) {
+  const ayar = pushAyar_();
+  if (!ayar || (ayar.tercih || {}).claude === false) return;
+  const k = gelenOku_(150).find(x => x.id === id);
+  if (!k) return;
+  const m = String(k.metin).match(/BR[İI]F[İI]NG\s+(SABAH|ÖĞLE|ÖĞLEN|AKŞAM)/i);
+  const tur = m ? m[1].toLocaleUpperCase('tr') : '';
+  const baslik = tur === 'SABAH' ? '☀️ Sabah brifingin hazır' : tur === 'AKŞAM' ? '🌙 Akşam brifingin hazır' : tur ? '🍝 Öğle brifingin hazır' : '💬 Claude cevap verdi';
+  const temiz = String(sonuc || '').replace(/\[\[[\s\S]*?\]\]/g, '').replace(/[*#_>`]/g, '').replace(/\s+/g, ' ').trim();
+  bildirimEkle_({id: 'c' + id, baslik, metin: m ? 'Dinlemek için dokun.' : temiz.slice(0, 160), hash: m ? '#bugun' : '#claude', tur: 'claude'});
+}
+/* Zamanlayıcı (5 dk): Claude'un cevaplarını içeri alır, zamanı gelen bildirimleri hazırlar ve telefonu dürter. */
+function bildirimTur() {
+  try { komutlariIceAktar(); } catch (e) { console.error(e); }
+  const ayar = pushAyar_();
+  if (!ayar) return;
+  const kilit = LockService.getScriptLock();
+  if (!kilit.tryLock(20000)) return;
+  let hazir = 0;
+  try {
+    const s = bildirimSayfasi_(), v = satirlar_(s), simdi = Date.now();
+    let harita = null;
+    const veri = () => harita || (harita = hepsiniOku_().harita);
+    v.forEach((r, i) => {
+      if (r[6] !== 'bekliyor' || Number(r[1]) > simdi + 150000) return;
+      let durum = 'gonderildi';
+      if (simdi - Number(r[1]) > 30 * 60000) durum = 'atlandi';
+      else { const k = bildirimKontrol_(r, veri, ayar.tercih || {}); if (k === false) durum = 'atlandi'; else if (typeof k === 'string') r[3] = k; }
+      if (durum === 'gonderildi') hazir++;
+      s.getRange(i + 2, 4, 1, 4).setValues([[r[3], r[4], r[5], durum]]);
+    });
+  } finally { kilit.releaseLock(); }
+  if (hazir) console.log(pushGonder_(ayar));
+}
+/* false: gönderme · metin: bu metinle gönder · true: olduğu gibi */
+function bildirimKontrol_(r, veri, tercih) {
+  const tur = String(r[5]), id = String(r[0]);
+  if (tercih[tur] === false) return false;
+  if (tur === 'su' || tur === 'kapat' || tur === 'plan') {
+    const h = veri(), gun = h['days/' + bugun_()] || {};
+    if (tur === 'kapat') return gun.mood == null;
+    if (tur === 'plan') {
+      const m = id.match(/^p-(\d{4}-\d{2}-\d{2})-(.+)$/);
+      if (!m) return true;
+      const p = ((h['days/' + m[1]] || {}).plan || []).find(x => x.id === m[2]);
+      return !!(p && !p.done);
+    }
+    const ayarlar = h['meta/settings'] || {}, al = (ayarlar.habits || []).find(x => x.key === 'su') || {};
+    const hedef = Number(al.hedef) || 8, n = Number((gun.counts || {}).su) || 0;
+    if (n >= hedef) return false;
+    return n ? 'Bugün ' + n + '/' + hedef + ' bardak. Bir bardak daha iç.' : 'Bugün henüz su kaydı yok. Bir bardak su iç.';
+  }
+  return true;
+}
+function pushGonder_(ayar) {
+  ayar = ayar || pushAyar_();
+  if (!ayar) return 'abonelik yok';
+  const simdi = Math.floor(Date.now() / 1000);
+  const j = (ayar.jwt || []).filter(x => x.exp - simdi > 120 && x.exp - simdi <= 86340).sort((a, b) => a.exp - b.exp)[0];
+  if (!j) return 'imzaların süresi doldu — uygulamayı bir kez aç';
+  const r = UrlFetchApp.fetch(ayar.endpoint, {method: 'post', headers: {TTL: '21600', Urgency: 'high', Authorization: 'vapid t=' + j.t + ', k=' + ayar.pub}, muteHttpExceptions: true, followRedirects: false});
+  const kod = r.getResponseCode();
+  if (kod === 404 || kod === 410) { pushAyarYaz_(null); return 'abonelik artık geçersiz (' + kod + ') — uygulamada bildirimleri yeniden aç'; }
+  return kod >= 200 && kod < 300 ? 'gönderildi (' + kod + ')' : 'hata ' + kod + ': ' + r.getContentText().slice(0, 160);
+}
+/* Telefon (service worker) dürtülünce buradan metni alır. */
+function bildirimAl_() {
+  const kilit = LockService.getScriptLock();
+  kilit.waitLock(15000);
+  try {
+    const s = bildirimSayfasi_(), v = satirlar_(s), out = [];
+    v.forEach((r, i) => { if (r[6] === 'gonderildi') { out.push({id: String(r[0]), baslik: String(r[2]), metin: String(r[3]), hash: String(r[4] || '#bugun')}); s.getRange(i + 2, 7).setValue('alindi'); } });
+    return {bildirimler: out.slice(-4)};
+  } finally { kilit.releaseLock(); }
 }
