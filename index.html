@@ -619,7 +619,7 @@ output.pop{display:inline-block;animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.7.1";
+const SURUM = "2.7.2";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -2469,7 +2469,7 @@ function anlikKart(){
   let h = `<section class="card"><div class="card-h"><h2>Claude'u anında çalıştır</h2><span class="meta">${kurulu ? "açık" : d.eski ? "sunucu eski" : "kapalı"}</span></div>
     <p class="small" style="margin:0 0 10px;color:var(--ink-2)">${kurulu ? "Bir şey söyleyince Claude hemen uyanır; cevap birkaç dakikada gelir. Art arda mesajlar tek seferde işlenir. Her uyandırma Claude kullanımından düşer." : "Şu an mesajların saatte bir işleniyor. Bunu açınca Claude, sen bir şey söylediğin anda çalışır ve birkaç dakikada cevap verir."}</p>`;
   if (d.eski) h += `<p class="small" style="margin:0 0 10px">Önce sunucuyu güncellemek gerekiyor (Hayat Merkezi → 3).</p>`;
-  else if (!kurulu) h += `<ol class="small adimlar"><li>Tarayıcıda <b>claude.ai/code/routines</b> sayfasını aç.</li><li><b>Hayat gelen kutusu (her saat)</b> görevini aç → düzenle → <b>Add another trigger</b> → <b>API</b> → <b>Generate token</b>.</li><li>Gösterilen adresi ve anahtarı aşağıya yapıştır, Kaydet.</li></ol>
+  else if (!kurulu) h += `<ol class="small adimlar"><li>Tarayıcıda <b>claude.ai/code/routines</b> sayfasını aç.</li><li><b>Hayat gelen kutusu (her saat)</b> görevini aç → düzenle → <b>Tetikleyici</b> satırının sonundaki <b>+</b> → <b>API</b> (+ yoksa: <b>Zamanlama</b> menüsünden <b>API</b>).</li><li><b>Fire URL</b>'yi kopyala, <b>Generate token</b>'a bas, anahtarı kopyala; ikisini aşağıya yapıştır, Kaydet.</li></ol>
     <input class="field" id="anlikUrl" placeholder="https://api.anthropic.com/v1/claude_code/routines/trig_…/fire" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-bottom:8px">
     <input class="field" id="anlikTok" type="password" placeholder="sk-ant-oat01-…" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-bottom:10px">
     <button type="button" class="btn full" data-act="anlikkaydet">Kaydet</button>`;
