@@ -19,7 +19,7 @@
  */
 
 const TZ = 'Europe/Rome';
-const SURUM = '2.1.0';
+const SURUM = '2.2.0';
 const UYGULAMA_ADRESI = 'https://ykdikmen.github.io/hayat/';
 // Şirketin Tur Programı takvimi. Seninle paylaşılmışsa turlar Bugün ekranında görünür; paylaşılmamışsa uygulama yine çalışır.
 // Tur görmek istemezsen tırnak içini boşalt: ''
@@ -76,9 +76,13 @@ function doPost(e) {
       case 'kaydet':
         yaz_(Array.isArray(govde.belgeler) ? govde.belgeler : []);
         return cevap_({tamam: true});
-      case 'gelen':
-        gelenEkle_(govde.kayit || {});
-        return cevap_({tamam: true});
+      case 'gelen': {
+        const k = govde.kayit || {}, yeni = gelenEkle_(k), c = {tamam: true};
+        if (yeni === 'bekliyor' && !OTOMATIK_ISTEK_.test(String(k.metin || ''))) c.anlik = claudeUyandir_('mesaj');
+        return cevap_(c);
+      }
+      case 'claudeTetik':
+        return cevap_(claudeTetik_(govde));
       case 'gelenIptal':
         gelenGuncelle_(String(govde.id || ''), {durum: 'iptal'});
         ozetYaz_();
@@ -251,6 +255,7 @@ function gelenEkle_(k) {
   if (n > 1 && s.getRange(2, 1, n - 1, 1).getValues().some(r => r[0] === id)) return; // aynı kayıt iki kez gelmesin
   s.appendRow([id, new Date().toISOString(), metin, durum, String(k.sonuc || '').slice(0, 9000), durum === 'uygulama' ? new Date().toISOString() : '']);
   ozetYaz_();
+  return durum;
 }
 function gelenOku_(adet) {
   const s = gelenSayfasi_();
@@ -645,6 +650,7 @@ function bildirimClaude_(id, sonuc) {
 /* Zamanlayıcı (5 dk): Claude'un cevaplarını içeri alır, zamanı gelen bildirimleri hazırlar ve telefonu dürter. */
 function bildirimTur() {
   try { komutlariIceAktar(); } catch (e) { console.error(e); }
+  try { tetikBekleyen_(); } catch (e) { console.error(e); }
   const ayar = pushAyar_();
   if (!ayar) return;
   const kilit = LockService.getScriptLock();
@@ -705,4 +711,66 @@ function bildirimAl_() {
     v.forEach((r, i) => { if (r[6] === 'gonderildi') { out.push({id: String(r[0]), baslik: String(r[2]), metin: String(r[3]), hash: String(r[4] || '#bugun')}); s.getRange(i + 2, 7).setValue('alindi'); } });
     return {bildirimler: out.slice(-4)};
   } finally { kilit.releaseLock(); }
+}
+
+/* ===================== 2.7: Claude'u anında uyandır ===================== */
+/* Uygulamadan gerçek bir mesaj gelince Claude'daki "Hayat gelen kutusu" görevi API tetikleyicisiyle hemen çalışır
+   (claude.ai/code/routines → görev → Add another trigger → API → Generate token). Adres ve anahtar sadece burada,
+   Script Properties'te durur; uygulamaya geri verilmez. */
+const OTOMATIK_ISTEK_ = /^\s*(📣|📬)/;
+function tetikAyar_() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('CLAUDE_TETIK') || 'null'); } catch (e) { return null; } }
+function claudeTetik_(b) {
+  const p = PropertiesService.getScriptProperties();
+  if (b.sil) { p.deleteProperty('CLAUDE_TETIK'); p.deleteProperty('CLAUDE_TETIK_BEKLIYOR'); return {tamam: true, kurulu: false}; }
+  if (b.url || b.token) {
+    const url = String(b.url || '').trim(), token = String(b.token || '').trim();
+    if (!/^https:\/\/api\.anthropic\.com\/v1\/claude_code\/routines\/trig_[A-Za-z0-9]+\/fire$/.test(url)) return {hata: 'Adres https://api.anthropic.com/v1/claude_code/routines/trig_…/fire biçiminde olmalı.'};
+    if (!/^sk-ant-[A-Za-z0-9_-]{20,}$/.test(token)) return {hata: 'Anahtar sk-ant- ile başlamalı.'};
+    p.setProperty('CLAUDE_TETIK', JSON.stringify({url, token}));
+  }
+  const cevap = {tamam: true, kurulu: !!tetikAyar_(), son: p.getProperty('CLAUDE_TETIK_SON') || ''};
+  if (b.dene && cevap.kurulu) { cevap.dene = claudeUyandir_('deneme', true); cevap.son = p.getProperty('CLAUDE_TETIK_SON') || ''; }
+  return cevap;
+}
+/* Art arda mesajlar tek oturumda işlensin: son uyandırmadan 3 dk geçmediyse bekletir, zamanlayıcı sonra uyandırır. */
+function claudeUyandir_(neden, zorla) {
+  const k = tetikAyar_();
+  if (!k) return 'kurulu değil';
+  const p = PropertiesService.getScriptProperties(), simdi = Date.now(), son = Number(p.getProperty('CLAUDE_TETIK_ZAMAN') || 0);
+  if (!zorla && simdi - son < 3 * 60000) { p.setProperty('CLAUDE_TETIK_BEKLIYOR', '1'); return 'bekletildi'; }
+  p.setProperty('CLAUDE_TETIK_ZAMAN', String(simdi));
+  p.deleteProperty('CLAUDE_TETIK_BEKLIYOR');
+  let durum;
+  try {
+    const metin = neden === 'deneme' ? 'Hayat uygulamasından deneme: gelen kutusunda bekleyen varsa işle, yoksa "Bekleyen yok." de ve bildirim gönderme.'
+      : 'Hayat uygulamasından az önce yeni mesaj geldi; saatlik çalışmayı beklemeden gelen kutusundaki bekleyenleri şimdi işle.';
+    const r = UrlFetchApp.fetch(k.url, {method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+      headers: {Authorization: 'Bearer ' + k.token, 'anthropic-version': '2023-06-01'}, payload: JSON.stringify({text: metin})});
+    const kod = r.getResponseCode();
+    durum = kod >= 200 && kod < 300 ? 'çalıştı' : kod === 401 ? 'hata 401: anahtar geçersiz (yeni anahtar üret ve yeniden kaydet)' : kod === 429 ? 'hata 429: saatlik sınır doldu, saatlik görev işleyecek' : 'hata ' + kod + ': ' + r.getContentText().slice(0, 160);
+    if (kod >= 200 && kod < 300) hizliIzle_();
+  } catch (e) { durum = 'hata: ' + e; }
+  p.setProperty('CLAUDE_TETIK_SON', Utilities.formatDate(new Date(), TZ, 'dd.MM HH:mm') + ' · ' + durum);
+  return durum;
+}
+function kullaniciBekleyen_() { return gelenOku_(80).filter(x => x.durum === 'bekliyor' && !OTOMATIK_ISTEK_.test(String(x.metin))).length; }
+/* Uyandırdıktan sonra 15 dk boyunca dakikada bir Claude'un cevabına bakar; gelince içeri alır ve telefona bildirir. */
+function hizliIzle_() {
+  PropertiesService.getScriptProperties().setProperty('HIZLI_BITIS', String(Date.now() + 15 * 60000));
+  hizliKur_(75);
+}
+function hizliKur_(sn) {
+  ScriptApp.getProjectTriggers().forEach(t => { if (t.getHandlerFunction() === 'hizliTur') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('hizliTur').timeBased().after(sn * 1000).create();
+}
+function hizliTur() {
+  ScriptApp.getProjectTriggers().forEach(t => { if (t.getHandlerFunction() === 'hizliTur') ScriptApp.deleteTrigger(t); });
+  bildirimTur();
+  if (kullaniciBekleyen_() && Date.now() < Number(PropertiesService.getScriptProperties().getProperty('HIZLI_BITIS') || 0)) hizliKur_(60);
+}
+/* bildirimTur her 5 dakikada: bekletilmiş bir uyandırma varsa ve hâlâ bekleyen mesaj varsa şimdi uyandır */
+function tetikBekleyen_() {
+  const p = PropertiesService.getScriptProperties();
+  if (p.getProperty('CLAUDE_TETIK_BEKLIYOR') && kullaniciBekleyen_()) claudeUyandir_('bekleyen');
+  else if (p.getProperty('CLAUDE_TETIK_BEKLIYOR') && !kullaniciBekleyen_()) p.deleteProperty('CLAUDE_TETIK_BEKLIYOR');
 }

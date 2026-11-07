@@ -586,6 +586,8 @@ output.pop{display:inline-block;animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
 .seg[hidden]{display:none}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.45s}
 
+.adimlar{margin:0 0 10px;padding-left:18px;color:var(--ink-2);display:grid;gap:4px}
+
 </style>
 </head>
 <body>
@@ -617,7 +619,7 @@ output.pop{display:inline-block;animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.7.0";
+const SURUM = "2.7.1";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -938,7 +940,8 @@ async function gelenKuyrukGonder(){
     let kuyruk = LS.get(K_GELEN_KUYRUK) || [];
     while (kuyruk.length) {
       const k = kuyruk[0];
-      await api("gelen", {kayit: {id: k.id, metin: k.metin, durum: k.durum, sonuc: k.sonuc}});
+      const r = await api("gelen", {kayit: {id: k.id, metin: k.metin, durum: k.durum, sonuc: k.sonuc}});
+      if (r && typeof r.anlik === "string") { LS.set("hayat.anlik", r.anlik !== "kurulu değil"); if (/^hata/.test(r.anlik)) LS.set("hayat.anlikSon", r.anlik); }
       kuyruk = (LS.get(K_GELEN_KUYRUK) || []).filter(x => x.id !== k.id); LS.set(K_GELEN_KUYRUK, kuyruk);
       const g = S.gelen.find(x => x.id === k.id); if (g) g.gonderildi = true;
     }
@@ -1847,7 +1850,7 @@ function rutinKart(){
 }
 function claudeAyarlar(){
   const a = ayar(), tema = LS.get(K_TEMA) || "sistem";
-  let h = profilKart() + rutinKart() + bildirimKart();
+  let h = profilKart() + rutinKart() + (claudeVar() ? anlikKart() : "") + bildirimKart();
   h += sesAyarKart();
   h += `<section class="card"><div class="card-h"><h2>Para</h2></div><form id="f-ayar" class="formgrid">
       <label class="small" style="display:grid;gap:5px;font-weight:700;color:var(--ink-2)" for="aButce">Aylık bütçe (€)<input class="field" id="aButce" inputmode="decimal" value="${a.butce ?? ""}" placeholder="örn. 1200"></label>
@@ -2444,6 +2447,37 @@ function bildirimKart(){
 }
 if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => { if (e.data && e.data.hash && /^#[a-z]+$/.test(e.data.hash)) location.hash = e.data.hash; });
 
+/* ---- Claude'u anında çalıştır: Claude'daki gelen kutusu görevinin API tetikleyicisi sunucuya kaydedilir ---- */
+let ANLIK = {durum: null, mesaj: "", bekliyor: false};
+async function anlikDurum(){
+  if (ANLIK.bekliyor || !OTURUM) return;
+  ANLIK.bekliyor = true;
+  try { const r = await api("claudeTetik", {}); ANLIK.durum = r; LS.set("hayat.anlik", !!r.kurulu); }
+  catch (e) { ANLIK.durum = {eski: e && e.kod === "sunucu" && /bilinmeyen/.test(e.mesaj || "")}; }
+  ANLIK.bekliyor = false; render();
+}
+async function anlikIslem(govde, mesaj){
+  ANLIK.mesaj = mesaj || "Bekle…"; render();
+  try { const r = await api("claudeTetik", govde); ANLIK.durum = r; LS.set("hayat.anlik", !!r.kurulu);
+    ANLIK.mesaj = govde.sil ? "Kaldırıldı; mesajlar yine saatlik işlenir." : govde.dene ? (/^çalıştı/.test(r.dene || "") ? "Claude uyandı ✓ Birkaç dakika içinde oturum biter." : "Olmadı: " + (r.dene || "")) : "Kaydedildi ✓ Şimdi Dene'ye bas."; }
+  catch (e) { ANLIK.mesaj = (e && (e.mesaj || e.message)) || String(e); }
+  render();
+}
+function anlikKart(){
+  if (ANLIK.durum === null) setTimeout(anlikDurum, 0);
+  const d = ANLIK.durum || {}, kurulu = !!d.kurulu;
+  let h = `<section class="card"><div class="card-h"><h2>Claude'u anında çalıştır</h2><span class="meta">${kurulu ? "açık" : d.eski ? "sunucu eski" : "kapalı"}</span></div>
+    <p class="small" style="margin:0 0 10px;color:var(--ink-2)">${kurulu ? "Bir şey söyleyince Claude hemen uyanır; cevap birkaç dakikada gelir. Art arda mesajlar tek seferde işlenir. Her uyandırma Claude kullanımından düşer." : "Şu an mesajların saatte bir işleniyor. Bunu açınca Claude, sen bir şey söylediğin anda çalışır ve birkaç dakikada cevap verir."}</p>`;
+  if (d.eski) h += `<p class="small" style="margin:0 0 10px">Önce sunucuyu güncellemek gerekiyor (Hayat Merkezi → 3).</p>`;
+  else if (!kurulu) h += `<ol class="small adimlar"><li>Tarayıcıda <b>claude.ai/code/routines</b> sayfasını aç.</li><li><b>Hayat gelen kutusu (her saat)</b> görevini aç → düzenle → <b>Add another trigger</b> → <b>API</b> → <b>Generate token</b>.</li><li>Gösterilen adresi ve anahtarı aşağıya yapıştır, Kaydet.</li></ol>
+    <input class="field" id="anlikUrl" placeholder="https://api.anthropic.com/v1/claude_code/routines/trig_…/fire" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-bottom:8px">
+    <input class="field" id="anlikTok" type="password" placeholder="sk-ant-oat01-…" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-bottom:10px">
+    <button type="button" class="btn full" data-act="anlikkaydet">Kaydet</button>`;
+  else h += `${d.son ? `<p class="small muted" style="margin:0 0 10px">Son: ${esc(d.son)}</p>` : ""}<div class="gk-dug"><button type="button" class="btn" data-act="anlikdene">Dene</button><button type="button" class="linkbtn gk-temiz" data-act="anliksil">Kaldır</button></div>`;
+  if (ANLIK.mesaj) h += `<p class="small" style="margin:10px 0 0" role="status">${esc(ANLIK.mesaj)}</p>`;
+  return h + `</section>`;
+}
+
 /* ---------- 2.7: hareket — sayfa girişleri, dokunuş dalgası, kayan menü göstergesi, sayı sayma, kaydırarak gün değiştirme,
    dokunsal titreşim (iOS 18+), renk temaları ve günün tohumuyla dalgalanan arka plan ---------- */
 const SEKMELER = ["bugun", "para", "gunluk", "ilerleme", "claude"];
@@ -2748,7 +2782,7 @@ function gonder(text){
   } else {
     const k = {id, metin: text, durum: "bekliyor", sonuc: "", zaman, gonderildi: false};
     S.gelen.push(k); if (S.mode !== "mock") gelenGonder(k);
-    out = {id, yerel: false, ozet: "Claude'a ilettim. En geç 1 saat içinde işler; cevabı Bildirimler'de görürsün."};
+    out = {id, yerel: false, ozet: LS.get("hayat.anlik") ? "Claude'a ilettim; birkaç dakika içinde işler, bitince bildirim gelir." : "Claude'a ilettim. En geç 1 saat içinde işler; cevabı Bildirimler'de görürsün."};
   }
   cacheSave();
   return out;
@@ -2947,6 +2981,9 @@ document.addEventListener("click", e => {
       for (const t of [S.today, addDays(S.today, 1)]) if ((getDay(t).plan || []).some(p => p.rutin === id && !p.done)) editDay(t, d => { d.plan = d.plan.filter(p => !(p.rutin === id && !p.done)); });
       hatirlatKur(); render(); break; }
     case "gauge": ibreOynat(true); break;
+    case "anlikkaydet": { const u = (document.getElementById("anlikUrl") || {}).value || "", t = (document.getElementById("anlikTok") || {}).value || ""; if (!u.trim() || !t.trim()) { toast("Adresi ve anahtarı yapıştır."); break; } anlikIslem({url: u.trim(), token: t.trim()}, "Kaydediliyor…"); break; }
+    case "anlikdene": anlikIslem({dene: true}, "Claude uyandırılıyor…"); break;
+    case "anliksil": anlikIslem({sil: true}, "Kaldırılıyor…"); break;
     case "renk": { const v = b.dataset.v, uygula = () => { LS.set("hayat.renk", v); renkUygula(); render(); }; if (document.startViewTransition && hareketAcik()) document.startViewTransition(uygula); else uygula(); break; }
     case "hareket": LS.set("hayat.hareket", b.dataset.v === "1"); renkUygula(); render(); break;
     case "titresim": LS.set("hayat.titresim", b.dataset.v === "1"); render(); if (b.dataset.v === "1") titret(); break;
