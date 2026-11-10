@@ -761,6 +761,12 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 .sheet .grab{position:relative}
 .sheet .grab::before{content:"";position:absolute;inset:-12px -60px}
 
+/* 2.8.1 sohbet modu: konu şeridi */
+.sohbet-yol{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0 2px;padding:0}
+.sohbet-yol li{padding:5px 11px;border-radius:99px;font-size:12.5px;font-weight:700;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line)}
+.sohbet-yol li.gecti{color:var(--ink-2);text-decoration:line-through;text-decoration-color:var(--line-2)}
+.sohbet-yol li.simdi{color:var(--on-mint);background:var(--mint);border-color:transparent}
+
 .adimlar{margin:0 0 10px;padding-left:18px;color:var(--ink-2);display:grid;gap:4px}
 
 </style>
@@ -795,7 +801,7 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.8.0";
+const SURUM = "2.8.1";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -3786,9 +3792,83 @@ function sesBaslat(gid){
   if (S.agent.open) { S.agent.open = false; renderSheet(); }
   micKapat();
   sesAudioHazirla();
-  SES = {acik: true, oturum: uid(), durum: "okuyor", metin, kaynak, tur: 0, cevaplar: [], ara: "", hata: "", yerel: !g || !g.sonuc || kaynak.startsWith("Uygulamadan")};
+  sohbetGonder();   /* önceki sohbetten gönderilmemiş cevap kaldıysa kaybolmasın */
+  const yerel = !g || !g.sonuc || kaynak.startsWith("Uygulamadan"), bol = yerel ? null : sesBolumler(g.sonuc);
+  const gm = String((g && g.metin) || ""), slot = /SABAH/.test(gm) ? "Sabah" : /ÖĞLE/.test(gm) ? "Öğle" : /AKŞAM/.test(gm) ? "Akşam" : "";
+  SES = {acik: true, oturum: uid(), durum: "okuyor", metin, kaynak, tur: 0, cevaplar: [], ara: "", hata: "", yerel, bolumler: bol, bi: 0, sohbet: [], slot};
   renderSes();
+  if (bol) { sesBolumOku(); return; }
   seslendir(metin + SES_SON, () => sesDinle(false), false, SES.yerel);
+}
+/* ---- Sohbet modu ----
+   Brifing metninde [[bolum Ad]] satırları varsa konu konu okunur: bir bölüm biter, sonundaki soruya cevabın dinlenir,
+   sonra sıradaki konuya geçilir. Basit kayıtlar ("3 su") anında işlenir; geri kalan cevaplar sohbet bitince TEK mesajda
+   Claude'a gider (soru + cevap birlikte, bağlam kaybolmasın). İşaret yoksa eski akış hiç değişmeden çalışır;
+   eski sürümler işaretleri zaten gizli blok sayıp atlar. */
+function sesBolumler(sonuc){
+  const ham = String(sonuc || ""), re = /\[\[bolum\s+([^\]\n]{1,40})\]\]/gi;
+  let m, son = 0, ad = null, giris = "", out = [];
+  while ((m = re.exec(ham))) { const parca = ham.slice(son, m.index); if (ad == null) giris = parca; else out.push({ad, ham: parca}); ad = m[1].trim(); son = re.lastIndex; }
+  if (ad == null) return null;
+  out.push({ad, ham: ham.slice(son)});
+  out = out.map(b => ({ad: b.ad, metin: sesTemiz(b.ham)})).filter(b => b.metin);
+  if (out.length < 2) return null;
+  const g = sesTemiz(giris); if (g) out[0].metin = g + "\n" + out[0].metin;
+  return out;
+}
+function sonSoru(metin){   /* bölümün sonundaki soru cümlesi (art arda birkaç soru olabilir) */
+  const c = String(metin).match(/[^.!?…\n]+[.!?…]+|[^.!?…\n]+$/g) || [], q = [];
+  for (let i = c.length - 1; i >= 0 && /\?\s*$/.test(c[i]); i--) q.unshift(c[i].trim());
+  return q.join(" ");
+}
+function sesOnHazirla(metin){   /* sıradaki bölümün doğal sesi, sen cevap verirken arka planda hazırlansın */
+  try {
+    const a = ttsAyar(); if (a.kaynak !== "gemini" || !a.anahtar || kotaDolu() || S.mode !== "live") return;
+    geminiSes(metin).catch(e => { const m = String(e.message || e); if (/^429/.test(m) && /PerDay|per day|daily/i.test(m)) kotaIsaretle(); });
+  } catch (e) {}
+}
+function sesBolumOku(){
+  if (!SES.acik || !SES.bolumler) return;
+  const i = SES.bi, b = SES.bolumler[i], o = SES.oturum;
+  Object.assign(SES, {durum: "okuyor", hata: "", yukleniyor: false}); renderSes();
+  const sonra = SES.bolumler[i + 1]; if (sonra) sesOnHazirla(sonra.metin);
+  seslendir(b.metin, () => {
+    if (!SES.acik || SES.oturum !== o || SES.bi !== i) return;
+    if (/\?\s*$/.test(b.metin)) sesDinle(false); else sesBolumGec();
+  }, false, false);
+}
+function sesBolumGec(){   /* sıradaki konu; konular bittiyse son bir "eklemek istediğin var mı" turu */
+  if (!SES.acik || !SES.bolumler) return;
+  sesZamanSil(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; sesDurdur();
+  Object.assign(SES, {oturum: uid(), ara: "", baz: "", sayiyor: false, elle: false, bekledi: false});
+  SES.bi++;
+  if (SES.bi < SES.bolumler.length) { sesBolumOku(); return; }
+  SES.bi = SES.bolumler.length; SES.durum = "okuyor"; renderSes();
+  seslendir("Benden bu kadar. Eklemek istediğin bir şey var mı?", () => sesDinle(false), false, true);
+}
+const SOHBET_BITIR = /^(kapat|bitir|bitirelim|görüşürüz|iyi geceler|bu kadar yeter|yeter)$/, SOHBET_GEC = /^(geç|geçelim|bunu geç|sonraki|sonrakine geç|atla|pas|devam|devam et)$/;
+function sesBolumCevap(t){
+  const sade = trLow(t).replace(/[.!,?]/g, "").trim();
+  if (SOHBET_BITIR.test(sade)) { sesBitir("Tamamdır, görüşürüz!"); return; }
+  const bitti = SES.bi >= SES.bolumler.length, b = bitti ? null : SES.bolumler[SES.bi];
+  if (!bitti && SOHBET_GEC.test(sade)) { sesBolumGec(); return; }
+  if (bitti && BITIS.test(sade)) { sesBitir(SES.sohbet.length ? "Tamam, hepsini ilettim. Görüşürüz!" : "Tamamdır, görüşürüz!"); return; }
+  let ozet;
+  if (localParse(t) || !claudeVar()) ozet = gonder(t).ozet;   /* basit kayıt: anında */
+  else { SES.sohbet.push({bolum: b ? b.ad : "Ek", soru: b ? sonSoru(b.metin) : "", cevap: t}); ozet = ""; }
+  SES.cevaplar.push({t, ozet, bolum: b ? b.ad : "Ek"}); SES.tur++;
+  render();
+  if (bitti) { sesBitir(SES.sohbet.length ? "Tamam, hepsini ilettim. Görüşürüz!" : "Tamamdır, görüşürüz!"); return; }
+  sesBolumGec();
+}
+function sohbetGonder(){   /* birikmiş cevapları tek mesaj olarak Claude'a ilet (yerel ayrıştırmaya sokmadan) */
+  const c = SES && SES.sohbet; if (!c || !c.length) return;
+  SES.sohbet = [];
+  const metin = `🎧 ${SES.slot ? SES.slot + " brifingindeki" : "Brifingdeki"} sorulara cevaplarım (tırnak içindeki koçun sorusu, okun sağındaki benim cevabım):\n` +
+    c.map(x => x.soru ? `${x.bolum} · “${x.soru}” → ${x.cevap}` : `${x.bolum}: ${x.cevap}`).join("\n");
+  const k = {id: "g" + uid(), metin, durum: "bekliyor", sonuc: "", zaman: new Date().toISOString(), gonderildi: false};
+  S.gelen.push(k); if (S.mode !== "mock") gelenGonder(k);
+  cacheSave(); render();
 }
 const SES_SON = "\nSen ne dersin? Dinliyorum.";
 /* prepare the newest briefing's voice in the background (one request), so "Dinle" starts at once */
@@ -3797,7 +3877,8 @@ function sesHazirla(){
     const a = ttsAyar(); if (a.kaynak !== "gemini" || !a.anahtar || kotaDolu() || S.mode !== "live") return;
     const g = sonKanal("brifing")[0]; if (!g || !g.sonuc || Date.now() - gZaman(g) > 16*3600e3) return;
     const k = "hayat.sesHazir." + g.id; if (LS.get(k)) return; LS.set(k, 1);
-    geminiSes(sesTemiz(g.sonuc) + SES_SON).catch(e => { if (/^429/.test(String(e.message || e)) && /PerDay|per day|daily/i.test(String(e.message || e))) kotaIsaretle(); });
+    const bol = sesBolumler(g.sonuc);
+    geminiSes(bol ? bol[0].metin : sesTemiz(g.sonuc) + SES_SON).catch(e => { if (/^429/.test(String(e.message || e)) && /PerDay|per day|daily/i.test(String(e.message || e))) kotaIsaretle(); });
   } catch (e) {}
 }
 /* Dinleme: kısa duraklamada kesmez. Tanıma kendiliğinden biterse yeniden başlar ve söylenenler birikir.
@@ -3863,6 +3944,7 @@ function sesCevap(t){
   if (!SES.acik) return;
   if (!t) { SES.durum = "bekle"; renderSes(); return; }
   if (yankiMi(t)) { SES.durum = "bekle"; SES.hata = YANKI; renderSes(); return; }
+  if (SES.bolumler) { sesBolumCevap(t); return; }
   if (BITIS.test(trLow(t).replace(/[.!,]/g, "").trim())) { sesBitir("Tamamdır, görüşürüz!"); return; }
   const r = gonder(t);
   SES.cevaplar.push({t, yerel: r.yerel, ozet: r.ozet}); SES.tur++;
@@ -3874,11 +3956,12 @@ function sesCevap(t){
 }
 function sesBitir(son){
   if (!SES.acik) return;
+  sohbetGonder();
   sesZamanSil(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null;
   if (son) { SES.durum = "bitti"; renderSes(); const o = SES.oturum; seslendir(son, () => { if (SES.oturum === o) sesKapat(); }, false, true); }
   else sesKapat();
 }
-function sesKapat(){ sesZamanSil(); sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; SES = {acik: false}; renderSes(); }
+function sesKapat(){ sohbetGonder(); sesZamanSil(); sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; SES = {acik: false}; renderSes(); }
 function renderSes(){
   const el = document.getElementById("ses"); if (!el) return;
   if (!SES.acik) { el.hidden = true; el.innerHTML = ""; return; }
@@ -3886,16 +3969,17 @@ function renderSes(){
   const etiket = d === "okuyor" ? (SES.yukleniyor ? "Sesim hazırlanıyor…" : "Okuyorum…") : d === "dinliyor" ? (SES.sayiyor ? "Gönderiyorum… konuşursan beklerim" : "Dinliyorum. Acele etme, bitince küreye dokun") : d === "bitti" ? "Görüşürüz" : "Konuşmak için dokun";
   el.innerHTML = `<div class="sheet-bg" data-act="sesbitir"></div><div class="sheet sesk" role="dialog" aria-modal="true" aria-labelledby="sesT"><div class="sheet-in">
     <div class="grab"></div>
-    <div class="card-h" style="margin:0"><div><h2 id="sesT">Sesli brifing</h2><span class="small muted">${esc(SES.kaynak || "")}</span></div><button class="x" data-act="sesbitir" aria-label="Kapat">×</button></div>
+    <div class="card-h" style="margin:0"><div><h2 id="sesT">${SES.bolumler ? "Sohbet" : "Sesli brifing"}</h2><span class="small muted">${esc(SES.kaynak || "")}</span></div><button class="x" data-act="sesbitir" aria-label="Kapat">×</button></div>
+    ${SES.bolumler ? `<ol class="sohbet-yol" aria-label="Konular">${SES.bolumler.map((b, i) => `<li class="${i < SES.bi ? "gecti" : i === SES.bi ? "simdi" : ""}"${i === SES.bi ? ' aria-current="step"' : ""}>${esc(b.ad)}</li>`).join("")}</ol>` : ""}
     <button class="orb ${d}${SES.sayiyor ? " sayiyor" : ""}" data-act="${d === "dinliyor" ? "sesgonder" : d === "okuyor" ? "sesatla" : "seskonus"}" aria-label="${esc(etiket)}"><span></span>${d === "dinliyor" ? I.mic : d === "okuyor" ? `<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>` : I.mic}</button>
     <p class="orbtxt" aria-live="polite">${esc(etiket)}${d === "okuyor" ? `<br><span class="small muted">Dokunursan okumayı geçip seni dinler</span>` : ""}</p>
     ${d === "dinliyor" ? `<p class="ara" id="sesAra">${esc(SES.ara || "")}</p>
       <div class="chiprow" style="justify-content:center;margin:-4px 0 6px"><button class="chip" data-act="sesgonder">Gönder</button><button class="chip" data-act="seselle" aria-pressed="${!!SES.elle}">${SES.elle ? "Kendim göndereceğim ✓" : "Bekle, düşünüyorum"}</button><button class="chip" data-act="sesduzelt">Düzelt</button></div>` : ""}
     ${SES.hata ? `<p class="small" style="color:var(--amber);margin:0;text-align:center">${esc(SES.hata)}</p>` : ""}
-    ${SES.cevaplar.length ? `<div class="reply">${SES.cevaplar.map(c => `<div class="you">Sen: ${esc(c.t)}</div><p style="margin:0 0 8px">${esc(c.ozet)}</p>`).join("")}</div>` : ""}
+    ${SES.cevaplar.length ? `<div class="reply">${SES.cevaplar.map(c => `<div class="you">${c.bolum ? esc(c.bolum) + " · " : ""}Sen: ${esc(c.t)}</div>${c.ozet ? `<p style="margin:0 0 8px">${esc(c.ozet)}</p>` : `<p style="margin:0 0 4px"></p>`}`).join("")}${SES.bolumler && SES.sohbet.length ? `<p class="small muted" style="margin:6px 0 0">Cevapların sohbet bitince tek mesajda Claude'a gidecek.</p>` : ""}</div>` : ""}
     <details class="sesmetin"><summary>Brifingin yazılı hâli</summary><div class="small" style="white-space:pre-wrap;color:var(--ink-2);margin-top:8px">${esc(SES.metin || "")}</div></details>
     <form class="comprow" id="f-ses"><textarea class="field" id="sesYaz" rows="1" placeholder="Ya da buraya yaz…" aria-label="Yazarak cevap ver"></textarea><button class="btn" aria-label="Gönder">${I.send}</button></form>
-    <div class="chiprow" style="justify-content:center"><button class="chip" data-act="sestekrar">Baştan oku</button><button class="chip" data-act="sesbitir">Bitir</button></div>
+    <div class="chiprow" style="justify-content:center">${SES.bolumler && SES.bi < SES.bolumler.length ? `<button class="chip" data-act="sesbolumgec">Bu konuyu geç</button>` : ""}<button class="chip" data-act="sestekrar">Baştan oku</button><button class="chip" data-act="sesbitir">Bitir</button></div>
   </div></div>`;
   sayfaAcilis(el); el.hidden = false;
 }
@@ -3908,7 +3992,10 @@ document.addEventListener("click", e => {
     case "sesdur": case "sesgonder": sesGonder(); break;
     case "seselle": SES.elle = !SES.elle; sesSessizlik(); renderSes(); break;
     case "sesduzelt": { const t = (SES.ara || "").trim(); sesZamanSil(); const r = sesRec; sesRec = null; try { if (r) r.abort(); } catch (er) {} Object.assign(SES, {durum: "bekle", ara: "", baz: "", sayiyor: false}); renderSes(); const f = document.getElementById("sesYaz"); if (f) { f.value = t; f.focus(); } break; }
-    case "sestekrar": { sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (er) {} sesRec = null; sesAudioHazirla(); const m = SES.metin; SES.oturum = uid(); SES.durum = "okuyor"; SES.hata = ""; renderSes(); seslendir(m + SES_SON, () => sesDinle(false), false, SES.yerel); break; }
+    case "sesbolumgec": sesBolumGec(); break;
+    case "sestekrar": { sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (er) {} sesRec = null; sesAudioHazirla(); const m = SES.metin; SES.oturum = uid(); SES.durum = "okuyor"; SES.hata = ""; sesZamanSil();
+      if (SES.bolumler) { SES.bi = 0; sesBolumOku(); break; }
+      renderSes(); seslendir(m + SES_SON, () => sesDinle(false), false, SES.yerel); break; }
     case "sesdene": ttsFormKaydet(); sesDene(); break;
     case "sesbitir": sesKapat(); break;
   }
