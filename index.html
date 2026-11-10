@@ -655,6 +655,39 @@ html.sade .ak-nabiz::after{animation:none;opacity:0}
 @keyframes toastGir{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
 .toast-b{margin-left:10px;border:0;background:transparent;color:inherit;font:inherit;font-weight:800;text-decoration:underline;text-underline-offset:3px;padding:8px 4px;margin-top:-8px;margin-bottom:-8px}
 
+/* 2.8 alışkanlık karoları */
+.karolar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.habchip.karo{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 8px;text-align:left;padding:11px 12px 10px;border-radius:16px;min-height:76px;color:var(--ink)}
+.habchip.karo .kr-ad{display:flex;align-items:center;gap:7px;min-width:0;font-weight:800;font-size:14.5px}
+.habchip.karo .kr-ad span{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.15;overflow-wrap:anywhere}
+.karolar>.karo:last-child:nth-child(odd){grid-column:1/-1}
+.kr-em{flex:none;font-size:18px;line-height:1;font-style:normal}
+.habchip.karo .dot{width:24px;height:24px;border-radius:50%;justify-self:end}
+.habchip.karo .dot svg{width:14px;height:14px;stroke:var(--on-mint);stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.habchip.karo[aria-pressed="true"]{background:var(--mint-soft);border-color:var(--mint);color:var(--ink)}
+.habchip.karo[aria-pressed="true"] .dot svg{opacity:1}
+.kr-alt{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.kr-gun{display:flex;gap:3px;flex:none}
+.kr-gun i{width:8px;height:8px;border-radius:50%;background:var(--surface-3);box-shadow:inset 0 0 0 1px var(--line-2)}
+.kr-gun i.v{background:var(--mint);box-shadow:none}
+.kr-gun i.b{outline:2px solid var(--ink-3);outline-offset:1px}
+.kr-not{font-size:11.5px;font-weight:700;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.counter.karo{padding:11px 12px 10px;border-radius:16px;gap:8px;border:1px solid var(--line)}
+.counter.karo .lbl{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;color:var(--ink);overflow:visible}
+.counter.karo .lbl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.counter.karo .stepper button{width:40px;height:44px;border-radius:13px}
+.counter.karo .stepper button[data-n="1"],.counter.karo .stepper button[data-n="0.5"]{width:50px;background:var(--mint);color:var(--on-mint);border-color:transparent;font-size:22px}
+.counter.karo .stepper output{font-size:28px;line-height:1}
+.kr-graf{display:flex;align-items:flex-end;gap:3px;height:22px;flex:none}
+.kr-graf i{width:7px;border-radius:3px 3px 1px 1px;background:var(--line-2);min-height:3px}
+.kr-graf i.b{background:var(--mint)}
+.kr-graf i.b.cok{background:var(--coral)}
+.counters>.karo:last-child:nth-child(odd){grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px}
+.counters>.karo:last-child:nth-child(odd) .stepper{gap:10px}
+.counters>.karo:last-child:nth-child(odd) .kr-alt{grid-column:1/-1}
+#view.giris .kr-graf i{transform-origin:center bottom;animation:grafDol .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.25s + var(--j,0) * 40ms)}
+@keyframes grafDol{from{transform:scaleY(.1)}to{transform:scaleY(1)}}
+
 .adimlar{margin:0 0 10px;padding-left:18px;color:var(--ink-2);display:grid;gap:4px}
 
 </style>
@@ -1589,17 +1622,37 @@ function postaKart(){
     ${postaHtml(c, true)}
     <button class="linkbtn" data-act="seggo" data-tab="claude" data-g="claude" data-v="posta" style="margin-top:6px">Tüm özeti aç</button></section>`;
 }
+/* Alışkanlıklar: iki sütun karo. İşaretlenenler tek dokunuş; sayaçlarda + büyük. Her karoda son 7 gün görünür
+   (işaret: noktalar ve seri, sayaç: mini çubuklar ve ortalama). Yalnızca mevcut günlerden okunur; şemaya alan eklenmez. */
+const HAB_EM = {spor: "🏃", okuma: "📖", sigara: "🚬", su: "💧", cis: "🚽", buyuk: "🧻", dis: "🦷", kahve: "☕", alkol: "🍷", ekran: "📱", yuruyus: "👟", nefes: "🧘", saglikli: "🥗", sosyal: "🫶", kilo: "⚖️"};
+const habEm = k => HAB_EM[k] ? `<i class="kr-em" aria-hidden="true">${HAB_EM[k]}</i>` : "";
+function habGraf(vals, lower){
+  /* vals: eski → yeni 7 değer (null = kayıt yok); son değer seçili gün */
+  const say = vals.filter(v => v != null), max = Math.max(1, ...say.map(Number)), once = vals.slice(0, 6).filter(v => v != null);
+  const ort = once.length ? once.reduce((a, b) => a + b, 0) / once.length : null, bugun = vals[6];
+  const cok = lower && ort != null && bugun != null && bugun > ort;
+  return {ort, html: `<span class="kr-graf" aria-hidden="true">${vals.map((v, i) => `<i class="${i === 6 ? "b" + (cok ? " cok" : "") : ""}" style="height:${v == null ? 0 : Math.max(12, Math.round(v / max * 100))}%;--j:${i}"></i>`).join("")}</span>`};
+}
 function aliskanlikKart(date, d){
-  const hs = habits();
-  let h = `<section class="card"><div class="card-h"><h2>Alışkanlıklar</h2><a class="linkbtn" href="#gunluk">Günlük →</a></div><div class="habchecks">` +
-    hs.filter(x => x.type === "check").map(x => `<button class="habchip" data-act="habcheck" data-k="${esc(x.key)}" aria-pressed="${!!(d.checks||{})[x.key]}"><span class="dot"></span>${esc(x.label)}</button>`).join("") + `</div><div class="counters">` +
-    hs.filter(x => x.type === "count").map(x => `<div class="counter"><span class="lbl">${esc(x.label)}</span><span class="stepper">
+  const hs = habits(), gunler = [6,5,4,3,2,1,0].map(n => addDays(date, -n));
+  const isaret = hs.filter(x => x.type === "check").map(x => {
+    const v = gunler.map(g => !!((getDay(g).checks || {})[x.key])), n = v.filter(Boolean).length;
+    let seri = 0; for (let i = v[6] ? 6 : 5; i >= 0 && v[i]; i--) seri++;
+    const not = seri >= 2 ? `🔥 ${seri}` : `${n}/7`;
+    return `<button class="habchip karo" data-act="habcheck" data-k="${esc(x.key)}" aria-pressed="${v[6]}" aria-label="${esc(x.label)}${seri >= 2 ? `, ${seri} gün üst üste` : `, son 7 günde ${n}`}"><span class="kr-ad">${habEm(x.key)}<span>${esc(x.label)}</span></span><span class="dot">${I.check}</span>
+      <span class="kr-alt"><span class="kr-gun" aria-hidden="true">${v.map((y, i) => `<i class="${y ? "v" : ""}${i === 6 ? " b" : ""}"></i>`).join("")}</span><span class="kr-not">${not}</span></span></button>`;
+  }).join("");
+  const alt = (g, birim) => `<span class="kr-alt">${g.html}<span class="kr-not">${g.ort == null ? "" : "ort " + nf1.format(g.ort) + (birim || "")}</span></span>`;
+  let h = `<section class="card"><div class="card-h"><h2>Alışkanlıklar</h2><a class="linkbtn" href="#gunluk">Günlük →</a></div>${isaret ? `<div class="karolar">${isaret}</div>` : ""}<div class="counters">` +
+    hs.filter(x => x.type === "count").map(x => { const g = habGraf(gunler.map(gn => { const c = (getDay(gn).counts || {})[x.key]; return c == null ? null : Number(c) || 0; }), !!x.lower);
+      return `<div class="counter karo"><span class="lbl">${habEm(x.key)}<span>${esc(x.label)}</span></span><span class="stepper">
       <button data-act="cnt" data-k="${esc(x.key)}" data-n="-1" aria-label="${esc(x.label)} azalt">−</button><output>${(d.counts||{})[x.key] ?? 0}</output>
-      <button data-act="cnt" data-k="${esc(x.key)}" data-n="1" aria-label="${esc(x.label)} artır">+</button></span></div>`).join("") +
-    hs.filter(x => x.type === "olcum").map(x => `<div class="counter"><label class="lbl" for="olc-${esc(x.key)}">${esc(x.label)}</label><span class="olcum"><input class="field" id="olc-${esc(x.key)}" data-olcum="${esc(x.key)}" inputmode="decimal" value="${(d.counts||{})[x.key] ?? ""}" placeholder="—"></span></div>`).join("") +
-    `<div class="counter"><span class="lbl">Uyku (saat)</span><span class="stepper">
+      <button data-act="cnt" data-k="${esc(x.key)}" data-n="1" aria-label="${esc(x.label)} artır">+</button></span>${alt(g)}</div>`; }).join("") +
+    hs.filter(x => x.type === "olcum").map(x => `<div class="counter karo"><label class="lbl" for="olc-${esc(x.key)}">${habEm(x.key)}<span>${esc(x.label)}</span></label><span class="olcum"><input class="field" id="olc-${esc(x.key)}" data-olcum="${esc(x.key)}" inputmode="decimal" value="${(d.counts||{})[x.key] ?? ""}" placeholder="—"></span></div>`).join("") +
+    (() => { const g = habGraf(gunler.map(gn => { const u = getDay(gn).sleep; return u == null ? null : Number(u) || 0; }), false);
+      return `<div class="counter karo"><span class="lbl"><i class="kr-em" aria-hidden="true">😴</i><span>Uyku (saat)</span></span><span class="stepper">
       <button data-act="sleep" data-n="-0.5" aria-label="Uyku azalt">−</button><output>${d.sleep == null ? "—" : nf1.format(d.sleep)}</output>
-      <button data-act="sleep" data-n="0.5" aria-label="Uyku artır">+</button></span></div></div></section>`;
+      <button data-act="sleep" data-n="0.5" aria-label="Uyku artır">+</button></span>${alt(g, " sa")}</div>`; })() + `</div></section>`;
   return h;
 }
 function paraMini(date, d){
