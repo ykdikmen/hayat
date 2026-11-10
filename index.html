@@ -655,6 +655,48 @@ html.sade .ak-nabiz::after{animation:none;opacity:0}
 @keyframes toastGir{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
 .toast-b{margin-left:10px;border:0;background:transparent;color:inherit;font:inherit;font-weight:800;text-decoration:underline;text-underline-offset:3px;padding:8px 4px;margin-top:-8px;margin-bottom:-8px}
 
+/* 2.8 yeni temalar: her birinin kendi renkleri ve yazı tipleri var. Yazı tipleri fontlar/ klasöründen, yalnızca tema seçilince iner. */
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:200 800;font-display:swap;src:url(fontlar/bricolage-grotesque-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:200 800;font-display:swap;src:url(fontlar/bricolage-grotesque-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Instrument Sans";font-style:normal;font-weight:400 700;font-display:swap;src:url(fontlar/instrument-sans-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Instrument Sans";font-style:normal;font-weight:400 700;font-display:swap;src:url(fontlar/instrument-sans-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Rubik";font-style:normal;font-weight:300 900;font-display:swap;src:url(fontlar/rubik-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Rubik";font-style:normal;font-weight:300 900;font-display:swap;src:url(fontlar/rubik-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:200 1000;font-display:swap;src:url(fontlar/nunito-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:200 1000;font-display:swap;src:url(fontlar/nunito-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Lexend";font-style:normal;font-weight:100 900;font-display:swap;src:url(fontlar/lexend-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Lexend";font-style:normal;font-weight:100 900;font-display:swap;src:url(fontlar/lexend-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:500;font-display:swap;src:url(fontlar/chakra-petch-latin-ext-500-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:500;font-display:swap;src:url(fontlar/chakra-petch-latin-500-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:600;font-display:swap;src:url(fontlar/chakra-petch-latin-ext-600-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:600;font-display:swap;src:url(fontlar/chakra-petch-latin-600-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:700;font-display:swap;src:url(fontlar/chakra-petch-latin-ext-700-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:700;font-display:swap;src:url(fontlar/chakra-petch-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root[data-renk="tramonto"]{color-scheme:dark;
+  --font-display:"Bricolage Grotesque","Saira Semi Condensed",system-ui,sans-serif;--font-body:"Instrument Sans",system-ui,-apple-system,sans-serif;
+  --bg:#170f1e;--bg-2:#1e1428;--surface:#261a32;--surface-2:#31223f;--surface-3:#3e2c4f;--line:#3d2b4d;--line-2:#584069;
+  --ink:#fdf2ea;--ink-2:#d2bfcc;--ink-3:#a08ca0;--mint:#ffae52;--on-mint:#3a1a02;--mint-soft:rgba(255,174,82,.16);
+  --coral:#ff6f91;--coral-soft:rgba(255,111,145,.16);--amber:#ffd166;--amber-soft:rgba(255,209,102,.15);
+  --sky:#8fb8ff;--rose:#ff8fc0;--violet:#c4a6ff;--mood-low:#ff8a5c;--mood-high:#8fb8ff;--good:#7be0a4;--bad:#ff7a7a;
+  --shadow:0 14px 36px rgba(8,2,14,.5);--a1:rgba(255,138,76,.30);--a2:rgba(224,84,168,.24);--a3:rgba(126,104,255,.18);--parilti:rgba(255,220,200,.07)}
+:root[data-renk="limon"]{color-scheme:light;
+  --font-display:"Rubik","Saira Semi Condensed",system-ui,sans-serif;--font-body:"Nunito",system-ui,-apple-system,sans-serif;
+  --bg:#fff4c7;--bg-2:#fffae6;--surface:#fffefa;--surface-2:#fff6d6;--surface-3:#ffeaa3;--line:#f3e2a0;--line-2:#e2c96a;
+  --ink:#1a2145;--ink-2:#4a5179;--ink-3:#62678a;--mint:#2747f5;--on-mint:#ffffff;--mint-soft:rgba(39,71,245,.11);
+  --coral:#d2331d;--coral-soft:rgba(210,51,29,.11);--amber:#955e00;--amber-soft:rgba(240,170,0,.18);
+  --sky:#1787e0;--rose:#d93d86;--violet:#7445e8;--mood-low:#e8612a;--mood-high:#2a78e0;--good:#11915a;--bad:#d0362a;
+  --shadow:0 12px 30px rgba(120,90,0,.14);--a1:rgba(255,196,40,.50);--a2:rgba(255,140,90,.26);--a3:rgba(255,255,255,.75);--parilti:rgba(255,255,255,.85)}
+:root[data-renk="neon"]{color-scheme:dark;
+  --font-display:"Chakra Petch","Saira Semi Condensed",system-ui,sans-serif;--font-body:"Lexend",system-ui,-apple-system,sans-serif;
+  --bg:#07080f;--bg-2:#0c0e1a;--surface:#12152b;--surface-2:#1a1e3b;--surface-3:#252b50;--line:#272c52;--line-2:#3d4578;
+  --ink:#f3f5ff;--ink-2:#b6bce4;--ink-3:#858cbb;--mint:#b08cff;--on-mint:#190a3d;--mint-soft:rgba(176,140,255,.17);
+  --coral:#ff5fa0;--coral-soft:rgba(255,95,160,.16);--amber:#ffc857;--amber-soft:rgba(255,200,87,.15);
+  --sky:#4fd8ff;--rose:#ff7ac8;--violet:#b08cff;--mood-low:#ff8a5c;--mood-high:#4fd8ff;--good:#5df0a8;--bad:#ff6b7d;
+  --shadow:0 14px 38px rgba(0,0,0,.6);--a1:rgba(150,92,255,.34);--a2:rgba(255,70,160,.22);--a3:rgba(40,200,255,.20);--parilti:rgba(190,170,255,.08)}
+:root[data-renk="limon"] body{font-size:15.5px}
+:root[data-renk="neon"] h1,:root[data-renk="neon"] h2,:root[data-renk="neon"] .sky .hello{letter-spacing:.01em}
+.renkler{grid-template-columns:repeat(4,1fr)}
+
 /* 2.8 alışkanlık karoları */
 .karolar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
 .habchip.karo{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 8px;text-align:left;padding:11px 12px 10px;border-radius:16px;min-height:76px;color:var(--ink)}
@@ -2644,7 +2686,8 @@ function anlikKart(){
 /* ---------- 2.7: hareket — sayfa girişleri, dokunuş dalgası, kayan menü göstergesi, sayı sayma, kaydırarak gün değiştirme,
    dokunsal titreşim (iOS 18+), renk temaları ve günün tohumuyla dalgalanan arka plan ---------- */
 const SEKMELER = ["bugun", "para", "gunluk", "ilerleme", "claude"];
-const RENKLER = [["gece", "Gece", "#0c1118", "#7bdcb8"], ["orman", "Orman", "#0d1a14", "#9fd8a8"], ["kum", "Kum", "#f3ece2", "#e8692f"], ["bulut", "Bulut", "#eef3fa", "#2c78d6"]];
+const RENKLER = [["gece", "Gece", "#0c1118", "#7bdcb8"], ["orman", "Orman", "#0d1a14", "#9fd8a8"], ["kum", "Kum", "#f3ece2", "#e8692f"], ["bulut", "Bulut", "#eef3fa", "#2c78d6"],
+  ["tramonto", "Tramonto", "#170f1e", "#ffae52"], ["limon", "Limon", "#fff4c7", "#2747f5"], ["neon", "Neon", "#07080f", "#b08cff"]];
 const hareketAcik = () => LS.get("hayat.hareket") !== false && !AZ_HAREKET();
 const HRK = {sekme: null, gun: null, pop: null, tik: null, auraGun: null, hab: null, yeni: null, prg: null, vespaT: null};
 
