@@ -812,7 +812,7 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.8.0";
+const SURUM = "2.8.1";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -2099,7 +2099,7 @@ function claudePosta(){
       ${c.baslik ? `<p class="small muted" style="margin:0 0 6px">${inl(esc(c.baslik))}</p>` : ""}${postaHtml(c, false)}</section>`; }).join("");
 }
 function claudeSohbet(){
-  let h = !claudeVar() ? `<section class="card"><p style="margin:0">Ortadaki düğmeye söylediğin her şey buraya düşer. Sigara, su, spor, uyku, ruh hali, harcama (“12 euro yemek”) ve “yarın 10:00 dişçi” gibi planları uygulama hemen yazar.</p></section>` : `<section class="card"><p style="margin:0 0 10px">Ortadaki düğmeye söylediğin her şey buraya düşer. Basit kayıtları (sigara, su, spor, uyku, harcama) uygulama hemen işler; randevu, plan, hedef ve soruları Claude 08:00–23:00 arası her saat işler.</p>
+  let h = !claudeVar() ? `<section class="card"><p style="margin:0">Ortadaki düğmeye söylediğin her şey buraya düşer. Sigara, su, spor, uyku, ruh hali, harcama (“12 euro yemek”) ve “yarın 10:00 dişçi” gibi planları uygulama hemen yazar.</p></section>` : `<section class="card"><p style="margin:0 0 10px">Ortadaki düğmeye söylediğin her şey buraya düşer. Basit kayıtları (sigara, su, spor, uyku, harcama) uygulama hemen işler; randevu, plan, hedef ve soruları Claude ${LS.get("hayat.anlik") ? "birkaç dakika içinde" : "en geç bir saat içinde"} işler; bitince bildirim gelir.</p>
     <div class="chiprow">${QUICK.map(q => `<button class="chip" data-act="ask" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div></section>`;
   const list = (S.gelen || []).filter(g => g.durum !== "iptal" && !kanalOf(g)).slice().reverse().slice(0, 40);
   if (!list.length) return h + bos(I.chat, "Henüz bir şey söylemedin.", `<button class="btn soft" data-act="compose">Söyle ya da yaz</button>`);

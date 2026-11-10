@@ -4,16 +4,15 @@ Bu repo üzerinde iki ayrı Claude oturumu çalışıyor. Oturumlar birbirine me
 gönderemez; ortak defterimiz bu dosya ve PR'lar. Bir işe başlamadan önce burayı
 oku, bitirince güncelle.
 
-Son güncelleme: 10 Kasım 2026, Fable oturumu.
+Son güncelleme: 10 Kasım 2026 akşam, Opus oturumu.
 
 ## Şu anki durum
 
 - Yayındaki sürüm: `main` = 2.7.2.
 - Bekleyen PR: **#1** (`claude/program-zaman-cizgisi`) = 2.8.0. Kerem merge edecek.
-- Opus oturumunun 2.8 "akıcılık" tasarım dokümanı (`hayat-2.8` dalı) GitHub'a hiç
-  gönderilmemiş; yalnızca o oturumun kendi ortamında duruyor. Aşağıdaki tablo o
-  dokümanın Kerem'in onayladığı özetinden çıkarıldı. Opus oturumu: dokümanı bu
-  dala (`docs/` altına) ekleyebilirsen iyi olur.
+- Bekleyen PR: **Opus işleri** (`claude/opus-gunluk-bos-formlar`) = 2.8.1, PR #1'in
+  üstüne açıldı (tabanı `claude/program-zaman-cizgisi`). Önce #1, sonra bu merge edilir.
+- 2.8 tasarım dokümanı artık repoda: `docs/superpowers/specs/2026-11-10-hayat-28-akicilik-design.md`.
 
 ## PR #1'de olanlar
 
@@ -37,16 +36,36 @@ Son güncelleme: 10 Kasım 2026, Fable oturumu.
 
 | İş | Kim | Not |
 |---|---|---|
-| D2 Aylık tablo bugünün sütununa kaysın, sütun vurgulansın | Opus | kendi içinde, küçük |
-| D3 Boş ekranlara ikonlu, düğmeli kartlar | Opus | Bildirimler düğmesi bildirim ayarlarına gider |
-| D4 Para / Yeni hedef / Odak formları "+ Ekle" arkasında | Opus | Bugün'deki "Harcama ekle"den gelince açık gelsin |
-| B3 Günlük doluluk işaretleri + Günlük çipleri ve kapanır kartları | Opus | `kapanir()` ve `seritRender()` hazır, Günlük kartlarına `data-kart` vermek yeterli |
+| D2 Aylık tablo bugünün sütununa kaysın, sütun vurgulansın | Opus | **bitti (2.8.1)** |
+| D3 Boş ekranlara ikonlu, düğmeli kartlar | Opus | **bitti (2.8.1)** |
+| D4 Para / Yeni hedef / Odak formları "+ Ekle" arkasında | Opus | **bitti (2.8.1)** |
+| B3 Günlük doluluk işaretleri + Günlük çipleri ve kapanır kartları | Opus | **bitti (2.8.1)** |
 | A1 Ayarlar ayrı ekran (⚙︎, sağdan kayarak) | Fable | yapısal değişiklik |
 | C2 Çekerek yenileme + "Kaydedildi / Kaydediliyor / Çevrimdışı" yazısı | Fable | |
 | C3 Mikrofona basılı tutunca hızlı menü | Fable | |
 | Brifingler, görev istemleri, `sunucu/Code.js`, koç kimliği | Opus | Fable bunlara dokunmuyor |
 
+## Opus 2.8.1'de eklenenler (Fable'ın bilmesi gerekenler)
+
+- **A1 için:** iki düğme hâlâ eski yolu kullanıyor: `data-act="seggo" data-tab="claude" data-g="claude" data-v="ayarlar"`.
+  Biri boş Bildirimler ekranındaki "Bildirim ayarları", diğeri Para'daki "Aylık bütçe belirle →".
+  Ayarlar ayrı ekran olunca bunları ilgili alt sayfaya (Bildirimler, Para) yönlendir.
+- **Sürüm:** `SURUM` 2.8.1, `CACHE` `hayat-v281`. Senin sonraki PR'ın 2.8.2 / `hayat-v282` olsun.
+- **Mevcut testte iki hata, PR #1'den geliyor (benim değişikliğimden önce de vardı):**
+  - Sayfa giriş animasyonu testi `#view` üzerinde `giris` sınıfını arıyor; sen `gir` yaptın.
+  - Bugün'den sola kaydırınca ertesi güne geçiş testi geçmiyor (2026-11-10 → 2026-11-11 bekleniyor).
+  Bilerek mi değişti, bir bak.
+
 ## Kod içinde hazır duran parçalar
+
+- `bos(ikon, metin, düğme)`: boş durum kartı. İkonlar `BOS_I` (hedef, para, tur) ve `I` (bell, mail, chat).
+- `formAcik(f)`, `formAcBtn(f, metin)`: katlanan formlar. `S.ui.acik[f] = sekme` geçicidir;
+  `render()` sekme değişince temizler. Açmak için `data-act="formac" data-f="para|hedef|odak"`.
+  Odak ve kart kimlikleri `FORM_ODAK`, `FORM_KART`.
+- `gunlukDolu(gün)`, `GUNLUK_BOL`: Günlük'ün altı bölümünden hangilerinin dolu olduğu.
+  `gunlukDolulukYaz()` yazarken çubuğu ve şerit çiplerini günceller.
+- `tabloKaydir()`: render sonunda aylık tabloyu bugüne kaydırır; ay başına kaydırma `TABLO_KAY`'da tutulur.
+- `SERIT_KART` artık Günlük kimliklerini de içeriyor. Şerit çipleri Bugün ve Günlük'te çıkıyor.
 
 - `kapanir(kimlik, başlık, özetFonksiyonu, kartHtml)`: bir kartı kapanır yapar. Kart
   kimliği `data-kart` olarak yazılır; şerit çipleri bu özniteliği okur.
