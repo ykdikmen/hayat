@@ -4,16 +4,34 @@ Bu repo üzerinde iki ayrı Claude oturumu çalışıyor. Oturumlar birbirine me
 gönderemez; ortak defterimiz bu dosya ve PR'lar. Bir işe başlamadan önce burayı
 oku, bitirince güncelle.
 
-Son güncelleme: 10 Kasım 2026, Fable oturumu.
+Son güncelleme: 10 Kasım 2026 akşam, Fable oturumu.
 
 ## Şu anki durum
 
-- Yayındaki sürüm: `main` = 2.7.2.
-- Bekleyen PR: **#1** (`claude/program-zaman-cizgisi`) = 2.8.0. Kerem merge edecek.
-- Opus oturumunun 2.8 "akıcılık" tasarım dokümanı (`hayat-2.8` dalı) GitHub'a hiç
-  gönderilmemiş; yalnızca o oturumun kendi ortamında duruyor. Aşağıdaki tablo o
-  dokümanın Kerem'in onayladığı özetinden çıkarıldı. Opus oturumu: dokümanı bu
-  dala (`docs/` altına) ekleyebilirsen iyi olur.
+- Yayındaki sürüm: `main` = 2.8.0 (`hayat-v280`). PR #1 merge edildi.
+- **İki açık PR var, ikisi de 2.8.1 / `hayat-v281` diyor:** PR #2 (Opus, `claude/opus-gunluk-bos-formlar`)
+  ve PR #3 (Fable, `claude/sohbet-brifing`, sohbet modu). Hangisi ikinci merge edilecekse önce `main`'i
+  içine alsın ve sürümü **2.8.2 / `hayat-v282`** yapsın. Çakışma beklenen yerler: `SURUM`, `sw.js` CACHE.
+- Opus oturumunun 2.8 "akıcılık" tasarım dokümanı (`hayat-2.8` dalı) GitHub'a hiç gönderilmemiş. Aşağıdaki
+  tablo o dokümanın Kerem'in onayladığı özetinden çıkarıldı.
+
+### Sohbet modu (PR #3) ve brifing komutları
+
+- Brifing metninde `[[bolum Ad]]` satırları varsa Dinle ekranı konu konu okur ve her konudan sonra cevap
+  dinler; cevaplar sohbet bitince `🎧 … brifingindeki sorulara cevaplarım` diye başlayan TEK mesajda gelen
+  kutusuna düşer (her satır: konu · "koçun sorusu" → Kerem'in cevabı). Bu mesaj yankı değildir; "Hayat
+  Anında" ve saatlik gelen kutusu görevleri onu Kerem'in kendi sözleri olarak işlemeli.
+- PR #3 merge edilmeden önce de zararsızdır: eski sürümler işaretleri gizli blok sayıp atlar.
+- Tek ses dosyası (Kerem'in isteği, 10 Kasım): Gemini sesi açıkken bütün sohbet TEK istekte seslendirilir;
+  konu aralarına `[long pause]` etiketi konur, uygulama ses dalgasında bu uzun sessizlikleri bulup dosyayı
+  her soruda durdurur, cevaptan sonra kaldığı yerden sürdürür (`sohbetTek`, `kesimHesapla`, `sohbetTekCal`).
+  Aralar güvenle bulunamazsa konu konu seslendirmeye döner; iki kez üst üste olmazsa kendini kapatır
+  (Ayarlar > Ses > "Sohbette tek ses dosyası"). Sentetik sesle sınandı; Gemini'nin etiketi gerçekten
+  uzun sessizliğe çevirdiği ve iPhone'da kaldığı yerden devam ettiği gerçek telefonda DOĞRULANMADI.
+  Komut yazarken: konu metinlerinin içinde `[long pause]` kullanma, toplam metin 4500 karakteri geçmesin
+  (geçerse uygulama konu konu seslendirir).
+- Akşam brifingi görevinin komutu 10 Kasım'da Fable oturumunca bu biçime göre yeniden yazıldı (deneme).
+  Sabah ve öğle komutları eski biçimde; Kerem beğenirse onlar da çevrilecek.
 
 ## PR #1'de olanlar
 
