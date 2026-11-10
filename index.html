@@ -546,7 +546,7 @@ html.sade #aura{display:none}
 html.sade .card{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}
 @media (prefers-reduced-transparency: reduce){#aura{display:none}.card{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}}
 /* sayfa girişi */
-#view.giris > *{animation:giris .62s cubic-bezier(.16,.84,.3,1) both;animation-delay:calc(var(--i,0) * 50ms)}
+#view.gir > *{animation:giris .62s cubic-bezier(.16,.84,.3,1) both;animation-delay:calc(var(--i,0) * 50ms)}
 @keyframes giris{from{opacity:0;transform:translate3d(var(--gx,0),22px,0) scale(.985)}to{opacity:1;transform:none}}
 /* menü göstergesi */
 nav.tabs .gosterge{position:absolute;top:3px;left:0;width:52px;height:30px;border-radius:15px;background:var(--mint-soft);transition:transform .5s cubic-bezier(.3,1.35,.5,1),opacity .2s;pointer-events:none;z-index:0}
@@ -643,7 +643,7 @@ html.sade .ak-nabiz::after{animation:none;opacity:0}
 @keyframes vespaGel{from{transform:translateX(-300px)}to{transform:translateX(0)}}
 /* alışkanlık işaretlenince nokta zıplar; çubuklar sayfaya girerken dolar */
 .habchip.pop .dot{animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
-#view.giris .bar i,#view.giris .karne-p i{transform-origin:left center;animation:barDol .8s cubic-bezier(.2,.8,.2,1) .2s both}
+#view.gir .bar i,#view.gir .karne-p i{transform-origin:left center;animation:barDol .8s cubic-bezier(.2,.8,.2,1) .2s both}
 @keyframes barDol{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 /* alttan açılan sayfalar */
 #sheet.acilis .sheet,#ses.acilis .sheet{animation:sayfaYuksel .36s cubic-bezier(.2,.9,.25,1) both}
@@ -727,7 +727,7 @@ html.sade .ak-nabiz::after{animation:none;opacity:0}
 .counters>.karo:last-child:nth-child(odd){grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px}
 .counters>.karo:last-child:nth-child(odd) .stepper{gap:10px}
 .counters>.karo:last-child:nth-child(odd) .kr-alt{grid-column:1/-1}
-#view.giris .kr-graf i{transform-origin:center bottom;animation:grafDol .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.25s + var(--j,0) * 40ms)}
+#view.gir .kr-graf i{transform-origin:center bottom;animation:grafDol .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.25s + var(--j,0) * 40ms)}
 @keyframes grafDol{from{transform:scaleY(.1)}to{transform:scaleY(1)}}
 
 .adimlar{margin:0 0 10px;padding-left:18px;color:var(--ink-2);display:grid;gap:4px}
@@ -2799,11 +2799,11 @@ function hareketRender(){
     if (gecen < 2600) { vg.style.animationDelay = (-gecen / 1000).toFixed(2) + "s"; vg.classList.add("gel"); }
   }
   if (!(sekmeDegisti || gunDegisti) || !hareketAcik()) return;
-  v.classList.remove("giris"); void v.offsetWidth;
+  v.classList.remove("gir"); void v.offsetWidth;
   v.style.setProperty("--gx", (yon * 26) + "px");
   [...v.children].forEach((c, i) => c.style.setProperty("--i", Math.min(i, 9)));
-  v.classList.add("giris");
-  clearTimeout(HRK.z); HRK.z = setTimeout(() => v.classList.remove("giris"), 1100);
+  v.classList.add("gir");   /* "giris" DEĞİL: o sınıf giriş ekranının (tam ekran, sabit) stilidir */
+  clearTimeout(HRK.z); HRK.z = setTimeout(() => v.classList.remove("gir"), 1100);
   if (sekmeDegisti || ilk) sayilariSay(v);
   const a = document.querySelector('#tabs a[aria-current="page"]'); if (a && sekmeDegisti && !ilk) { a.classList.remove("zipla"); void a.offsetWidth; a.classList.add("zipla"); }
 }
