@@ -2088,7 +2088,10 @@ function sesAyarKart(){
       <p class="small muted" style="margin:0">Gemini'ye ulaşılamazsa (internet, günlük ücretsiz hak) yedek sesle devam eder. Yedeği iyileştirmek için iPhone Ayarlar → Erişilebilirlik → Seslendirilen İçerik → Sesler → Türkçe → “Gelişmiş” bir ses indir. Anahtar yalnızca bu telefonda saklanır. Ücretsiz kullanımda Google okunan metni hizmetini geliştirmek için kullanabilir.</p>
       ${ttsSonHata ? `<p class="small" style="margin:0;color:var(--amber)">Son denemede: ${esc(ttsSonHata)}</p>` : ""}
       <div class="acts" style="margin:0"><button class="btn">Kaydet</button><button type="button" class="btn soft" data-act="sesdene">Sesi dene</button></div>
-    </form></section>`;
+    </form>
+    <div class="ayar-b" style="margin-top:14px"><div class="small" style="font-weight:800;margin-bottom:6px">Sohbette tek ses dosyası</div>
+      <div class="seg">${[["1","Açık"],["0","Kapalı"]].map(([v,l]) => `<button type="button" data-act="tekses" data-v="${v}" aria-pressed="${tekSesAcik() === (v === "1")}">${l}</button>`).join("")}</div>
+      <p class="small muted" style="margin:6px 0 0">Açıkken sohbetli brifing tek istekte seslendirilir ve sen cevap verirken ses dosyası olduğu yerde bekler; günlük ücretsiz hakkı korur. ${(LS.get("hayat.tekSesHata") || 0) >= 2 ? "Konu araları iki kez bulunamadığı için kendiliğinden kapandı; Açık'a basarsan yeniden dener." : "Konu araları bulunamazsa konu konu seslendirmeye döner."}</p></div></section>`;
 }
 function profilKart(){
   const a = ayar(), cv = claudeVar(), k = S.kimlik;
@@ -3354,6 +3357,7 @@ document.addEventListener("click", e => {
     case "renk": { const v = b.dataset.v, uygula = () => { LS.set("hayat.renk", v); renkUygula(); render(); }; if (document.startViewTransition && hareketAcik()) document.startViewTransition(uygula); else uygula(); break; }
     case "hareket": LS.set("hayat.hareket", b.dataset.v === "1"); renkUygula(); render(); break;
     case "titresim": LS.set("hayat.titresim", b.dataset.v === "1"); render(); if (b.dataset.v === "1") titret(); break;
+    case "tekses": LS.set("hayat.tekSes", b.dataset.v === "1"); LS.set("hayat.tekSesHata", 0); render(); break;
     case "sesler": LS.set("hayat.sesler", b.dataset.v === "1"); render(); if (b.dataset.v === "1") efektSes("ding"); break;
     case "gkmic": gkMic(); break;
     case "gkkaydet": gkKaydet(); break;
@@ -3797,7 +3801,16 @@ function sesBaslat(gid){
   const gm = String((g && g.metin) || ""), slot = /SABAH/.test(gm) ? "Sabah" : /ÖĞLE/.test(gm) ? "Öğle" : /AKŞAM/.test(gm) ? "Akşam" : "";
   SES = {acik: true, oturum: uid(), durum: "okuyor", metin, kaynak, tur: 0, cevaplar: [], ara: "", hata: "", yerel, bolumler: bol, bi: 0, sohbet: [], slot};
   renderSes();
-  if (bol) { sesBolumOku(); return; }
+  if (bol) {
+    const o = SES.oturum; SES.yukleniyor = true; renderSes();
+    sohbetTek(bol).then(t => {
+      if (!SES.acik || SES.oturum !== o) return;
+      SES.yukleniyor = false; SES.tek = t && t.kesim ? t : null;
+      sesBolumOku();   /* sesBolumOku uyarıyı temizler; not ondan SONRA yazılır */
+      if (t && t.ayrilamadi && SES.acik && !SES.hata) { SES.hata = "Tek ses dosyasında konu araları bulunamadı; konu konu seslendiriyorum."; renderSes(); }
+    });
+    return;
+  }
   seslendir(metin + SES_SON, () => sesDinle(false), false, SES.yerel);
 }
 /* ---- Sohbet modu ----
@@ -3831,11 +3844,86 @@ function sesBolumOku(){
   if (!SES.acik || !SES.bolumler) return;
   const i = SES.bi, b = SES.bolumler[i], o = SES.oturum;
   Object.assign(SES, {durum: "okuyor", hata: "", yukleniyor: false}); renderSes();
-  const sonra = SES.bolumler[i + 1]; if (sonra) sesOnHazirla(sonra.metin);
-  seslendir(b.metin, () => {
+  const bitince = () => {
     if (!SES.acik || SES.oturum !== o || SES.bi !== i) return;
     if (/\?\s*$/.test(b.metin)) sesDinle(false); else sesBolumGec();
-  }, false, false);
+  };
+  if (SES.tek) { soyledi(b.metin); sohbetTekCal(i, bitince); return; }
+  const sonra = SES.bolumler[i + 1]; if (sonra) sesOnHazirla(sonra.metin);
+  seslendir(b.metin, bitince, false, false);
+}
+/* ---- Sohbet: tek ses dosyası ----
+   Bütün brifing TEK istekte seslendirilir (ücretsiz günlük ses hakkını korur). Konu aralarına Gemini'nin [long pause]
+   etiketi konur; ses dalgasında bu uzun sessizlikler bulunur, dosya o noktalarda durdurulup cevabın dinlenir ve
+   sonra kaldığı yerden devam eder. Sessizlikler güvenle bulunamazsa (etiket uygulanmadıysa) konu konu seslendirmeye
+   dönülür; iki kez üst üste olmazsa bir daha denenmez (Ayarlar > Ses'ten yeniden açılır). */
+const TEK_ARA = "\n\n[long pause]\n\n";
+const tekSesAcik = () => LS.get("hayat.tekSes") !== false && (LS.get("hayat.tekSesHata") || 0) < 2;
+const tekHazir = new Map();
+function sohbetTek(bol){
+  let a; try { a = ttsAyar(); } catch (e) { return Promise.resolve(null); }
+  if (a.kaynak !== "gemini" || !a.anahtar || kotaDolu() || !tekSesAcik() || S.mode === "mock") return Promise.resolve(null);
+  const metin = bol.map(b => b.metin.replace(/\s*\n+\s*/g, " ")).join(TEK_ARA);
+  if (metin.length > 4500) return Promise.resolve(null);
+  const k = hashSes([a.ses, a.uslup, metin].join("|"));
+  if (!tekHazir.has(k)) tekHazir.set(k, (async () => {
+    const url = await geminiSes(metin);
+    const kesim = await sesKesimBul(url, bol.map(b => b.metin.length));
+    if (!kesim) { LS.set("hayat.tekSesHata", (LS.get("hayat.tekSesHata") || 0) + 1); return {ayrilamadi: true}; }
+    LS.set("hayat.tekSesHata", 0);
+    return {url, kesim};
+  })().catch(e => { const m = String((e && e.message) || e); if (/^429/.test(m) && /PerDay|per day|daily/i.test(m)) kotaIsaretle(); tekHazir.delete(k); return null; }));
+  return tekHazir.get(k);
+}
+async function sesKesimBul(url, uzunluklar){
+  try {
+    const buf = await (await fetch(url)).arrayBuffer();
+    const AC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!AC) return null;
+    const ctx = new AC(1, 1, 24000);
+    const ab = await new Promise((res, rej) => { const pr = ctx.decodeAudioData(buf, res, rej); if (pr && pr.then) pr.then(res, rej); });
+    return kesimHesapla(ab.getChannelData(0), ab.sampleRate, uzunluklar);
+  } catch (e) { return null; }
+}
+/* Ses örneklerinden konu aralarını bulur. uzunluklar: konuların karakter sayıları (sırayla). Emin değilse null döner. */
+function kesimHesapla(x, sr, uzunluklar){
+  const n = uzunluklar.length - 1; if (n < 1) return null;
+  const adim = Math.round(sr * 0.02), kare = Math.floor(x.length / adim); if (kare < 50) return null;
+  const rms = new Float32Array(kare); let tepe = 0;
+  for (let i = 0; i < kare; i++) { let t = 0; for (let j = i * adim, e = j + adim; j < e; j++) t += x[j] * x[j]; rms[i] = Math.sqrt(t / adim); if (rms[i] > tepe) tepe = rms[i]; }
+  if (tepe < 0.01) return null;
+  const esik = tepe * 0.035, bos = [];
+  for (let i = 0, bas = -1; i <= kare; i++) {
+    const sessiz = i < kare && rms[i] < esik;
+    if (sessiz && bas < 0) bas = i;
+    if (!sessiz && bas >= 0) { if (bas > 0 && i < kare && i - bas >= 10) bos.push({b: bas * 0.02, s: i * 0.02, u: (i - bas) * 0.02}); bas = -1; }
+  }
+  /* konu araları dosyadaki EN UZUN n sessizlik olmalı: en az 0,8 sn, geri kalan her sessizlikten 1,3 kat uzun
+     ve her biri metin uzunluğuna göre beklenen yerin yakınında */
+  const sirali = bos.slice().sort((p, q) => q.u - p.u); if (sirali.length < n) return null;
+  const secilen = sirali.slice(0, n).sort((p, q) => p.b - q.b), digerEnUzun = sirali.length > n ? sirali[n].u : 0;
+  const enKisa = Math.min(...secilen.map(g => g.u));
+  if (enKisa < 0.8 || enKisa < digerEnUzun * 1.3) return null;
+  const sure = kare * 0.02, toplam = uzunluklar.reduce((p, q) => p + q, 0), pencere = Math.max(4, sure * 0.12);
+  let kum = 0;
+  for (let k = 0; k < n; k++) { kum += uzunluklar[k]; if (Math.abs((secilen[k].b + secilen[k].s) / 2 - sure * kum / toplam) > pencere) return null; }
+  return secilen.map(g => ({dur: g.b + 0.2, devam: Math.max(g.b + 0.2, g.s - 0.12)}));
+}
+function sohbetTekCal(i, bitince){   /* tek dosyanın i. konusunu çal; konu bitince dur ve bitince()'yi çağır */
+  const t = SES.tek, a = sesAudio || (sesAudio = new Audio()), o = SES.oturum;
+  const bas = i === 0 ? 0 : t.kesim[i - 1].devam, son = i < t.kesim.length ? t.kesim[i].dur : Infinity;
+  let bitti = false; clearInterval(SES.tekZ);
+  const tamam = () => { if (bitti) return; bitti = true; clearInterval(z); a.onended = null; a.onerror = null; try { a.pause(); } catch (e) {} if (SES.acik && SES.oturum === o) bitince(); };
+  let z = null;
+  const basla = () => {
+    if (!SES.acik || SES.oturum !== o) return;
+    try { a.currentTime = bas; a.preservesPitch = true; a.playbackRate = ttsAyar().hiz || 1; } catch (e) {}
+    a.onended = tamam; a.onerror = tamam;
+    const pr = a.play();
+    if (pr && pr.catch) pr.catch(() => { if (SES.oturum !== o) return; clearInterval(z); SES.durum = "bekle"; SES.hata = "Ses başlatılamadı; “Baştan oku”ya dokun."; renderSes(); });
+    z = SES.tekZ = setInterval(() => { if (!SES.acik || SES.oturum !== o) { clearInterval(z); return; } if (a.currentTime >= son) tamam(); }, 40);
+  };
+  if (a.src !== t.url || a.readyState < 1) { a.src = t.url; a.addEventListener("loadedmetadata", basla, {once: true}); try { a.load(); } catch (e) {} }
+  else basla();
 }
 function sesBolumGec(){   /* sıradaki konu; konular bittiyse son bir "eklemek istediğin var mı" turu */
   if (!SES.acik || !SES.bolumler) return;
@@ -3878,6 +3966,7 @@ function sesHazirla(){
     const g = sonKanal("brifing")[0]; if (!g || !g.sonuc || Date.now() - gZaman(g) > 16*3600e3) return;
     const k = "hayat.sesHazir." + g.id; if (LS.get(k)) return; LS.set(k, 1);
     const bol = sesBolumler(g.sonuc);
+    if (bol && tekSesAcik()) { sohbetTek(bol); return; }
     geminiSes(bol ? bol[0].metin : sesTemiz(g.sonuc) + SES_SON).catch(e => { if (/^429/.test(String(e.message || e)) && /PerDay|per day|daily/i.test(String(e.message || e))) kotaIsaretle(); });
   } catch (e) {}
 }

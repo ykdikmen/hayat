@@ -22,6 +22,14 @@ Son güncelleme: 10 Kasım 2026 akşam, Fable oturumu.
   kutusuna düşer (her satır: konu · "koçun sorusu" → Kerem'in cevabı). Bu mesaj yankı değildir; "Hayat
   Anında" ve saatlik gelen kutusu görevleri onu Kerem'in kendi sözleri olarak işlemeli.
 - PR #3 merge edilmeden önce de zararsızdır: eski sürümler işaretleri gizli blok sayıp atlar.
+- Tek ses dosyası (Kerem'in isteği, 10 Kasım): Gemini sesi açıkken bütün sohbet TEK istekte seslendirilir;
+  konu aralarına `[long pause]` etiketi konur, uygulama ses dalgasında bu uzun sessizlikleri bulup dosyayı
+  her soruda durdurur, cevaptan sonra kaldığı yerden sürdürür (`sohbetTek`, `kesimHesapla`, `sohbetTekCal`).
+  Aralar güvenle bulunamazsa konu konu seslendirmeye döner; iki kez üst üste olmazsa kendini kapatır
+  (Ayarlar > Ses > "Sohbette tek ses dosyası"). Sentetik sesle sınandı; Gemini'nin etiketi gerçekten
+  uzun sessizliğe çevirdiği ve iPhone'da kaldığı yerden devam ettiği gerçek telefonda DOĞRULANMADI.
+  Komut yazarken: konu metinlerinin içinde `[long pause]` kullanma, toplam metin 4500 karakteri geçmesin
+  (geçerse uygulama konu konu seslendirir).
 - Akşam brifingi görevinin komutu 10 Kasım'da Fable oturumunca bu biçime göre yeniden yazıldı (deneme).
   Sabah ve öğle komutları eski biçimde; Kerem beğenirse onlar da çevrilecek.
 
