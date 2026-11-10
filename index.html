@@ -374,6 +374,8 @@ table.hg{border-collapse:separate;border-spacing:3px;font-size:11px}
 table.hg th{font-weight:700;color:var(--ink-3);text-align:center;padding:0 0 2px}
 table.hg th.rowh{text-align:left;color:var(--ink-2);font-size:12px;padding-right:6px;white-space:nowrap;position:sticky;left:-16px;background:var(--surface);z-index:1}
 table.hg th.tcol{color:var(--mint)}
+table.hg td.tcol{box-shadow:0 0 0 1.5px color-mix(in srgb, var(--mint) 70%, transparent)}
+table.hg td.tcol.fut{box-shadow:none}
 table.hg td{width:24px;min-width:24px;height:24px;border-radius:7px;text-align:center;vertical-align:middle;padding:0;font-weight:700;font-variant-numeric:tabular-nums}
 td.c0{border:1px solid var(--line)}
 td.c1{background:var(--mint)}
@@ -755,6 +757,15 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 .kapa-ad{flex:none}
 .kapa-ozet{flex:1;min-width:0;text-align:right;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card.acildi{animation:kartAc .34s cubic-bezier(.2,.8,.2,1)}
+.bos{display:grid;justify-items:center;gap:10px;text-align:center;padding:18px 8px 8px}
+.bos .bos-i{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb, var(--mint) 12%, transparent);color:var(--mint)}
+.bos .bos-i svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.bos p{margin:0;color:var(--ink-2);font-size:14px;line-height:1.45;max-width:30ch}
+.bos .btn{margin-top:2px}
+.card.katli{padding:6px}
+.formac{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 14px;border:1.5px dashed color-mix(in srgb, var(--mint) 45%, var(--line));border-radius:16px;background:transparent;color:var(--ink);font:inherit;font-weight:700;font-size:15px;text-align:left;cursor:pointer}
+.formac .formac-arti{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--mint);color:var(--on-mint, #04140e);font-size:20px;line-height:1;font-weight:800;flex:none}
+.formac:active{transform:scale(.985)}
 @keyframes kartAc{from{opacity:.4;transform:translate3d(0,-8px,0)}to{opacity:1;transform:none}}
 /* çekerek kapatma */
 .sheet .grab,.sheet .card-h{touch-action:none}
@@ -1555,6 +1566,17 @@ function banners(){
   return h;
 }
 function zil(){ const n = okunmamis(); return `<a class="iconbtn" href="#claude" aria-label="${claudeVar() ? "Bildirimler ve Claude" : "Bildirimler ve ayarlar"}${n ? `, ${n} yeni` : ""}">${I.bell}${n ? `<span class="badge">${n > 9 ? "9+" : n}</span>` : ""}</a>`; }
+/* Boş durum: ikon + tek cümle + (varsa) eylem düğmesi */
+const BOS_I = {
+  hedef: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>`,
+  para: `<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 15h2"/></svg>`,
+  tur: `<svg viewBox="0 0 24 24"><circle cx="6" cy="17" r="2.6"/><circle cx="18" cy="17" r="2.6"/><path d="M8.6 17h6.8M15 17l-2.2-7H10M12.8 10l1.6-4h2.8M6 14.4 8.2 11H12"/></svg>`
+};
+const bos = (ikon, metin, dugme) => `<div class="bos"><span class="bos-i" aria-hidden="true">${ikon}</span><p>${metin}</p>${dugme || ""}</div>`;
+/* Katlanan formlar: "+ … ekle" düğmesinin arkasında durur; açık olanlar sekme değişince kapanır (saklanmaz) */
+const FORM_ODAK = {para: "paraTutar", hedef: "gTitle", odak: "nText"}, FORM_KART = {para: "paraEkle", hedef: "hedefEkle", odak: "odakKart"};
+const formAcik = f => !!(S.ui.acik || {})[f];
+const formAcBtn = (f, metin, ek) => `<button type="button" class="formac" data-act="formac" data-f="${f}"${ek || ""}><span class="formac-arti" aria-hidden="true">+</span>${metin}</button>`;
 function ust(eyebrow, title, right){ return `<div class="top"><div style="min-width:0"><div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(title)}</h1></div><div class="btnrow">${right || ""}${zil()}</div></div>`; }
 const navBtns = (act, label) => `<button class="iconbtn" data-act="${act}" data-n="-1" aria-label="Önceki ${label}">${I.l}</button><button class="iconbtn" data-act="${act}" data-n="1" aria-label="Sonraki ${label}">${I.r}</button>`;
 const sortPlan = p => (p || []).slice().sort((a,b) => (a.time||"99") < (b.time||"99") ? -1 : (a.time||"99") > (b.time||"99") ? 1 : 0);
@@ -1704,7 +1726,7 @@ function turKart(date){
     else h += `<p class="empty">Takvim yükleniyor…</p>`;
     return h + `</section>`;
   }
-  if (!t.count) return h + `<p class="empty">Bu gün tur yok${t.external ? ` · ${t.external} dış tur (Vahit)` : ""}.</p></section>`;
+  if (!t.count) return h + bos(BOS_I.tur, `Bu gün tur yok${t.external ? ` · ${t.external} dış tur (Vahit)` : ""}.`) + `</section>`;
   h += `<div class="tline"><b class="num">${t.count} tur</b><span>${t.pax} kişi · ${eur(t.net)} net</span></div>`;
   h += `<div class="chiprow" style="margin-top:10px"><span class="chip">${esc(saatOzet(t.list))}</span>
     ${t.rehbersiz ? `<span class="chip hot">${t.rehbersiz} rehbersiz</span>` : ""}
@@ -1788,7 +1810,8 @@ function viewPara(){
 
   const kats = S.ui.paraTip === "gelir" ? KAT_GELIR : KAT_GIDER;
   if (!kats.some(k => k.k === S.ui.paraKat)) S.ui.paraKat = kats[0].k;
-  h += `<section class="card" id="paraEkle"><div class="card-h"><h2>Ekle</h2><div class="seg" style="min-width:168px">
+  if (!formAcik("para")) h += `<section class="card katli" id="paraEkle">${formAcBtn("para", "Harcama ya da gelir ekle")}</section>`;
+  else h += `<section class="card" id="paraEkle"><div class="card-h"><h2>Ekle</h2><div class="seg" style="min-width:168px">
       <button type="button" data-act="paratip" data-v="gider" aria-pressed="${S.ui.paraTip === "gider"}">Gider</button><button type="button" data-act="paratip" data-v="gelir" aria-pressed="${S.ui.paraTip === "gelir"}">Gelir</button></div></div>
     <form id="f-para" class="formstack">
       <div class="amount"><span>€</span><input id="paraTutar" data-keep inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Tutar (euro)"></div>
@@ -1808,7 +1831,7 @@ function viewPara(){
   h += `<section class="card"><div class="card-h"><h2>Gözlem</h2></div>${paraGozlem(ym, p, a, cur)}</section>`;
 
   h += `<section class="card"><div class="card-h"><h2>Kayıtlar</h2><span class="meta">${p.kalemler.length}</span></div>`;
-  if (!p.kalemler.length) h += `<p class="empty">Bu ay kayıt yok. Yukarıdan ya da sesle ekle.</p>`;
+  if (!p.kalemler.length) h += bos(BOS_I.para, "Bu ay kayıt yok. Elle ya da alttaki mikrofona söyleyerek ekleyebilirsin.", formAcik("para") ? "" : `<button class="btn soft" data-act="formac" data-f="para">Harcama ekle</button>`);
   else {
     let lastD = "";
     for (const e of p.kalemler.slice(0, 120)) {
@@ -1955,19 +1978,19 @@ function viewAliskanlik(){
       if (x.type === "olcum") return `<div class="row"><span>${esc(x.label)}</span><b>${vals.length ? `son ${nf1.format(vals[vals.length-1])}` : "—"}</b></div>`;
       return `<div class="row"><span>${esc(x.label)}</span><b>${vals.length ? `ort ${nf1.format(s/vals.length)}/gün · toplam ${s}` : "—"}</b></div>`;
     }).join("") + `</div></section>`;
-  h += `<section class="card"><div class="card-h"><h2>Aylık tablo</h2><span class="meta">kutuya dokun</span></div><div class="gridwrap"><table class="hg"><thead><tr><th class="rowh"></th>` +
+  h += `<section class="card"><div class="card-h"><h2>Aylık tablo</h2><span class="meta">kutuya dokun</span></div><div class="gridwrap" data-ay="${mdays[0].slice(0,7)}"><table class="hg"><thead><tr><th class="rowh"></th>` +
     mdays.map(d => `<th class="${d === S.today ? "tcol" : ""}">${d2u(d).getUTCDate()}</th>`).join("") + `</tr></thead><tbody>`;
   for (const x of hs) {
     let maxC = 1; if (x.type !== "check") mdays.forEach(d => { const v = (getDay(d).counts||{})[x.key]; if (v > maxC) maxC = v; });
     h += `<tr><th class="rowh" scope="row">${esc(x.label)}</th>` + mdays.map(d => {
       const fut = d > S.today;
       if (x.type === "check") { const on = !!(getDay(d).checks||{})[x.key];
-        return `<td class="${on ? "c1" : "c0"} ${fut ? "fut" : ""}">${fut ? "" : `<button data-act="gridcheck" data-k="${esc(x.key)}" data-d="${d}" aria-label="${esc(x.label)} ${d}" aria-pressed="${on}"></button>`}</td>`; }
+        return `<td class="${on ? "c1" : "c0"} ${fut ? "fut" : ""}${d === S.today ? " tcol" : ""}">${fut ? "" : `<button data-act="gridcheck" data-k="${esc(x.key)}" data-d="${d}" aria-label="${esc(x.label)} ${d}" aria-pressed="${on}"></button>`}</td>`; }
       const v = (getDay(d).counts||{})[x.key], al = v == null ? 0 : .15 + .7*(Math.min(1, v/maxC));
-      return `<td class="${fut ? "fut" : ""}" style="${v == null ? "border:1px solid var(--line)" : `background:color-mix(in srgb, var(--sky) ${Math.round(al*100)}%, transparent)`}">${fut ? "" : `<button data-act="opendate" data-d="${d}" aria-label="${esc(x.label)} ${d}">${v == null ? "" : (x.type === "olcum" ? Math.round(v) : v)}</button>`}</td>`;
+      return `<td class="${fut ? "fut" : ""}${d === S.today ? " tcol" : ""}" style="${v == null ? "border:1px solid var(--line)" : `background:color-mix(in srgb, var(--sky) ${Math.round(al*100)}%, transparent)`}">${fut ? "" : `<button data-act="opendate" data-d="${d}" aria-label="${esc(x.label)} ${d}">${v == null ? "" : (x.type === "olcum" ? Math.round(v) : v)}</button>`}</td>`;
     }).join("") + `</tr>`;
   }
-  h += `<tr><th class="rowh" scope="row">Uyku</th>` + mdays.map(d => { const v = getDay(d).sleep; return `<td class="${d > S.today ? "fut" : ""}" style="${v == null ? "border:1px solid var(--line)" : `background:color-mix(in srgb, var(--violet) ${Math.round((.15+.7*Math.min(1, v/10))*100)}%, transparent)`}">${d > S.today ? "" : `<button data-act="opendate" data-d="${d}" aria-label="Uyku ${d}">${v == null ? "" : Math.round(v)}</button>`}</td>`; }).join("") + `</tr>`;
+  h += `<tr><th class="rowh" scope="row">Uyku</th>` + mdays.map(d => { const v = getDay(d).sleep; return `<td class="${d > S.today ? "fut" : ""}${d === S.today ? " tcol" : ""}" style="${v == null ? "border:1px solid var(--line)" : `background:color-mix(in srgb, var(--violet) ${Math.round((.15+.7*Math.min(1, v/10))*100)}%, transparent)`}">${d > S.today ? "" : `<button data-act="opendate" data-d="${d}" aria-label="Uyku ${d}">${v == null ? "" : Math.round(v)}</button>`}</td>`; }).join("") + `</tr>`;
   h += `</tbody></table></div></section>`;
   h += `<section class="card"><div class="card-h"><h2>Alışkanlıklarım</h2><button class="chip ${S.habitEdit ? "on" : ""}" data-act="habedit">${S.habitEdit ? "Bitti" : "Düzenle"}</button></div>`;
   if (S.habitEdit) {
@@ -1980,8 +2003,8 @@ function viewAliskanlik(){
   if (sug.length) h += `<section class="card"><div class="card-h"><h2>Takip etmeye değer</h2><span class="meta">tek dokunuş</span></div>${sug.map(o => `<div class="sugg"><b>${esc(o.label)}</b><p>${esc(o.neden)}</p><button class="minibtn" data-act="habekle" data-k="${o.key}">Ekle</button></div>`).join("")}</section>`;
   return h;
 }
-function goalBlock(list){
-  if (!list.length) return `<p class="empty">Henüz hedef yok.</p>`;
+function goalBlock(list, ufuk){
+  if (!list.length) return bos(BOS_I.hedef, "Henüz hedef yok.", `<button class="btn soft" data-act="formac" data-f="hedef" data-h="${ufuk}">Hedef ekle</button>`);
   return list.map(g => `<div class="goal"><div class="gt"><span class="title">${esc(g.title)}</span><span class="area">${esc(AREAS[g.area] || "Genel")}</span></div>
     ${g.next ? `<div class="gnext">Sonraki adım: ${esc(g.next)}</div>` : ""}
     <div class="gctl"><button class="minibtn" data-act="gprog" data-id="${esc(g.id)}" data-n="-10" aria-label="İlerlemeyi azalt">−10</button><span class="bar"><i style="width:${g.progress||0}%"></i></span><b>${g.progress||0}%</b><button class="minibtn" data-act="gprog" data-id="${esc(g.id)}" data-n="10" aria-label="İlerlemeyi artır">+10</button>
@@ -1992,21 +2015,22 @@ function viewHedefler(){
   const yil = S.today.slice(0,4), left = daysBetween(S.today, `${yil}-12-31`), y2 = String(Number(yil) + 2);
   let h = ust(`Yıl sonuna ${left} gün`, "Hedefler");
   h += segBtns("ilerleme", [["hafta","Hafta"],["aliskanlik","Alışkanlık"],["hedefler","Hedefler"]]);
-  h += `<section class="card"><div class="card-h"><h2>${yil} sonu</h2><span class="meta">31 Aralık</span></div>${goalBlock(gl.filter(g => g.horizon === yil))}</section>`;
-  h += `<section class="card"><div class="card-h"><h2>2 yıl</h2><span class="meta">${AY[d2u(S.today).getUTCMonth()]} ${y2}</span></div>${goalBlock(gl.filter(g => g.horizon !== yil))}</section>`;
-  h += `<section class="card"><div class="card-h"><h2>Yeni hedef</h2></div><form class="formgrid" id="f-goal">
+  h += `<section class="card"><div class="card-h"><h2>${yil} sonu</h2><span class="meta">31 Aralık</span></div>${goalBlock(gl.filter(g => g.horizon === yil), yil)}</section>`;
+  h += `<section class="card"><div class="card-h"><h2>2 yıl</h2><span class="meta">${AY[d2u(S.today).getUTCMonth()]} ${y2}</span></div>${goalBlock(gl.filter(g => g.horizon !== yil), y2)}</section>`;
+  const birlikte = claudeVar() ? `<div class="chiprow" style="margin-top:12px"><button class="chip" data-act="ask" data-q="Hedeflerimi birlikte yazalım: ${yil} sonu ve 2 yıl için iş, sağlık, para ve kişisel hayat. Bana sorular sor.">Claude'la birlikte yaz</button></div>` : "";
+  if (!formAcik("hedef")) h += `<section class="card katli" id="hedefEkle">${formAcBtn("hedef", "Yeni hedef ekle")}${birlikte}</section>`;
+  else h += `<section class="card" id="hedefEkle"><div class="card-h"><h2>Yeni hedef</h2></div><form class="formgrid" id="f-goal">
       <input class="field full" id="gTitle" placeholder="Hedef (örn. Hello Rides'ı açmak)" autocomplete="off" aria-label="Hedef">
-      <select class="field" id="gHorizon" aria-label="Süre"><option value="${yil}">${yil} sonu</option><option value="${y2}">2 yıl (${y2})</option></select>
+      <select class="field" id="gHorizon" aria-label="Süre"><option value="${yil}">${yil} sonu</option><option value="${y2}" ${S.ui.hedefUfuk === y2 ? "selected" : ""}>2 yıl (${y2})</option></select>
       <select class="field" id="gArea" aria-label="Alan">${Object.entries(AREAS).map(([k,v]) => `<option value="${k}">${v}</option>`).join("")}</select>
       <input class="field full" id="gNext" placeholder="Sonraki somut adım" autocomplete="off" aria-label="Sonraki adım">
-      <button class="btn full">Hedefi ekle</button></form>
-      ${claudeVar() ? `<div class="chiprow" style="margin-top:12px"><button class="chip" data-act="ask" data-q="Hedeflerimi birlikte yazalım: ${yil} sonu ve 2 yıl için iş, sağlık, para ve kişisel hayat. Bana sorular sor.">Claude'la birlikte yaz</button></div>` : ""}</section>`;
+      <button class="btn full">Hedefi ekle</button></form>${birlikte}</section>`;
   const nl = Object.entries(S.notes).map(([id,n]) => Object.assign({id}, n)).sort((a,b) => (a.createdAt||"") < (b.createdAt||"") ? -1 : 1);
-  h += `<section class="card"><div class="card-h"><h2>Odak listesi</h2></div><div class="focusgrp">` + Object.entries(FOCUS).map(([k,label]) => {
+  h += `<section class="card" id="odakKart"><div class="card-h"><h2>Odak listesi</h2></div><div class="focusgrp">` + Object.entries(FOCUS).map(([k,label]) => {
     const items = nl.filter(n => n.kind === k);
     return `<h3>${label}</h3>` + (items.length ? `<ul class="list">${items.map(n => `<li class="${n.done ? "done" : ""}"><button class="check" data-act="ntoggle" data-id="${esc(n.id)}" aria-pressed="${!!n.done}" aria-label="Tamamlandı">${I.check}</button><span class="li-text">${esc(n.text)}</span><button class="x" data-act="ndel" data-id="${esc(n.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>` : `<p class="empty">Boş.</p>`);
-  }).join("") + `</div><form class="formgrid" id="f-note" style="margin-top:10px"><select class="field" id="nKind" aria-label="Liste">${Object.entries(FOCUS).map(([k,v]) => `<option value="${k}">${v}</option>`).join("")}</select>
-    <input class="field" id="nText" placeholder="Örn. Paolo'yu ara" autocomplete="off" aria-label="Madde"><button class="btn full">Listeye ekle</button></form></section>`;
+  }).join("") + `</div>` + (!formAcik("odak") ? `<div style="margin-top:10px">${formAcBtn("odak", "Listeye ekle")}</div></section>` : `<form class="formgrid" id="f-note" style="margin-top:10px"><select class="field" id="nKind" aria-label="Liste">${Object.entries(FOCUS).map(([k,v]) => `<option value="${k}">${v}</option>`).join("")}</select>
+    <input class="field" id="nText" placeholder="Örn. Paolo'yu ara" autocomplete="off" aria-label="Madde"><button class="btn full">Listeye ekle</button></form></section>`);
   return h;
 }
 
@@ -2027,7 +2051,7 @@ function viewClaude(){
 }
 function claudeBildirim(){
   const g = gorulen(), list = akis();
-  if (!list.length) return `<p class="empty">${claudeVar() ? "Henüz bildirim yok. Claude'un sabah programı, posta özetleri ve cevapları burada toplanır." : "Henüz bildirim yok. Uyarılar ve hatırlatmalar burada toplanır."}</p>`;
+  if (!list.length) return bos(I.bell, claudeVar() ? "Henüz bildirim yok. Claude'un sabah programı, posta özetleri ve cevapları burada toplanır." : "Henüz bildirim yok. Uyarılar ve hatırlatmalar burada toplanır.", `<button class="btn soft" data-act="seggo" data-tab="claude" data-g="claude" data-v="ayarlar">Bildirim ayarları</button>`);
   const icon = t => t === "posta" ? I.mail : t === "brifing" ? I.sun : t === "uyari" ? I.alert : I.chat;
   let h = `<div class="chiprow" style="justify-content:flex-end"><button class="chip" data-act="okundu">Tümünü okundu say</button></div><div class="feed">`;
   h += list.map(x => {
@@ -2044,7 +2068,7 @@ function claudePosta(){
   let h = `<section class="card flat"><p class="empty" style="margin:0">Claude gelen kutunu sabah, öğle, 16:35 ve akşam okur. Viator, GetYourGuide, TripAdvisor ve rezervasyon bildirimlerini ayıklar; kalanları önem sırasıyla yazar. Cevap bekleyen her mail için 3 seçenek sunar (samimi, profesyonel, reddeden): “Rosie\'ye birinciyi hazırla” dersen Gmail\'de taslağı hazırlar, sen bakıp gönderirsin.</p>
     <div class="chiprow" style="margin-top:10px"><span class="chip"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--coral);margin-right:6px"></i>cevap lazım</span><span class="chip"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:6px"></i>önemli</span><span class="chip"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sky);margin-right:6px"></i>bilgi</span></div>
     ${bek ? `<p class="small muted" style="margin:10px 0 0">Bir sonraki özet hazırlanıyor.</p>` : `<button class="btn soft" style="margin-top:10px" data-act="postaiste">Bir sonraki turda özet iste</button>`}</section>`;
-  if (!list.length) return h + `<p class="empty">Henüz özet yok.</p>`;
+  if (!list.length) return h + bos(I.mail, "Henüz özet yok. Claude gelen kutunu okuyunca özet burada belirir.");
   return h + list.slice(0, 8).map((p, i) => { const c = postaCoz(p.sonuc), z = gZaman(p);
     return `<section class="card"><div class="card-h"><h2>${i === 0 ? "Son özet" : esc(fmtShort(fmtYMD.format(new Date(z))))}</h2><span class="meta">${esc(fmtShort(fmtYMD.format(new Date(z))))} · ${esc(fmtHM.format(new Date(z)))}</span></div>
       ${c.baslik ? `<p class="small muted" style="margin:0 0 6px">${inl(esc(c.baslik))}</p>` : ""}${postaHtml(c, false)}</section>`; }).join("");
@@ -2053,7 +2077,7 @@ function claudeSohbet(){
   let h = !claudeVar() ? `<section class="card"><p style="margin:0">Ortadaki düğmeye söylediğin her şey buraya düşer. Sigara, su, spor, uyku, ruh hali, harcama (“12 euro yemek”) ve “yarın 10:00 dişçi” gibi planları uygulama hemen yazar.</p></section>` : `<section class="card"><p style="margin:0 0 10px">Ortadaki düğmeye söylediğin her şey buraya düşer. Basit kayıtları (sigara, su, spor, uyku, harcama) uygulama hemen işler; randevu, plan, hedef ve soruları Claude 08:00–23:00 arası her saat işler.</p>
     <div class="chiprow">${QUICK.map(q => `<button class="chip" data-act="ask" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div></section>`;
   const list = (S.gelen || []).filter(g => g.durum !== "iptal" && !kanalOf(g)).slice().reverse().slice(0, 40);
-  if (!list.length) return h + `<p class="empty">Henüz bir şey söylemedin.</p>`;
+  if (!list.length) return h + bos(I.chat, "Henüz bir şey söylemedin.", `<button class="btn soft" data-act="compose">Söyle ya da yaz</button>`);
   h += `<section class="msgs">` + list.map(g => {
     const t = g.zaman ? new Date(g.zaman) : null, when = t && !isNaN(t) ? `${fmtShort(fmtYMD.format(t))} · ${fmtHM.format(t)}` : "";
     let out = `<div class="msg u">${esc(g.metin)}<span class="when">${esc(when)}</span></div>`;
@@ -2847,6 +2871,7 @@ function hareketRender(){
   if (HRK.pop) { const b = v.querySelector(`[data-act=cnt][data-k="${HRK.pop}"]`), o = b && b.parentElement.querySelector("output"); if (o) o.classList.add("pop"); HRK.pop = null; }
   if (HRK.tik) { const c = v.querySelector(`.check[data-id="${HRK.tik}"]`); if (c && c.getAttribute("aria-pressed") === "true") c.classList.add("tik-yeni"); HRK.tik = null; }
   if (HRK.acilan) { const c = v.querySelector(`[data-kart="${HRK.acilan}"]`); if (c && hareketAcik()) c.classList.add("acildi"); HRK.acilan = null; }
+  if (HRK.formAc) { const c = document.getElementById(FORM_KART[HRK.formAc]); if (c && hareketAcik()) c.classList.add("acildi"); HRK.formAc = null; }
   if (HRK.hab) { const c = [...v.querySelectorAll(".habchip")].find(x => x.dataset.k === HRK.hab); if (c && hareketAcik()) c.classList.add("pop"); HRK.hab = null; }
   if (HRK.yeni) { const li = [...v.querySelectorAll(".akis li[data-pid]")].find(x => x.dataset.pid === HRK.yeni); if (li && hareketAcik()) li.classList.add("yeni"); HRK.yeni = null; }
   /* plan çubuğu: önceki değerden yenisine dolar (sayfaya girişte sıfırdan) */
@@ -3178,6 +3203,7 @@ function scheduleRender(){ if (typing()) { renderPending = true; return; } rende
 view.addEventListener("focusout", () => { if (renderPending) setTimeout(() => { if (!typing() && renderPending) { renderPending = false; render(); } }, 60); });
 function render(focusId){
   renderPending = false;
+  if (S.ui.acik && lastTab !== S.tab) for (const f in S.ui.acik) if (S.ui.acik[f] !== S.tab) delete S.ui.acik[f];
   const keep = {}; view.querySelectorAll("[data-keep]").forEach(el => { keep[el.id] = el.value; });
   const fn = {bugun: viewBugun, para: viewPara, gunluk: viewGunluk, ilerleme: viewIlerleme, claude: viewClaude}[S.tab] || viewBugun;
   view.innerHTML = fn();
@@ -3189,6 +3215,18 @@ function render(focusId){
   canliRender();
   hareketRender();
   seritRender();
+  tabloKaydir();
+}
+/* Aylık tablo: ilk açılışta bugünün sütununa kayar; sonra her yeniden çizimde bıraktığı yerde kalır (ay başına hatırlanır). */
+const TABLO_KAY = {};
+function tabloKaydir(){
+  const w = view.querySelector(".gridwrap[data-ay]"); if (!w) return;
+  const ay = w.dataset.ay;
+  if (TABLO_KAY[ay] != null) w.scrollLeft = TABLO_KAY[ay];
+  else { const th = w.querySelector("thead th.tcol"), rh = w.querySelector("thead th.rowh");
+    if (th) w.scrollLeft = Math.max(0, th.offsetLeft - (rh ? rh.offsetWidth : 0) - (w.clientWidth - (rh ? rh.offsetWidth : 0)) / 2 + th.offsetWidth / 2);
+    TABLO_KAY[ay] = w.scrollLeft; }
+  w.addEventListener("scroll", () => { TABLO_KAY[ay] = w.scrollLeft; }, {passive: true});
 }
 
 /* ---------- kompakt şerit: aşağı inince üstte kalır; gün okları, zil ve bölüm çipleri hep elinin altında ---------- */
@@ -3323,9 +3361,11 @@ document.addEventListener("click", e => {
     case "paradel":
       if (S.confirmDel !== "p:" + id) { S.confirmDel = "p:" + id; render(); break; }
       S.confirmDel = null; editDay(b.dataset.d, d => { d.para = (d.para || []).filter(x => x.id !== id); }); render(); break;
-    case "paragit": S.agent.open = false; renderSheet(); S.ui.paraAy = S.today.slice(0,7); gotoTab("para"); setTimeout(() => { const el = document.getElementById("paraEkle"); if (el) el.scrollIntoView({block: "start"}); const inp = document.getElementById("paraTutar"); if (inp) inp.focus({preventScroll: true}); }, 80); break;
+    case "paragit": S.agent.open = false; renderSheet(); S.ui.paraAy = S.today.slice(0,7); S.ui.acik = Object.assign({}, S.ui.acik, {para: "para"}); gotoTab("para"); setTimeout(() => { const el = document.getElementById("paraEkle"); if (el) el.scrollIntoView({block: "start"}); const inp = document.getElementById("paraTutar"); if (inp) inp.focus({preventScroll: true}); }, 80); break;
     case "plangit": S.agent.open = false; renderSheet(); S.sel = S.today; gotoTab("bugun"); setTimeout(() => { const el = document.getElementById("planTitle"); if (el) { el.scrollIntoView({block: "center"}); el.focus({preventScroll: true}); } }, 80); break;
     case "compose": openComposer(); break;
+    case "formac": { const f = b.dataset.f; S.ui.acik = Object.assign({}, S.ui.acik, {[f]: S.tab}); if (b.dataset.h) S.ui.hedefUfuk = b.dataset.h; HRK.formAc = f;
+      render(FORM_ODAK[f]); const c = document.getElementById(FORM_KART[f]); if (c) c.scrollIntoView({block: "nearest", behavior: hareketAcik() ? "smooth" : "auto"}); break; }
     case "ask": runAgent(b.dataset.q); break;
     case "abundo": undoAgent(); break;
     case "abclose": S.agent.open = false; micKapat(); renderSheet(); break;
