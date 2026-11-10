@@ -757,6 +757,12 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 .kapa-ad{flex:none}
 .kapa-ozet{flex:1;min-width:0;text-align:right;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card.acildi{animation:kartAc .34s cubic-bezier(.2,.8,.2,1)}
+.doluluk{display:flex;align-items:center;gap:10px;margin:-4px 2px 14px;color:var(--ink-3);font-size:12.5px}
+.doluluk b{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.dol-cubuk{display:flex;gap:4px}
+.dol-cubuk i{width:18px;height:5px;border-radius:3px;background:var(--surface-3, rgba(255,255,255,.12));transition:background .3s}
+.dol-cubuk i.on{background:var(--mint)}
+.serit-cip .chip.dolu::after{content:"✓";margin-left:5px;color:var(--mint);font-weight:800}
 .bos{display:grid;justify-items:center;gap:10px;text-align:center;padding:18px 8px 8px}
 .bos .bos-i{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb, var(--mint) 12%, transparent);color:var(--mint)}
 .bos .bos-i svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -1863,36 +1869,55 @@ function paraGozlem(ym, p, a, cur){
 }
 
 /* ---------- GÜNLÜK ---------- */
+/* Günlük doluluğu: altı bölümden hangileri dolu (çiplerde ✓, başlıkta n/6) */
+const GUNLUK_BOL = [["sesli","Sesli"],["nasilsin","Nasılsın"],["uyku","Uyku"],["sabah","Sabah"],["aksam","Akşam"],["kazanim","Kazanımlar"]];
+const dolu = x => !!String(x || "").trim();
+function gunlukDolu(d){
+  const g = d.gunluk || {}, uy = d.uykuSaat || {};
+  return {sesli: !!(g.kayitlar || []).length, nasilsin: MOODS.some(([k]) => d[k] != null), uyku: d.sleep != null || dolu(uy.yatis) || dolu(uy.kalkis),
+    sabah: dolu(g.niyet), aksam: dolu(g.iyi) || dolu(g.gelistir) || (g.sukur || []).some(dolu) || dolu(d.note), kazanim: !!(d.wins || []).length};
+}
+function dolulukHtml(d){
+  const o = gunlukDolu(d), n = GUNLUK_BOL.filter(([k]) => o[k]).length;
+  return `<span class="dol-cubuk" aria-hidden="true">${GUNLUK_BOL.map(([k]) => `<i class="${o[k] ? "on" : ""}"></i>`).join("")}</span><span class="dol-yazi"><b>${n}/${GUNLUK_BOL.length}</b> bölüm dolu</span>`;
+}
+function gunlukDolulukYaz(){
+  if (S.tab !== "gunluk") return;
+  const d = getDay(S.sel), el = document.getElementById("gDoluluk"); if (el) el.innerHTML = dolulukHtml(d);
+  const o = gunlukDolu(d); document.querySelectorAll("#serit .serit-cip .chip").forEach(c => { if (c.dataset.k in o) c.classList.toggle("dolu", o[c.dataset.k]); });
+}
 function viewGunluk(){
   const date = S.sel, d = getDay(date), g = d.gunluk || {}, uy = d.uykuSaat || {};
   let h = banners() + ust(relLabel(date), fmtLong(date), navBtns("day", "gün"));
-  h += sesliGunlukKart(date, d);
-  h += `<section class="card"><div class="card-h"><h2>Nasılsın?</h2><span class="meta">1–10</span></div>` + MOODS.map(([k,l,c]) => `<div class="slider">
+  h += `<div class="doluluk" id="gDoluluk" role="status">${dolulukHtml(d)}</div>`;
+  const kayit = g.kayitlar || [];
+  h += kapanir("sesli", "Sesli günlük", () => GK.aktif ? "kaydediyor…" : kayit.length ? `${kayit.length} kayıt` : GK.metin ? "taslak var" : "boş", sesliGunlukKart(date, d));
+  h += kapanir("nasilsin", "Nasılsın?", () => MOODS.map(([k,l]) => `${l} ${d[k] ?? "—"}`).join(" · "), `<section class="card"><div class="card-h"><h2>Nasılsın?</h2><span class="meta">1–10</span></div>` + MOODS.map(([k,l,c]) => `<div class="slider">
       <label for="r-${k}"><i style="background:${c}"></i>${l}</label>
       <input type="range" min="1" max="10" step="1" id="r-${k}" data-mood="${k}" value="${d[k] ?? 5}" class="${d[k] == null ? "unset" : ""}">
-      <output id="o-${k}">${d[k] ?? "—"}</output></div>`).join("") + `</section>`;
-  h += `<section class="card"><div class="card-h"><h2>Uyku</h2><span class="meta">${d.sleep != null ? nf1.format(d.sleep) + " saat" : ""}</span></div>
+      <output id="o-${k}">${d[k] ?? "—"}</output></div>`).join("") + `</section>`);
+  h += kapanir("uyku", "Uyku", () => d.sleep != null ? `${nf1.format(d.sleep)} saat` + (uy.yatis && uy.kalkis ? ` · ${uy.yatis}–${uy.kalkis}` : "") : "girilmedi", `<section class="card"><div class="card-h"><h2>Uyku</h2><span class="meta">${d.sleep != null ? nf1.format(d.sleep) + " saat" : ""}</span></div>
     <div class="sleepset"><label for="uyYatis">Yattım<input class="field" type="time" id="uyYatis" value="${esc(uy.yatis || "")}"></label><label for="uyKalkis">Kalktım<input class="field" type="time" id="uyKalkis" value="${esc(uy.kalkis || "")}"></label></div>
-    <p class="hint" style="margin-top:8px">Saatleri girince uyku süresi kendiliğinden hesaplanır.</p></section>`;
-  h += `<section class="card"><div class="card-h"><h2>Sabah</h2></div>
-    <div class="jq"><label for="gNiyet">Bugünün tek niyeti</label><input class="field" id="gNiyet" data-gunluk="niyet" value="${esc(g.niyet || "")}" placeholder="Örn. Sakin kal, turları zamanında çıkar" autocomplete="off"></div></section>`;
-  h += `<section class="card"><div class="card-h"><h2>Akşam</h2></div>
+    <p class="hint" style="margin-top:8px">Saatleri girince uyku süresi kendiliğinden hesaplanır.</p></section>`);
+  h += kapanir("sabah", "Sabah", () => dolu(g.niyet) ? g.niyet : "boş", `<section class="card"><div class="card-h"><h2>Sabah</h2></div>
+    <div class="jq"><label for="gNiyet">Bugünün tek niyeti</label><input class="field" id="gNiyet" data-gunluk="niyet" value="${esc(g.niyet || "")}" placeholder="Örn. Sakin kal, turları zamanında çıkar" autocomplete="off"></div></section>`);
+  h += kapanir("aksam", "Akşam", () => [g.iyi, g.gelistir, d.note].find(dolu) || ((g.sukur || []).some(dolu) ? "minnettarlık yazıldı" : "boş"), `<section class="card"><div class="card-h"><h2>Akşam</h2></div>
     <div class="jq"><label for="gIyi">Bugün iyi giden</label><input class="field" id="gIyi" data-gunluk="iyi" value="${esc(g.iyi || "")}" autocomplete="off"></div>
     <div class="jq"><label for="gGelistir">Daha iyi yapabilirdim</label><input class="field" id="gGelistir" data-gunluk="gelistir" value="${esc(g.gelistir || "")}" autocomplete="off"></div>
     <div class="jq"><label for="gSukur0">Minnettar olduğum 3 şey</label>${[0,1,2].map(i => `<input class="field" id="gSukur${i}" data-gunluk="sukur" data-i="${i}" value="${esc((g.sukur || [])[i] || "")}" placeholder="${i + 1}." autocomplete="off" aria-label="Minnettar olduğun şey ${i + 1}">`).join("")}</div>
-    <div class="jq"><label for="dayNote">Serbest not</label><textarea class="field" id="dayNote" placeholder="Kimle konuştun, ne öğrendin, aklında ne var…">${esc(d.note || "")}</textarea></div></section>`;
+    <div class="jq"><label for="dayNote">Serbest not</label><textarea class="field" id="dayNote" placeholder="Kimle konuştun, ne öğrendin, aklında ne var…">${esc(d.note || "")}</textarea></div></section>`);
   const wins = d.wins || [];
-  h += `<section class="card"><div class="card-h"><h2>Kazanımlar</h2><span class="meta">${wins.length || ""}</span></div>` + (wins.length ? `<ul class="list">${wins.map(x => `<li><span class="li-text">${esc(x.text)}</span><button class="x" data-act="windel" data-id="${esc(x.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>` : `<p class="empty">Küçük de olsa, bugün neyi başardın?</p>`) +
-    `<form class="add" id="f-win"><input class="field grow" id="winText" placeholder="Başardığın bir şey…" autocomplete="off" aria-label="Kazanım"><button class="btn">Ekle</button></form></section>`;
+  h += kapanir("kazanim", "Kazanımlar", () => wins.length ? `${wins.length} kazanım` : "boş", `<section class="card"><div class="card-h"><h2>Kazanımlar</h2><span class="meta">${wins.length || ""}</span></div>` + (wins.length ? `<ul class="list">${wins.map(x => `<li><span class="li-text">${esc(x.text)}</span><button class="x" data-act="windel" data-id="${esc(x.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>` : `<p class="empty">Küçük de olsa, bugün neyi başardın?</p>`) +
+    `<form class="add" id="f-win"><input class="field grow" id="winText" placeholder="Başardığın bir şey…" autocomplete="off" aria-label="Kazanım"><button class="btn">Ekle</button></form></section>`);
   const health = d.health || [];
-  h += `<section class="card"><div class="card-h"><h2>Sağlık</h2></div>` + (health.length ? `<ul class="list">${health.map(x => `<li><span class="li-time">${esc(x.time || "")}</span><span class="li-text">${esc(x.text)}</span><button class="x" data-act="healthdel" data-id="${esc(x.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>` : `<p class="empty">Ağrı, ilaç, belirti… ne olursa yaz.</p>`) +
-    `<form class="add" id="f-health"><input class="field grow" id="healthText" placeholder="Örn. baş ağrısı, ilaç aldım" autocomplete="off" aria-label="Sağlık notu"><button class="btn">Ekle</button></form></section>`;
-  h += ruhTakvim(date);
-  h += `<section class="card"><div class="card-h"><h2>Kendini tanı</h2><span class="meta">son 30 gün</span></div>${kendiniTani()}</section>`;
+  h += kapanir("saglik", "Sağlık", () => health.length ? `${health.length} not` : "boş", `<section class="card"><div class="card-h"><h2>Sağlık</h2></div>` + (health.length ? `<ul class="list">${health.map(x => `<li><span class="li-time">${esc(x.time || "")}</span><span class="li-text">${esc(x.text)}</span><button class="x" data-act="healthdel" data-id="${esc(x.id)}" aria-label="Sil">×</button></li>`).join("")}</ul>` : `<p class="empty">Ağrı, ilaç, belirti… ne olursa yaz.</p>`) +
+    `<form class="add" id="f-health"><input class="field grow" id="healthText" placeholder="Örn. baş ağrısı, ilaç aldım" autocomplete="off" aria-label="Sağlık notu"><button class="btn">Ekle</button></form></section>`);
+  h += kapanir("ruh", "Ruh hali takvimi", () => monthName(date.slice(0,7)), ruhTakvim(date));
+  h += kapanir("tani", "Kendini tanı", () => "son 30 günün kalıpları", `<section class="card"><div class="card-h"><h2>Kendini tanı</h2><span class="meta">son 30 gün</span></div>${kendiniTani()}</section>`);
   const gecmis = []; for (let i = 1; i <= 14; i++) { const x = addDays(S.today, -i); if (S.days[x]) gecmis.push(x); }
-  h += `<section class="card"><div class="card-h"><h2>Geçmiş</h2></div>` + (gecmis.length ? gecmis.map(x => { const dd = S.days[x], gg = dd.gunluk || {};
+  h += kapanir("gecmis", "Geçmiş", () => gecmis.length ? `${gecmis.length} gün` : "boş", `<section class="card"><div class="card-h"><h2>Geçmiş</h2></div>` + (gecmis.length ? gecmis.map(x => { const dd = S.days[x], gg = dd.gunluk || {};
       const ozet = dd.note || gg.iyi || gg.niyet || (dd.wins || []).map(w => w.text).join(", ") || `${(dd.plan || []).filter(p => p.done).length}/${(dd.plan || []).length} plan`;
-      return `<button class="past" data-act="opendate" data-d="${x}" data-to="#gunluk"><span class="d">${d2u(x).getUTCDate()}<small>${GUN_K[dow(x)]}</small></span><span class="s">${esc(ozet)}</span><span class="moodot" style="${dd.mood != null ? `background:color-mix(in srgb, var(--rose) ${dd.mood*9}%, var(--surface-3))` : ""}">${dd.mood ?? "·"}</span></button>`; }).join("") : `<p class="empty">Geçmiş günler burada birikecek.</p>`) + `</section>`;
+      return `<button class="past" data-act="opendate" data-d="${x}" data-to="#gunluk"><span class="d">${d2u(x).getUTCDate()}<small>${GUN_K[dow(x)]}</small></span><span class="s">${esc(ozet)}</span><span class="moodot" style="${dd.mood != null ? `background:color-mix(in srgb, var(--rose) ${dd.mood*9}%, var(--surface-3))` : ""}">${dd.mood ?? "·"}</span></button>`; }).join("") : `<p class="empty">Geçmiş günler burada birikecek.</p>`) + `</section>`);
   return h;
 }
 function kendiniTani(){
@@ -3230,14 +3255,16 @@ function tabloKaydir(){
 }
 
 /* ---------- kompakt şerit: aşağı inince üstte kalır; gün okları, zil ve bölüm çipleri hep elinin altında ---------- */
-const SERIT_KART = {program: "Program", turlar: "Turlar", posta: "Posta", aliskanlik: "Alışkanlık", sigara: "Sigara", para: "Para"};
+const SERIT_KART = {program: "Program", turlar: "Turlar", posta: "Posta", aliskanlik: "Alışkanlık", sigara: "Sigara", para: "Para",
+  sesli: "Sesli", nasilsin: "Nasılsın", uyku: "Uyku", sabah: "Sabah", aksam: "Akşam", kazanim: "Kazanımlar", saglik: "Sağlık", ruh: "Takvim", tani: "Kalıplar", gecmis: "Geçmiş"};
 function seritRender(){
   const el = document.getElementById("serit"); if (!el) return;
   const gunlu = S.tab === "bugun" || S.tab === "gunluk";
   const baslik = {bugun: "Bugün", para: "Para", gunluk: "Günlük", ilerleme: "İlerleme", claude: claudeVar() ? "Claude" : "Bildirimler"}[S.tab] || "";
   const ad = gunlu ? (S.sel === S.today ? "Bugün" : fmtShort(S.sel)) : baslik;
   const orta = `${gunlu ? `<button class="iconbtn" data-act="gunserit" data-n="-1" aria-label="Önceki gün">${I.l}</button>` : ""}<button class="serit-ad" data-act="basadon" aria-label="${esc(ad)}, sayfanın başına dön">${esc(ad)}</button>${gunlu ? `<button class="iconbtn" data-act="gunserit" data-n="1" aria-label="Sonraki gün">${I.r}</button>` : ""}`;
-  const cipler = S.tab === "bugun" ? [...view.querySelectorAll("[data-kart]")].map(c => `<button class="chip" data-act="karta" data-k="${c.dataset.kart}">${SERIT_KART[c.dataset.kart] || ""}</button>`).join("") : "";
+  const dl = S.tab === "gunluk" ? gunlukDolu(getDay(S.sel)) : {};
+  const cipler = S.tab === "bugun" || S.tab === "gunluk" ? [...view.querySelectorAll("[data-kart]")].filter(c => SERIT_KART[c.dataset.kart]).map(c => `<button class="chip${dl[c.dataset.kart] ? " dolu" : ""}" data-act="karta" data-k="${c.dataset.kart}">${SERIT_KART[c.dataset.kart]}</button>`).join("") : "";
   const eskiKay = (el.querySelector(".serit-cip") || {}).scrollLeft || 0;
   el.innerHTML = `<div class="serit-ust">${orta}<span class="grow"></span>${S.tab !== "claude" ? zil() : ""}</div>${cipler ? `<div class="serit-cip" data-kaydirma>${cipler}</div>` : ""}`;
   const cr = el.querySelector(".serit-cip"); if (cr) cr.scrollLeft = eskiKay;
@@ -3469,6 +3496,8 @@ document.addEventListener("input", e => {
     saveDay(date, 900);
   }
 });
+/* Günlük'te yazarken doluluk çubuğu ve çip işaretleri anında güncellenir */
+["input", "change"].forEach(t => document.addEventListener(t, () => { if (S.tab === "gunluk") requestAnimationFrame(gunlukDolulukYaz); }));
 document.addEventListener("keydown", e => {
   if (e.target && e.target.id === "abInput" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); runAgent(e.target.value); }
   if (e.key === "Escape" && S.agent.open) { S.agent.open = false; renderSheet(); }
