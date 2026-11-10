@@ -546,7 +546,7 @@ html.sade #aura{display:none}
 html.sade .card{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}
 @media (prefers-reduced-transparency: reduce){#aura{display:none}.card{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}}
 /* sayfa girişi */
-#view.giris > *{animation:giris .62s cubic-bezier(.16,.84,.3,1) both;animation-delay:calc(var(--i,0) * 50ms)}
+#view.gir > *{animation:giris .62s cubic-bezier(.16,.84,.3,1) both;animation-delay:calc(var(--i,0) * 50ms)}
 @keyframes giris{from{opacity:0;transform:translate3d(var(--gx,0),22px,0) scale(.985)}to{opacity:1;transform:none}}
 /* menü göstergesi */
 nav.tabs .gosterge{position:absolute;top:3px;left:0;width:52px;height:30px;border-radius:15px;background:var(--mint-soft);transition:transform .5s cubic-bezier(.3,1.35,.5,1),opacity .2s;pointer-events:none;z-index:0}
@@ -586,12 +586,188 @@ output.pop{display:inline-block;animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
 .seg[hidden]{display:none}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.45s}
 
+/* 2.8 program: günün akışı zaman çizgisinde */
+.prg-bar{height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden;margin:-4px 0 12px}
+.prg-bar i{display:block;height:100%;border-radius:99px;background:var(--mint);transition:width .7s cubic-bezier(.2,.8,.2,1)}
+ul.akis{list-style:none;margin:0;padding:0;--ray:67px}
+ul.akis li{position:relative;display:flex;align-items:center;gap:10px;min-width:0}
+ul.akis li::before{content:"";position:absolute;left:var(--ray);top:0;bottom:0;width:2px;background:var(--line);pointer-events:none}
+ul.akis li:first-child::before{top:50%}
+ul.akis li:last-child::before{bottom:50%}
+ul.akis li:only-child::before{display:none}
+.ak{padding:8px 0;min-height:46px}
+.ak-saat{flex:none;width:44px;font-family:var(--font-display);font-variant-numeric:tabular-nums;font-weight:600;font-size:16px;color:var(--ink-2)}
+.ak .check{position:relative;z-index:1;border-radius:50%;background:var(--surface);overflow:visible}
+.ak .check .dalga{display:none}
+.ak .check[aria-pressed="true"]{background:var(--mint)}
+.ak .check::after{content:"";position:absolute;inset:-10px -8px}
+.ak .x::after,.ak .bell::after{content:"";position:absolute;inset:-6px -5px}
+.ak .x,.ak .bell{position:relative}
+.ak-govde{flex:1;min-width:0;display:grid;gap:1px}
+.ak-govde .li-text{flex:none}
+.ak-alt{font-size:12px;font-weight:600;color:var(--ink-3);overflow-wrap:anywhere}
+.ak-alt b{font-weight:800;color:var(--ink)}
+.ak.done .ak-saat{color:var(--ink-3)}
+.ak.gec .ak-saat,.ak.gec .ak-alt{color:var(--amber)}
+.ak.sira{background:var(--mint-soft);border-radius:15px;margin:3px -8px;padding-left:8px;padding-right:4px}
+.ak.sira::before{left:calc(var(--ray) + 8px)}
+.ak.sira .ak-saat{color:var(--ink)}
+.ak.yeni{animation:akYeni 1.5s ease-out}
+@keyframes akYeni{0%,35%{background:var(--mint-soft);border-radius:15px}100%{background:transparent;border-radius:15px}}
+.ak-nokta{flex:none;position:relative;z-index:1;width:28px;height:28px;display:grid;place-items:center}
+.ak-nokta::after{content:"";width:11px;height:11px;border-radius:3px;transform:rotate(45deg);background:var(--sky);box-shadow:0 0 0 4px var(--surface)}
+.ak.tur .li-text{font-weight:700;font-size:14px}
+.ak.tur.gecmis .ak-saat,.ak.tur.gecmis .li-text{color:var(--ink-3)}
+.ak.tur.gecmis .ak-nokta::after{background:var(--line-2)}
+.ak.tur .pill{flex:none}
+.ak-grup{padding:10px 0 2px}
+.ak-grup:first-child{padding-top:0}
+.ak-grup span{margin-left:calc(var(--ray) + 25px);font-size:12px;font-weight:800;color:var(--ink-3)}
+.ak-simdi{padding:5px 0}
+.ak-simdi .ak-saat{color:var(--coral);font-size:14px}
+.ak-nabiz{flex:none;position:relative;z-index:1;width:28px;height:12px;display:grid;place-items:center}
+.ak-nabiz::before,.ak-nabiz::after{content:"";grid-area:1/1;width:10px;height:10px;border-radius:50%;background:var(--coral)}
+.ak-nabiz::before{box-shadow:0 0 0 3px var(--surface)}
+.ak-nabiz::after{animation:akNabiz 2.2s ease-out infinite}
+@keyframes akNabiz{from{transform:scale(1);opacity:.55}to{transform:scale(3);opacity:0}}
+.ak-cizgi{flex:1;display:flex;align-items:center;gap:8px;color:var(--coral);font-size:12px;font-weight:800}
+.ak-cizgi::after{content:"";flex:1;height:2px;border-radius:2px;background:var(--coral);opacity:.55}
+html.sade .ak-nabiz::after{animation:none;opacity:0}
+@media (prefers-reduced-motion:reduce){.ak-nabiz::after{animation:none;opacity:0}}
+/* gök kartı: sıradaki iş iki satır, başlık kesilmesin; dokununca programdaki yerine iner */
+.next.zamanli{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:10px;row-gap:0;padding:8px 12px}
+.next.zamanli .t{grid-row:1/3;align-self:center}
+.next.zamanli .w,.next.zamanli .in{grid-column:2;line-height:1.25}
+/* Vespa ufuk çizgisinde yerine sürer */
+.vespa-git.gel{animation:vespaGel 2.6s cubic-bezier(.22,.8,.3,1) both}
+@keyframes vespaGel{from{transform:translateX(-300px)}to{transform:translateX(0)}}
+/* alışkanlık işaretlenince nokta zıplar; çubuklar sayfaya girerken dolar */
+.habchip.pop .dot{animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
+#view.gir .bar i,#view.gir .karne-p i{transform-origin:left center;animation:barDol .8s cubic-bezier(.2,.8,.2,1) .2s both}
+@keyframes barDol{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* alttan açılan sayfalar */
+#sheet.acilis .sheet,#ses.acilis .sheet{animation:sayfaYuksel .36s cubic-bezier(.2,.9,.25,1) both}
+#sheet.acilis .sheet-bg,#ses.acilis .sheet-bg{animation:sayfaSol .28s ease-out both}
+@keyframes sayfaYuksel{from{transform:translate3d(0,100%,0)}to{transform:none}}
+@keyframes sayfaSol{from{opacity:0}to{opacity:1}}
+/* mesaj balonu: "Geri al" düğmesi */
+.toast{animation-name:toastGir}
+@keyframes toastGir{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+.toast-b{margin-left:10px;border:0;background:transparent;color:inherit;font:inherit;font-weight:800;text-decoration:underline;text-underline-offset:3px;padding:8px 4px;margin-top:-8px;margin-bottom:-8px}
+
+/* 2.8 yeni temalar: her birinin kendi renkleri ve yazı tipleri var. Yazı tipleri fontlar/ klasöründen, yalnızca tema seçilince iner. */
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:200 800;font-display:swap;src:url(fontlar/bricolage-grotesque-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:200 800;font-display:swap;src:url(fontlar/bricolage-grotesque-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Instrument Sans";font-style:normal;font-weight:400 700;font-display:swap;src:url(fontlar/instrument-sans-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Instrument Sans";font-style:normal;font-weight:400 700;font-display:swap;src:url(fontlar/instrument-sans-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Rubik";font-style:normal;font-weight:300 900;font-display:swap;src:url(fontlar/rubik-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Rubik";font-style:normal;font-weight:300 900;font-display:swap;src:url(fontlar/rubik-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:200 1000;font-display:swap;src:url(fontlar/nunito-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:200 1000;font-display:swap;src:url(fontlar/nunito-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Lexend";font-style:normal;font-weight:100 900;font-display:swap;src:url(fontlar/lexend-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Lexend";font-style:normal;font-weight:100 900;font-display:swap;src:url(fontlar/lexend-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:500;font-display:swap;src:url(fontlar/chakra-petch-latin-ext-500-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:500;font-display:swap;src:url(fontlar/chakra-petch-latin-500-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:600;font-display:swap;src:url(fontlar/chakra-petch-latin-ext-600-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:600;font-display:swap;src:url(fontlar/chakra-petch-latin-600-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:700;font-display:swap;src:url(fontlar/chakra-petch-latin-ext-700-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Chakra Petch";font-style:normal;font-weight:700;font-display:swap;src:url(fontlar/chakra-petch-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root[data-renk="tramonto"]{color-scheme:dark;
+  --font-display:"Bricolage Grotesque","Saira Semi Condensed",system-ui,sans-serif;--font-body:"Instrument Sans",system-ui,-apple-system,sans-serif;
+  --bg:#170f1e;--bg-2:#1e1428;--surface:#261a32;--surface-2:#31223f;--surface-3:#3e2c4f;--line:#3d2b4d;--line-2:#584069;
+  --ink:#fdf2ea;--ink-2:#d2bfcc;--ink-3:#a08ca0;--mint:#ffae52;--on-mint:#3a1a02;--mint-soft:rgba(255,174,82,.16);
+  --coral:#ff6f91;--coral-soft:rgba(255,111,145,.16);--amber:#ffd166;--amber-soft:rgba(255,209,102,.15);
+  --sky:#8fb8ff;--rose:#ff8fc0;--violet:#c4a6ff;--mood-low:#ff8a5c;--mood-high:#8fb8ff;--good:#7be0a4;--bad:#ff7a7a;
+  --shadow:0 14px 36px rgba(8,2,14,.5);--a1:rgba(255,138,76,.30);--a2:rgba(224,84,168,.24);--a3:rgba(126,104,255,.18);--parilti:rgba(255,220,200,.07)}
+:root[data-renk="limon"]{color-scheme:light;
+  --font-display:"Rubik","Saira Semi Condensed",system-ui,sans-serif;--font-body:"Nunito",system-ui,-apple-system,sans-serif;
+  --bg:#fff4c7;--bg-2:#fffae6;--surface:#fffefa;--surface-2:#fff6d6;--surface-3:#ffeaa3;--line:#f3e2a0;--line-2:#e2c96a;
+  --ink:#1a2145;--ink-2:#4a5179;--ink-3:#62678a;--mint:#2747f5;--on-mint:#ffffff;--mint-soft:rgba(39,71,245,.11);
+  --coral:#d2331d;--coral-soft:rgba(210,51,29,.11);--amber:#955e00;--amber-soft:rgba(240,170,0,.18);
+  --sky:#1787e0;--rose:#d93d86;--violet:#7445e8;--mood-low:#e8612a;--mood-high:#2a78e0;--good:#11915a;--bad:#d0362a;
+  --shadow:0 12px 30px rgba(120,90,0,.14);--a1:rgba(255,196,40,.50);--a2:rgba(255,140,90,.26);--a3:rgba(255,255,255,.75);--parilti:rgba(255,255,255,.85)}
+:root[data-renk="neon"]{color-scheme:dark;
+  --font-display:"Chakra Petch","Saira Semi Condensed",system-ui,sans-serif;--font-body:"Lexend",system-ui,-apple-system,sans-serif;
+  --bg:#07080f;--bg-2:#0c0e1a;--surface:#12152b;--surface-2:#1a1e3b;--surface-3:#252b50;--line:#272c52;--line-2:#3d4578;
+  --ink:#f3f5ff;--ink-2:#b6bce4;--ink-3:#858cbb;--mint:#b08cff;--on-mint:#190a3d;--mint-soft:rgba(176,140,255,.17);
+  --coral:#ff5fa0;--coral-soft:rgba(255,95,160,.16);--amber:#ffc857;--amber-soft:rgba(255,200,87,.15);
+  --sky:#4fd8ff;--rose:#ff7ac8;--violet:#b08cff;--mood-low:#ff8a5c;--mood-high:#4fd8ff;--good:#5df0a8;--bad:#ff6b7d;
+  --shadow:0 14px 38px rgba(0,0,0,.6);--a1:rgba(150,92,255,.34);--a2:rgba(255,70,160,.22);--a3:rgba(40,200,255,.20);--parilti:rgba(190,170,255,.08)}
+:root[data-renk="limon"] body{font-size:15.5px}
+:root[data-renk="neon"] h1,:root[data-renk="neon"] h2,:root[data-renk="neon"] .sky .hello{letter-spacing:.01em}
+.renkler{grid-template-columns:repeat(4,1fr)}
+
+/* 2.8 alışkanlık karoları */
+.karolar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.habchip.karo{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 8px;text-align:left;padding:11px 12px 10px;border-radius:16px;min-height:76px;color:var(--ink)}
+.habchip.karo .kr-ad{display:flex;align-items:center;gap:7px;min-width:0;font-weight:800;font-size:14.5px}
+.habchip.karo .kr-ad span{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.15;overflow-wrap:anywhere}
+.karolar>.karo:last-child:nth-child(odd){grid-column:1/-1}
+.kr-em{flex:none;font-size:18px;line-height:1;font-style:normal}
+.habchip.karo .dot{width:24px;height:24px;border-radius:50%;justify-self:end}
+.habchip.karo .dot svg{width:14px;height:14px;stroke:var(--on-mint);stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.habchip.karo[aria-pressed="true"]{background:var(--mint-soft);border-color:var(--mint);color:var(--ink)}
+.habchip.karo[aria-pressed="true"] .dot svg{opacity:1}
+.kr-alt{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.kr-gun{display:flex;gap:3px;flex:none}
+.kr-gun i{width:8px;height:8px;border-radius:50%;background:var(--surface-3);box-shadow:inset 0 0 0 1px var(--line-2)}
+.kr-gun i.v{background:var(--mint);box-shadow:none}
+.kr-gun i.b{outline:2px solid var(--ink-3);outline-offset:1px}
+.kr-not{font-size:11.5px;font-weight:700;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.counter.karo{padding:11px 12px 10px;border-radius:16px;gap:8px;border:1px solid var(--line)}
+.counter.karo .lbl{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;color:var(--ink);overflow:visible}
+.counter.karo .lbl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.counter.karo .stepper button{width:40px;height:44px;border-radius:13px}
+.counter.karo .stepper button[data-n="1"],.counter.karo .stepper button[data-n="0.5"]{width:50px;background:var(--mint);color:var(--on-mint);border-color:transparent;font-size:22px}
+.counter.karo .stepper output{font-size:28px;line-height:1}
+.kr-graf{display:flex;align-items:flex-end;gap:3px;height:22px;flex:none}
+.kr-graf i{width:7px;border-radius:3px 3px 1px 1px;background:var(--line-2);min-height:3px}
+.kr-graf i.b{background:var(--mint)}
+.kr-graf i.b.cok{background:var(--coral)}
+.counters>.karo:last-child:nth-child(odd){grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px}
+.counters>.karo:last-child:nth-child(odd) .stepper{gap:10px}
+.counters>.karo:last-child:nth-child(odd) .kr-alt{grid-column:1/-1}
+#view.gir .kr-graf i{transform-origin:center bottom;animation:grafDol .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.25s + var(--j,0) * 40ms)}
+@keyframes grafDol{from{transform:scaleY(.1)}to{transform:scaleY(1)}}
+
+/* 2.8 kompakt şerit + bölüm çipleri */
+.serit{position:fixed;top:0;left:0;right:0;z-index:20;padding:calc(env(safe-area-inset-top) + 6px) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+  background:color-mix(in srgb, var(--bg) 80%, transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid var(--line);
+  transform:translate3d(0,-104%,0);opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .2s}
+.serit.acik{transform:none;opacity:1;pointer-events:auto}
+html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}
+.serit-ust{display:flex;align-items:center;gap:6px;max-width:560px;margin:0 auto}
+.serit-ust .grow{flex:1}
+.serit .iconbtn{width:40px;height:40px;border-radius:13px;flex:none}
+.serit-ad{border:0;background:transparent;color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:18px;padding:8px 6px;min-height:40px;white-space:nowrap}
+.serit-cip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:8px -12px 0;padding:0 12px 1px;max-width:584px;-webkit-overflow-scrolling:touch}
+.serit-cip::-webkit-scrollbar{display:none}
+.serit-cip .chip{flex:none;padding:8px 13px;min-height:36px}
+/* 2.8 kapanır kartlar */
+.kapa-h{margin:0;min-width:0;flex:1}
+.card-h>.kapa-h{flex:0 1 auto}
+.kapa{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;color:inherit;font:inherit;letter-spacing:inherit;padding:6px 0;margin:-6px 0;text-align:left;min-height:36px;overflow:visible}
+.kapa .dalga{display:none}
+.kapa-ok{flex:none;width:18px;height:18px;fill:none;stroke:var(--ink-3);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
+.kapa[aria-expanded="false"] .kapa-ok{transform:rotate(-90deg)}
+.card.kapali{padding-top:10px;padding-bottom:10px}
+.card.kapali .kapa{min-height:44px}
+.kapa-ad{flex:none}
+.kapa-ozet{flex:1;min-width:0;text-align:right;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card.acildi{animation:kartAc .34s cubic-bezier(.2,.8,.2,1)}
+@keyframes kartAc{from{opacity:.4;transform:translate3d(0,-8px,0)}to{opacity:1;transform:none}}
+/* çekerek kapatma */
+.sheet .grab,.sheet .card-h{touch-action:none}
+.sheet .grab{position:relative}
+.sheet .grab::before{content:"";position:absolute;inset:-12px -60px}
+
 .adimlar{margin:0 0 10px;padding-left:18px;color:var(--ink-2);display:grid;gap:4px}
 
 </style>
 </head>
 <body>
 <main id="main"><div class="wrap" id="view"></div></main>
+<div id="serit" class="serit" aria-label="Hızlı gezinme"></div>
 <nav class="tabs" id="tabs" aria-label="Bölümler">
   <a href="#bugun" data-tab="bugun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Bugün</a>
   <a href="#para" data-tab="para"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 15h2"/></svg>Para</a>
@@ -619,7 +795,7 @@ output.pop{display:inline-block;animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.7.2";
+const SURUM = "2.8.0";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -1152,10 +1328,16 @@ function sistemBildirim(title, body, tag, hash){
   } catch (e) {}
 }
 let toastTimer = null;
-function toast(text){
+function toast(text, eylem){
   const el = document.getElementById("toast"); if (!el) return;
-  el.textContent = text; el.hidden = false; el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3800);
+  el.textContent = text;
+  if (eylem && eylem.fn) {   /* örn. "Geri al": tek dokunuşluk düğme, mesajla birlikte kaybolur */
+    const b = document.createElement("button"); b.type = "button"; b.className = "toast-b"; b.textContent = eylem.ad;
+    b.addEventListener("click", () => { clearTimeout(toastTimer); el.hidden = true; eylem.fn(); });
+    el.appendChild(b);
+  }
+  el.hidden = false; el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, eylem ? 6000 : 3800);
 }
 
 /* ---------- voice settings: live only on this phone (the Google key never goes to Drive) ---------- */
@@ -1223,7 +1405,7 @@ const SKYLINE = (() => {
     <path d="M61 53Q54 33 61.5 11Q69 33 62 53Z"/>
     <path mask="url(#colmask)" d="M84 53V24Q84 19 90 18.5L170 15Q176 15 176 21V53Z"/>
     <path d="M214 53V38H219V35Q240 6 261 35V38H266V53Z"/><rect x="237.5" y="6" width="5" height="9" rx="1"/><rect x="239.3" y="1" width="1.4" height="6"/>
-    <g transform="translate(284 37)"><circle cx="4" cy="12" r="3.3"/><circle cx="21" cy="12" r="3.3"/><path d="M0 11Q1 6 7 6H12L14 10L21 9Q25 9 25 12H1Z"/><path d="M6 6L4 -1H8L9 6Z"/><circle cx="13" cy="-2" r="2.7"/><path d="M11 0H15L16 9H10Z"/></g>
+    <g transform="translate(284 37)"><g class="vespa-git"><circle cx="4" cy="12" r="3.3"/><circle cx="21" cy="12" r="3.3"/><path d="M0 11Q1 6 7 6H12L14 10L21 9Q25 9 25 12H1Z"/><path d="M6 6L4 -1H8L9 6Z"/><circle cx="13" cy="-2" r="2.7"/><path d="M11 0H15L16 9H10Z"/></g></g>
     <rect x="331" y="24" width="3" height="29"/><path d="M306 26Q331 8 357 23Q345 30 331 28Q318 30 306 26Z"/>
   </g></svg>`;
 })();
@@ -1385,13 +1567,44 @@ function viewBugun(){
   h += skyHero(date, d, plan);
   if (!isToday) h += `<div class="chiprow"><button class="chip on" data-act="goday" data-d="${S.today}">Bugüne dön</button></div>`;
   if (isToday) h += briefKart();
-  h += programKart(date, d, plan);
-  h += turKart(date);
-  if (isToday && claudeVar()) h += postaKart();
-  h += aliskanlikKart(date, d);
-  if (isToday) h += sigaraKart();
-  h += paraMini(date, d);
+  h += kapanir("program", "Program", () => programOzet(date, plan), programKart(date, d, plan));
+  h += kapanir("turlar", "Turlar", () => { const t = toursFor(date); return !t ? "yükleniyor" : t.count ? `${t.count} tur · ${t.pax} kişi` : "yok"; }, turKart(date));
+  if (isToday && claudeVar()) h += kapanir("posta", "Posta", postaOzet, postaKart());
+  h += kapanir("aliskanlik", "Alışkanlıklar", () => aliskanlikOzet(d), aliskanlikKart(date, d));
+  if (isToday) h += kapanir("sigara", "Son sigaradan beri", () => { const g = sigaraDurum(); return g ? sureYaz(g.gecen) : "henüz kayıt yok"; }, sigaraKart());
+  h += kapanir("para", "Para", () => paraOzet(date, d), paraMini(date, d));
   return h;
+}
+/* Kapanır kartlar: başlığa dokununca kart tek satır özete iner; hangi kartların kapalı olduğu bu telefonda saklanır (hayat.kapali). */
+const KAPA_OK = `<svg class="kapa-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+const kapaliMi = k => !!(LS.get("hayat.kapali") || {})[k];
+function kapanir(k, baslik, ozet, html){
+  if (!html) return "";
+  if (kapaliMi(k)) return `<section class="card kapali" data-kart="${k}"><h2 class="kapa-h"><button class="kapa" data-act="kapa" data-k="${k}" aria-expanded="false"><span class="kapa-ad">${baslik}</span><span class="kapa-ozet">${esc(ozet())}</span>${KAPA_OK}</button></h2></section>`;
+  return html.replace(/<section class="card/, `<section data-kart="${k}" class="card`)
+    .replace(/<h2>([^<]*)<\/h2>/, (m, t) => `<h2 class="kapa-h"><button class="kapa" data-act="kapa" data-k="${k}" aria-expanded="true"><span class="kapa-ad">${t}</span>${KAPA_OK}</button></h2>`);
+}
+function programOzet(date, plan){
+  if (!plan.length) return "plan yok";
+  const done = plan.filter(x => x.done).length, now = hmMin(nowHM());
+  const sn = plan.find(x => !x.done && x.time && (date !== S.today || hmMin(x.time) >= now - 10)), kalan = plan.length - done;
+  return `${done}/${plan.length} tamam` + (sn ? ` · sıradaki ${sn.time}` : kalan ? ` · ${kalan} bekliyor` : "");
+}
+function postaOzet(){
+  const p = sonKanal("posta")[0];
+  if (!p) return S.gelen.some(g => kanalOf(g) === "posta" && g.durum === "bekliyor") ? "hazırlanıyor" : "henüz özet yok";
+  const cevap = postaCoz(p.sonuc).satirlar.filter(x => x.s === "r").length;
+  return cevap ? `${cevap} cevap bekliyor` : "özet " + fmtHM.format(new Date(gZaman(p)));
+}
+function aliskanlikOzet(d){
+  const hs = habits(), kisa = l => String(l).replace(/\s*\(.*$/, "");
+  const say = hs.filter(x => x.type === "count").slice(0, 2).map(x => `${kisa(x.label)} ${(d.counts || {})[x.key] ?? 0}`);
+  const tik = hs.filter(x => x.type === "check" && (d.checks || {})[x.key]).map(x => `${kisa(x.label)} ✓`);
+  return say.concat(tik).join(" · ") || "kayıt yok";
+}
+function paraOzet(date, d){
+  const g = (d.para || []).filter(x => x.tip !== "gelir").reduce((a, x) => a + (Number(x.tutar) || 0), 0);
+  return `${date === S.today ? "Bugün" : fmtShort(date)} ${eur2(g)} · ${AY[+date.slice(5,7)-1]} ${eur(paraAy(date.slice(0,7)).gider)}`;
 }
 function skyHero(date, d, plan){
   const isToday = date === S.today, hr = romeHour();
@@ -1405,7 +1618,7 @@ function skyHero(date, d, plan){
     const cands = plan.filter(x => !x.done && x.time && hmMin(x.time) >= now - 10).map(x => ({t: x.time, w: x.title}));
     if (t) t.list.filter(x => hmMin(x.time) >= now - 5).forEach(x => cands.push({t: x.time, w: `Tur · ${x.name} (${x.pax})`}));
     cands.sort((a,b) => hmMin(a.t) - hmMin(b.t));
-    if (cands.length) { const c = cands[0], m = hmMin(c.t) - now; next = `<a class="next" href="#bugun" data-act="noop"><span class="t">${esc(c.t)}</span><span class="w">${esc(c.w)}</span><span class="in">${untilText(Math.max(0, m))}</span></a>`; }
+    if (cands.length) { const c = cands[0], m = hmMin(c.t) - now; next = `<a class="next zamanli" href="#bugun" data-act="simdiye" aria-label="Sıradaki: ${esc(c.t)} ${esc(c.w)}, ${untilText(Math.max(0, m))}. Programda göster"><span class="t">${esc(c.t)}</span><span class="w">${esc(c.w)}</span><span class="in">${untilText(Math.max(0, m))}</span></a>`; }
     else if (!plan.length) next = claudeVar() ? `<button class="next" data-act="ask" data-q="Bugünümü planla"><span class="w">Plan boş. Dokun, Claude bugünü planlasın.</span><span class="in">${I.r.replace('<svg', '<svg width="16" height="16" style="stroke:currentColor;fill:none;stroke-width:2"')}</span></button>`
       : `<button class="next" data-act="compose"><span class="w">Plan boş. Dokun, plana ekle.</span><span class="in">${I.r.replace('<svg', '<svg width="16" height="16" style="stroke:currentColor;fill:none;stroke-width:2"')}</span></button>`;
     else if (done === plan.length) next = `<a class="next" href="#gunluk"><span class="w">Plan tamam. Günü kapatmak için Günlük'e iki satır yaz.</span></a>`;
@@ -1429,30 +1642,58 @@ function briefKart(){
   return `<section class="card brief ${S.ui.briefAcik ? "open" : ""}"><div class="card-h" style="margin-bottom:8px"><div class="who" style="margin:0"><span class="dot">${I.spark}</span>Claude · ${esc(saat)}</div><button class="chip ok" data-act="dinle" data-id="${esc(b.id)}">▶ Dinle</button></div>${md(b.sonuc)}
     <button class="linkbtn" data-act="briefac">${S.ui.briefAcik ? "Kısalt" : "Devamını oku"}</button></section>`;
 }
+/* Program: günün akışı tek bir zaman çizgisinde. Plan maddeleri işaretlenir; o günün turları (istenirse) aynı çizgide
+   salt okunur görünür. Veri şeması değişmez: turları gösterme tercihi yalnızca bu telefonda durur (hayat.programTur). */
+const prgGrup = m => m == null ? "Saatsiz" : m < 300 ? "Gece" : m < 720 ? "Sabah" : m < 1080 ? "Öğleden sonra" : "Akşam";
+const prgTurAcik = () => LS.get("hayat.programTur") !== false;
 function programKart(date, d, plan){
   const isToday = date === S.today, done = plan.filter(x => x.done).length, now = hmMin(nowHM());
-  let h = `<section class="card"><div class="card-h"><h2>Program</h2><span class="meta">${plan.length ? `${done}/${plan.length} tamam` : ""}</span></div>`;
-  if (plan.length) {
-    let rows = "", nowShown = !isToday;
-    for (const it of plan) {
-      if (!nowShown && it.time && hmMin(it.time) > now) { rows += `<li class="nowline" aria-hidden="true">ŞİMDİ ${esc(nowHM())}</li>`; nowShown = true; }
-      if (!nowShown && !it.time) { rows += `<li class="nowline" aria-hidden="true">ŞİMDİ ${esc(nowHM())}</li>`; nowShown = true; }
-      const late = isToday && !it.done && it.time && hmMin(it.time) + 30 < now;
+  const t = toursFor(date), turVar = !!(t && t.count), turGoster = turVar && prgTurAcik();
+  const pct = plan.length ? Math.round(done / plan.length * 100) : 0;
+  let h = `<section class="card" id="prgKart"><div class="card-h"><h2>Program</h2><span class="meta">${plan.length ? `${done}/${plan.length} tamam` : ""}</span></div>`;
+  if (plan.length) h += `<div class="prg-bar" role="progressbar" aria-label="Plan ilerlemesi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i data-p="${pct}" style="width:${pct}%"></i></div>`;
+  const sira = plan.map(it => ({m: it.time ? hmMin(it.time) : null, o: 0, it}));
+  if (turGoster) t.list.forEach(x => sira.push({m: hmMin(x.time), o: 1, tur: x}));
+  const saatli = sira.some(x => x.m != null);
+  if (isToday && saatli) sira.push({m: now, o: 2, simdi: true});
+  const inf = v => v == null ? 1e9 : v;
+  sira.sort((a, b) => inf(a.m) - inf(b.m) || a.o - b.o);
+  /* sıradaki: gök kartındaki "sıradaki" ile aynı kural */
+  const siradaki = isToday ? sira.find(x => x.m != null && !x.simdi && (x.tur ? x.m >= now - 5 : (!x.it.done && x.m >= now - 10))) : null;
+  if (sira.length) {
+    let rows = "", grup = null;
+    for (const x of sira) {
+      if (x.simdi) { rows += `<li class="ak-simdi" aria-hidden="true"><span class="ak-saat">${esc(nowHM())}</span><span class="ak-nabiz"></span><span class="ak-cizgi">şimdi</span></li>`; continue; }
+      const g = prgGrup(x.m);
+      if (saatli && g !== grup) { rows += `<li class="ak-grup"><span>${g}</span></li>`; grup = g; }
+      const kalan = x === siradaki ? `<b>${untilText(Math.max(0, x.m - now))}</b>` : "";
+      if (x.tur) {
+        const tr = x.tur, gecti = isToday ? x.m + 90 <= now : date < S.today;
+        rows += `<li class="ak tur ${tr.closed || gecti ? "gecmis" : ""} ${x === siradaki ? "sira" : ""}">
+          <span class="ak-saat">${esc(tr.time)}</span><span class="ak-nokta" aria-hidden="true"></span>
+          <span class="ak-govde"><span class="li-text">${esc(tr.name)} <span class="muted">(${tr.pax})</span></span><small class="ak-alt">${kalan ? kalan + " · " : ""}Tur${tr.platform === "GYG" ? " · GYG" : tr.platform === "VIA" ? " · Viator" : ""}${tr.guide ? " · " + esc(tr.guide) : ""}</small></span>
+          ${!tr.guide ? `<span class="pill hot">rehber yok</span>` : tr.closed ? `<span class="pill ok">kapandı</span>` : ""}</li>`;
+        continue;
+      }
+      const it = x.it, late = isToday && !it.done && x.m != null && x.m + 30 < now;
       const canBell = it.time && daysBetween(S.today, date) >= 0 && !it.done;
-      rows += `<li class="${it.done ? "done" : ""}">
+      const alt = kalan || (late ? "saati geçti" : "");
+      rows += `<li class="ak ${it.done ? "done" : ""} ${x === siradaki ? "sira" : ""} ${late ? "gec" : ""}" data-pid="${esc(it.id)}">
+        <span class="ak-saat">${esc(it.time || "")}</span>
         <button class="check" data-act="plantoggle" data-id="${esc(it.id)}" aria-pressed="${!!it.done}" aria-label="Tamamlandı işaretle">${I.check}</button>
-        <span class="li-time ${late ? "late" : ""}">${esc(it.time || "")}</span><span class="li-text">${esc(it.title)}</span>
+        <span class="ak-govde"><span class="li-text">${esc(it.title)}</span>${alt ? `<small class="ak-alt">${alt}</small>` : ""}</span>
         ${canBell ? `<button class="bell ${it.takvim ? "on" : ""}" data-act="plancal" data-id="${esc(it.id)}" aria-label="${it.takvim ? "Takvimde hatırlatma var" : "Telefonda hatırlat (Google Takvim)"}" ${it.takvim ? "disabled" : ""}>${I.bell}</button>` : ""}
         <button class="x" data-act="plandel" data-id="${esc(it.id)}" aria-label="Sil">×</button></li>`;
     }
-    h += `<ul class="list">${rows}</ul>`;
-  } else {
+    h += `<ul class="akis">${rows}</ul>`;
+  }
+  if (!plan.length) {
     h += `<p class="empty">${daysBetween(S.today, date) >= 0 ? (claudeVar() ? "Bu gün için plan yok. Aşağıdan ekle ya da Claude'a “planla” de." : "Bu gün için plan yok. Aşağıdan ekle ya da ortadaki düğmeye “10:00 spor” gibi söyle.") : "Bu gün için plan girilmemiş."}</p>`;
   }
   const calOn = LS.get("hayat.takvimVarsayilan") !== false;
   h += `<form class="add" id="f-plan"><input class="field" type="time" id="planTime" aria-label="Saat"><input class="field grow" id="planTitle" placeholder="Plana ekle…" autocomplete="off" aria-label="Plan maddesi"><button class="btn">Ekle</button></form>
     <label class="calchk"><input type="checkbox" id="planCal" ${calOn ? "checked" : ""}> Saatliyse telefonda hatırlat (Google Takvim, 60 ve 15 dk önce)</label>
-    <div class="chiprow" style="margin-top:12px">${isToday ? `<button class="chip" data-act="goday" data-d="${addDays(S.today,1)}">Yarını planla</button>` : ""}${claudeVar() ? `<button class="chip" data-act="ask" data-q="${isToday ? "Yarınımı planla" : "Bu günü planla: " + fmtLong(date)}">Claude planlasın</button>` : ""}</div></section>`;
+    <div class="chiprow" style="margin-top:12px">${isToday ? `<button class="chip" data-act="goday" data-d="${addDays(S.today,1)}">Yarını planla</button>` : ""}${claudeVar() ? `<button class="chip" data-act="ask" data-q="${isToday ? "Yarınımı planla" : "Bu günü planla: " + fmtLong(date)}">Claude planlasın</button>` : ""}${turVar ? `<button class="chip" data-act="prgtur" aria-pressed="${turGoster}">Turları göster</button>` : ""}</div></section>`;
   return h;
 }
 function turKart(date){
@@ -1486,17 +1727,37 @@ function postaKart(){
     ${postaHtml(c, true)}
     <button class="linkbtn" data-act="seggo" data-tab="claude" data-g="claude" data-v="posta" style="margin-top:6px">Tüm özeti aç</button></section>`;
 }
+/* Alışkanlıklar: iki sütun karo. İşaretlenenler tek dokunuş; sayaçlarda + büyük. Her karoda son 7 gün görünür
+   (işaret: noktalar ve seri, sayaç: mini çubuklar ve ortalama). Yalnızca mevcut günlerden okunur; şemaya alan eklenmez. */
+const HAB_EM = {spor: "🏃", okuma: "📖", sigara: "🚬", su: "💧", cis: "🚽", buyuk: "🧻", dis: "🦷", kahve: "☕", alkol: "🍷", ekran: "📱", yuruyus: "👟", nefes: "🧘", saglikli: "🥗", sosyal: "🫶", kilo: "⚖️"};
+const habEm = k => HAB_EM[k] ? `<i class="kr-em" aria-hidden="true">${HAB_EM[k]}</i>` : "";
+function habGraf(vals, lower){
+  /* vals: eski → yeni 7 değer (null = kayıt yok); son değer seçili gün */
+  const say = vals.filter(v => v != null), max = Math.max(1, ...say.map(Number)), once = vals.slice(0, 6).filter(v => v != null);
+  const ort = once.length ? once.reduce((a, b) => a + b, 0) / once.length : null, bugun = vals[6];
+  const cok = lower && ort != null && bugun != null && bugun > ort;
+  return {ort, html: `<span class="kr-graf" aria-hidden="true">${vals.map((v, i) => `<i class="${i === 6 ? "b" + (cok ? " cok" : "") : ""}" style="height:${v == null ? 0 : Math.max(12, Math.round(v / max * 100))}%;--j:${i}"></i>`).join("")}</span>`};
+}
 function aliskanlikKart(date, d){
-  const hs = habits();
-  let h = `<section class="card"><div class="card-h"><h2>Alışkanlıklar</h2><a class="linkbtn" href="#gunluk">Günlük →</a></div><div class="habchecks">` +
-    hs.filter(x => x.type === "check").map(x => `<button class="habchip" data-act="habcheck" data-k="${esc(x.key)}" aria-pressed="${!!(d.checks||{})[x.key]}"><span class="dot"></span>${esc(x.label)}</button>`).join("") + `</div><div class="counters">` +
-    hs.filter(x => x.type === "count").map(x => `<div class="counter"><span class="lbl">${esc(x.label)}</span><span class="stepper">
+  const hs = habits(), gunler = [6,5,4,3,2,1,0].map(n => addDays(date, -n));
+  const isaret = hs.filter(x => x.type === "check").map(x => {
+    const v = gunler.map(g => !!((getDay(g).checks || {})[x.key])), n = v.filter(Boolean).length;
+    let seri = 0; for (let i = v[6] ? 6 : 5; i >= 0 && v[i]; i--) seri++;
+    const not = seri >= 2 ? `🔥 ${seri}` : `${n}/7`;
+    return `<button class="habchip karo" data-act="habcheck" data-k="${esc(x.key)}" aria-pressed="${v[6]}" aria-label="${esc(x.label)}${seri >= 2 ? `, ${seri} gün üst üste` : `, son 7 günde ${n}`}"><span class="kr-ad">${habEm(x.key)}<span>${esc(x.label)}</span></span><span class="dot">${I.check}</span>
+      <span class="kr-alt"><span class="kr-gun" aria-hidden="true">${v.map((y, i) => `<i class="${y ? "v" : ""}${i === 6 ? " b" : ""}"></i>`).join("")}</span><span class="kr-not">${not}</span></span></button>`;
+  }).join("");
+  const alt = (g, birim) => `<span class="kr-alt">${g.html}<span class="kr-not">${g.ort == null ? "" : "ort " + nf1.format(g.ort) + (birim || "")}</span></span>`;
+  let h = `<section class="card"><div class="card-h"><h2>Alışkanlıklar</h2><a class="linkbtn" href="#gunluk">Günlük →</a></div>${isaret ? `<div class="karolar">${isaret}</div>` : ""}<div class="counters">` +
+    hs.filter(x => x.type === "count").map(x => { const g = habGraf(gunler.map(gn => { const c = (getDay(gn).counts || {})[x.key]; return c == null ? null : Number(c) || 0; }), !!x.lower);
+      return `<div class="counter karo"><span class="lbl">${habEm(x.key)}<span>${esc(x.label)}</span></span><span class="stepper">
       <button data-act="cnt" data-k="${esc(x.key)}" data-n="-1" aria-label="${esc(x.label)} azalt">−</button><output>${(d.counts||{})[x.key] ?? 0}</output>
-      <button data-act="cnt" data-k="${esc(x.key)}" data-n="1" aria-label="${esc(x.label)} artır">+</button></span></div>`).join("") +
-    hs.filter(x => x.type === "olcum").map(x => `<div class="counter"><label class="lbl" for="olc-${esc(x.key)}">${esc(x.label)}</label><span class="olcum"><input class="field" id="olc-${esc(x.key)}" data-olcum="${esc(x.key)}" inputmode="decimal" value="${(d.counts||{})[x.key] ?? ""}" placeholder="—"></span></div>`).join("") +
-    `<div class="counter"><span class="lbl">Uyku (saat)</span><span class="stepper">
+      <button data-act="cnt" data-k="${esc(x.key)}" data-n="1" aria-label="${esc(x.label)} artır">+</button></span>${alt(g)}</div>`; }).join("") +
+    hs.filter(x => x.type === "olcum").map(x => `<div class="counter karo"><label class="lbl" for="olc-${esc(x.key)}">${habEm(x.key)}<span>${esc(x.label)}</span></label><span class="olcum"><input class="field" id="olc-${esc(x.key)}" data-olcum="${esc(x.key)}" inputmode="decimal" value="${(d.counts||{})[x.key] ?? ""}" placeholder="—"></span></div>`).join("") +
+    (() => { const g = habGraf(gunler.map(gn => { const u = getDay(gn).sleep; return u == null ? null : Number(u) || 0; }), false);
+      return `<div class="counter karo"><span class="lbl"><i class="kr-em" aria-hidden="true">😴</i><span>Uyku (saat)</span></span><span class="stepper">
       <button data-act="sleep" data-n="-0.5" aria-label="Uyku azalt">−</button><output>${d.sleep == null ? "—" : nf1.format(d.sleep)}</output>
-      <button data-act="sleep" data-n="0.5" aria-label="Uyku artır">+</button></span></div></div></section>`;
+      <button data-act="sleep" data-n="0.5" aria-label="Uyku artır">+</button></span>${alt(g, " sa")}</div>`; })() + `</div></section>`;
   return h;
 }
 function paraMini(date, d){
@@ -1888,8 +2149,15 @@ function renderSheet(){
     ${claudeVar() ? `<div class="chiprow">${["Yarınımı planla","Bugünü değerlendir","Bu hafta kaç tur yaptık?"].map(q => `<button class="chip" data-act="ask" data-q="${q}">${q}</button>`).join("")}</div>
     <p class="hint">Basit kayıtları (sigara, su, spor, uyku, “12 euro yemek”) uygulama hemen yazar. Gerisini Claude bir saat içinde işler.</p>` : `<p class="hint">Sigara, su, spor, uyku, “12 euro yemek” ve “yarın 10:00 dişçi” gibi planları uygulama hemen yazar.</p>`}
   </div></div>`;
+  sayfaAcilis(el);
   el.hidden = false;
   const inp = document.getElementById("abInput"); if (inp) { inp.value = val; growInput(); }
+}
+
+/* alttan açılan sayfalar yalnızca ilk açılışta kayarak gelir; içerik yenilenirken tekrar oynamaz */
+function sayfaAcilis(el){
+  if (el.hidden && typeof hareketAcik === "function" && hareketAcik()) { el.classList.add("acilis"); clearTimeout(el._acz); el._acz = setTimeout(() => el.classList.remove("acilis"), 420); }
+  else if (!el.hidden) { clearTimeout(el._acz); el.classList.remove("acilis"); }
 }
 
 /* ---------- ortaklar: profil (ilk giriş), Claude'suz mod ve Claude kurulum mesajı ---------- */
@@ -2481,9 +2749,10 @@ function anlikKart(){
 /* ---------- 2.7: hareket — sayfa girişleri, dokunuş dalgası, kayan menü göstergesi, sayı sayma, kaydırarak gün değiştirme,
    dokunsal titreşim (iOS 18+), renk temaları ve günün tohumuyla dalgalanan arka plan ---------- */
 const SEKMELER = ["bugun", "para", "gunluk", "ilerleme", "claude"];
-const RENKLER = [["gece", "Gece", "#0c1118", "#7bdcb8"], ["orman", "Orman", "#0d1a14", "#9fd8a8"], ["kum", "Kum", "#f3ece2", "#e8692f"], ["bulut", "Bulut", "#eef3fa", "#2c78d6"]];
+const RENKLER = [["gece", "Gece", "#0c1118", "#7bdcb8"], ["orman", "Orman", "#0d1a14", "#9fd8a8"], ["kum", "Kum", "#f3ece2", "#e8692f"], ["bulut", "Bulut", "#eef3fa", "#2c78d6"],
+  ["tramonto", "Tramonto", "#170f1e", "#ffae52"], ["limon", "Limon", "#fff4c7", "#2747f5"], ["neon", "Neon", "#07080f", "#b08cff"]];
 const hareketAcik = () => LS.get("hayat.hareket") !== false && !AZ_HAREKET();
-const HRK = {sekme: null, gun: null, pop: null, tik: null, auraGun: null};
+const HRK = {sekme: null, gun: null, pop: null, tik: null, auraGun: null, hab: null, yeni: null, prg: null, vespaT: null, acilan: null};
 
 /* ---- renk teması ---- */
 function renkUygula(){
@@ -2577,12 +2846,28 @@ function hareketRender(){
   if (HRK.auraGun !== S.today) { HRK.auraGun = S.today; auraKur(); }
   if (HRK.pop) { const b = v.querySelector(`[data-act=cnt][data-k="${HRK.pop}"]`), o = b && b.parentElement.querySelector("output"); if (o) o.classList.add("pop"); HRK.pop = null; }
   if (HRK.tik) { const c = v.querySelector(`.check[data-id="${HRK.tik}"]`); if (c && c.getAttribute("aria-pressed") === "true") c.classList.add("tik-yeni"); HRK.tik = null; }
+  if (HRK.acilan) { const c = v.querySelector(`[data-kart="${HRK.acilan}"]`); if (c && hareketAcik()) c.classList.add("acildi"); HRK.acilan = null; }
+  if (HRK.hab) { const c = [...v.querySelectorAll(".habchip")].find(x => x.dataset.k === HRK.hab); if (c && hareketAcik()) c.classList.add("pop"); HRK.hab = null; }
+  if (HRK.yeni) { const li = [...v.querySelectorAll(".akis li[data-pid]")].find(x => x.dataset.pid === HRK.yeni); if (li && hareketAcik()) li.classList.add("yeni"); HRK.yeni = null; }
+  /* plan çubuğu: önceki değerden yenisine dolar (sayfaya girişte sıfırdan) */
+  const pb = v.querySelector(".prg-bar i");
+  if (pb) {
+    const hedef = Number(pb.dataset.p) || 0, bas = (sekmeDegisti || gunDegisti || HRK.prg == null) ? 0 : HRK.prg; HRK.prg = hedef;
+    if (hareketAcik() && bas !== hedef) { pb.style.width = bas + "%"; requestAnimationFrame(() => requestAnimationFrame(() => { if (pb.isConnected) pb.style.width = hedef + "%"; })); }
+  } else HRK.prg = null;
+  /* Vespa: Bugün'e her girişte ufuk çizgisinde bir kez yerine sürer; araya render girerse kaldığı yerden devam eder */
+  const vg = v.querySelector(".vespa-git");
+  if (vg && hareketAcik()) {
+    if (sekmeDegisti) HRK.vespaT = performance.now();
+    const gecen = HRK.vespaT == null ? 1e9 : performance.now() - HRK.vespaT;
+    if (gecen < 2600) { vg.style.animationDelay = (-gecen / 1000).toFixed(2) + "s"; vg.classList.add("gel"); }
+  }
   if (!(sekmeDegisti || gunDegisti) || !hareketAcik()) return;
-  v.classList.remove("giris"); void v.offsetWidth;
+  v.classList.remove("gir"); void v.offsetWidth;
   v.style.setProperty("--gx", (yon * 26) + "px");
   [...v.children].forEach((c, i) => c.style.setProperty("--i", Math.min(i, 9)));
-  v.classList.add("giris");
-  clearTimeout(HRK.z); HRK.z = setTimeout(() => v.classList.remove("giris"), 1100);
+  v.classList.add("gir");   /* "giris" DEĞİL: o sınıf giriş ekranının (tam ekran, sabit) stilidir */
+  clearTimeout(HRK.z); HRK.z = setTimeout(() => v.classList.remove("gir"), 1100);
   if (sekmeDegisti || ilk) sayilariSay(v);
   const a = document.querySelector('#tabs a[aria-current="page"]'); if (a && sekmeDegisti && !ilk) { a.classList.remove("zipla"); void a.offsetWidth; a.classList.add("zipla"); }
 }
@@ -2903,7 +3188,73 @@ function render(focusId){
   if (lastTab !== S.tab) { lastTab = S.tab; document.getElementById("main").scrollTop = 0; }
   canliRender();
   hareketRender();
+  seritRender();
 }
+
+/* ---------- kompakt şerit: aşağı inince üstte kalır; gün okları, zil ve bölüm çipleri hep elinin altında ---------- */
+const SERIT_KART = {program: "Program", turlar: "Turlar", posta: "Posta", aliskanlik: "Alışkanlık", sigara: "Sigara", para: "Para"};
+function seritRender(){
+  const el = document.getElementById("serit"); if (!el) return;
+  const gunlu = S.tab === "bugun" || S.tab === "gunluk";
+  const baslik = {bugun: "Bugün", para: "Para", gunluk: "Günlük", ilerleme: "İlerleme", claude: claudeVar() ? "Claude" : "Bildirimler"}[S.tab] || "";
+  const ad = gunlu ? (S.sel === S.today ? "Bugün" : fmtShort(S.sel)) : baslik;
+  const orta = `${gunlu ? `<button class="iconbtn" data-act="gunserit" data-n="-1" aria-label="Önceki gün">${I.l}</button>` : ""}<button class="serit-ad" data-act="basadon" aria-label="${esc(ad)}, sayfanın başına dön">${esc(ad)}</button>${gunlu ? `<button class="iconbtn" data-act="gunserit" data-n="1" aria-label="Sonraki gün">${I.r}</button>` : ""}`;
+  const cipler = S.tab === "bugun" ? [...view.querySelectorAll("[data-kart]")].map(c => `<button class="chip" data-act="karta" data-k="${c.dataset.kart}">${SERIT_KART[c.dataset.kart] || ""}</button>`).join("") : "";
+  const eskiKay = (el.querySelector(".serit-cip") || {}).scrollLeft || 0;
+  el.innerHTML = `<div class="serit-ust">${orta}<span class="grow"></span>${S.tab !== "claude" ? zil() : ""}</div>${cipler ? `<div class="serit-cip" data-kaydirma>${cipler}</div>` : ""}`;
+  const cr = el.querySelector(".serit-cip"); if (cr) cr.scrollLeft = eskiKay;
+  seritIzle(true);
+}
+function seritIzle(aninda){
+  const el = document.getElementById("serit"), m = document.getElementById("main"); if (!el || !m) return;
+  const kahraman = view.querySelector(".sky"), esik = kahraman ? kahraman.offsetTop + kahraman.offsetHeight - 30 : 140;
+  const gorunur = m.scrollTop > esik;
+  if (el.classList.contains("acik") !== gorunur) { el.classList.toggle("acik", gorunur); el.inert = !gorunur; }
+  const cips = el.querySelectorAll(".serit-cip .chip"); if (!gorunur || !cips.length) return;
+  const sinir = el.getBoundingClientRect().bottom + 16; let aktif = null;
+  const kartlar = view.querySelectorAll("[data-kart]");
+  kartlar.forEach(c => { if (c.getBoundingClientRect().top <= sinir) aktif = c.dataset.kart; });
+  if (kartlar.length && m.scrollTop + m.clientHeight >= m.scrollHeight - 6) aktif = kartlar[kartlar.length - 1].dataset.kart;   /* sayfa sonu: son bölüm */
+  cips.forEach(c => { const on = c.dataset.k === aktif; if (c.classList.contains("on") === on) return; c.classList.toggle("on", on); if (on) c.setAttribute("aria-current", "true"); else c.removeAttribute("aria-current");
+    if (on) { const r = c.parentElement, hedef = c.offsetLeft - (r.clientWidth - c.offsetWidth) / 2; if (aninda || !hareketAcik()) r.scrollLeft = hedef; else r.scrollTo({left: hedef, behavior: "smooth"}); } });
+}
+(() => { let bekle = false; const m = document.getElementById("main");
+  if (m) m.addEventListener("scroll", () => { if (bekle) return; bekle = true; requestAnimationFrame(() => { bekle = false; seritIzle(); }); }, {passive: true});
+  const sr = document.getElementById("serit"); if (sr) sr.inert = true;
+})();
+/* açık sekmeye tekrar dokununca: sayfa başa döner; zaten baştaysa ve başka bir gündeysen bugüne */
+document.getElementById("tabs").addEventListener("click", e => {
+  const a = e.target.closest("a[data-tab]"); if (!a || a.dataset.tab !== S.tab || location.hash !== "#" + S.tab) return;
+  e.preventDefault();
+  const m = document.getElementById("main");
+  if (m.scrollTop > 4) m.scrollTo({top: 0, behavior: hareketAcik() ? "smooth" : "auto"});
+  else if ((S.tab === "bugun" || S.tab === "gunluk") && S.sel !== S.today) setSel(S.today);
+});
+/* alttan açılan pencereler: tutma çubuğundan ya da başlıktan aşağı çekince kapanır; az çekersen geri yaylanır.
+   Kapanış, arka plana dokunmakla aynı eylemi çalıştırır (mikrofonu kapatmak gibi temizlikler aynen olur). */
+(() => {
+  let sh = null, y0 = 0, t0 = 0, dy = 0;
+  document.addEventListener("touchstart", e => {
+    sh = null; if (e.touches.length !== 1) return;
+    const tut = e.target.closest(".sheet .grab, .sheet .card-h"); if (!tut || e.target.closest("button, a, input, textarea, select")) return;
+    const p = tut.closest(".sheet"); if (!p || !p.parentElement.querySelector(".sheet-bg[data-act]")) return;
+    sh = p; y0 = e.touches[0].clientY; t0 = Date.now(); dy = 0; p.parentElement.classList.remove("acilis"); p.style.transition = "none";
+  }, {passive: true});
+  document.addEventListener("touchmove", e => {
+    if (!sh) return; if (!sh.isConnected) { sh = null; return; }
+    dy = Math.max(0, e.touches[0].clientY - y0); sh.style.transform = `translate3d(0,${dy}px,0)`;
+  }, {passive: true});
+  const birak = () => {
+    if (!sh) return; const p = sh; sh = null; if (!p.isConnected) return;
+    const hiz = dy / Math.max(1, Date.now() - t0), anim = hareketAcik();
+    p.style.transition = anim ? "transform .22s cubic-bezier(.2,.8,.3,1)" : "none";
+    if (dy > 110 || (dy > 36 && hiz > 0.55)) {
+      p.style.transform = "translate3d(0,105%,0)";
+      setTimeout(() => { const bg = p.isConnected && p.parentElement.querySelector(".sheet-bg[data-act]"); if (bg) bg.click(); }, anim ? 190 : 0);
+    } else { p.style.transform = ""; setTimeout(() => { if (p.isConnected) p.style.transition = ""; }, 240); }
+  };
+  document.addEventListener("touchend", birak, {passive: true}); document.addEventListener("touchcancel", birak, {passive: true});
+})();
 
 /* ---------- routing ---------- */
 const ESKI = {hafta: ["ilerleme","hafta"], aliskanlik: ["ilerleme","aliskanlik"], hedefler: ["ilerleme","hedefler"], koc: ["claude","sohbet"], ayarlar: ["claude","ayarlar"], ses: ["claude","ayarlar"]};
@@ -2935,11 +3286,21 @@ document.addEventListener("click", e => {
     case "paramonth": S.ui.paraAy = addMonths(S.ui.paraAy, n); render(); break;
     case "opendate": S.sel = b.dataset.d; S.month = S.sel.slice(0,7); watchTours(); gotoTab((b.dataset.to || "#bugun").slice(1)); render(); break;
     case "plantoggle": planEfekt(b, id); editDay(S.sel, d => { const it = (d.plan||[]).find(x => x.id === id); if (it) it.done = !it.done; }); hatirlatKur(); render(); break;
-    case "plandel": editDay(S.sel, d => { d.plan = (d.plan||[]).filter(x => x.id !== id); }); hatirlatKur(); render(); break;
+    case "plandel": { const gun = S.sel, eski = (getDay(gun).plan || []).find(x => x.id === id);
+      editDay(gun, d => { d.plan = (d.plan||[]).filter(x => x.id !== id); }); hatirlatKur(); render();
+      if (eski) toast(`“${kisalt(eski.title, 26)}” silindi.`, {ad: "Geri al", fn: () => { editDay(gun, d => { if (!(d.plan || []).some(x => x.id === eski.id)) d.plan = (d.plan || []).concat([eski]); }); HRK.yeni = eski.id; hatirlatKur(); render(); }});
+      break; }
+    case "prgtur": LS.set("hayat.programTur", !prgTurAcik()); render(); break;
+    case "kapa": { const o = LS.get("hayat.kapali") || {}; if (o[k]) { delete o[k]; HRK.acilan = k; } else o[k] = true; LS.set("hayat.kapali", o); render(); break; }
+    case "gunserit": setSel(addDays(S.sel, n)); break;
+    case "basadon": document.getElementById("main").scrollTo({top: 0, behavior: hareketAcik() ? "smooth" : "auto"}); break;
+    case "karta": { const kart = view.querySelector(`[data-kart="${k}"]`), m = document.getElementById("main"), sr = document.getElementById("serit");
+      if (kart) m.scrollTo({top: m.scrollTop + kart.getBoundingClientRect().top - sr.getBoundingClientRect().bottom - 10, behavior: hareketAcik() ? "smooth" : "auto"}); break; }
+    case "simdiye": { e.preventDefault(); const el = view.querySelector(".ak.sira") || view.querySelector(".ak-simdi") || document.getElementById("prgKart"); if (el) el.scrollIntoView({block: "center", behavior: hareketAcik() ? "smooth" : "auto"}); break; }
     case "plancal": takvimeEkle(S.sel, id); break;
     case "healthdel": editDay(S.sel, d => { d.health = (d.health||[]).filter(x => x.id !== id); }); render(); break;
     case "windel": editDay(S.sel, d => { d.wins = (d.wins||[]).filter(x => x.id !== id); }); render(); break;
-    case "habcheck": editDay(S.sel, d => { d.checks = d.checks || {}; d.checks[k] = !d.checks[k]; }); render(); break;
+    case "habcheck": HRK.hab = k; editDay(S.sel, d => { d.checks = d.checks || {}; d.checks[k] = !d.checks[k]; }); render(); break;
     case "gridcheck": editDay(b.dataset.d, d => { d.checks = d.checks || {}; d.checks[k] = !d.checks[k]; }); render(); break;
     case "cnt": sayacEfekt(b, k, n); editDay(S.sel, d => { d.counts = d.counts || {}; d.counts[k] = Math.max(0, (d.counts[k] || 0) + n); }); render(); break;
     case "sleep": editDay(S.sel, d => { const v = d.sleep == null ? 7 : d.sleep + n; d.sleep = Math.max(0, Math.min(16, v)); }); render(); break;
@@ -3018,7 +3379,7 @@ document.addEventListener("submit", e => {
   switch (f.id) {
     case "f-plan": { const title = val("planTitle").trim(); if (!title) return; const time = val("planTime"); const cal = (document.getElementById("planCal") || {}).checked; const date = S.sel, nid = uid();
       LS.set("hayat.takvimVarsayilan", !!cal);
-      editDay(date, d => { d.plan = (d.plan||[]).concat([{id: nid, time, title, done: false}]); }); hatirlatKur(); render("planTitle");
+      editDay(date, d => { d.plan = (d.plan||[]).concat([{id: nid, time, title, done: false}]); }); HRK.yeni = nid; hatirlatKur(); render("planTitle");
       if (cal && time && daysBetween(S.today, date) >= 0) takvimeEkle(date, nid);
       break; }
     case "f-health": { const text = val("healthText").trim(); if (!text) return;
@@ -3536,7 +3897,7 @@ function renderSes(){
     <form class="comprow" id="f-ses"><textarea class="field" id="sesYaz" rows="1" placeholder="Ya da buraya yaz…" aria-label="Yazarak cevap ver"></textarea><button class="btn" aria-label="Gönder">${I.send}</button></form>
     <div class="chiprow" style="justify-content:center"><button class="chip" data-act="sestekrar">Baştan oku</button><button class="chip" data-act="sesbitir">Bitir</button></div>
   </div></div>`;
-  el.hidden = false;
+  sayfaAcilis(el); el.hidden = false;
 }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
