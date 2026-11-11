@@ -4,15 +4,49 @@ Bu repo üzerinde iki ayrı Claude oturumu çalışıyor. Oturumlar birbirine me
 gönderemez; ortak defterimiz bu dosya ve PR'lar. Bir işe başlamadan önce burayı
 oku, bitirince güncelle.
 
-Son güncelleme: 10 Kasım 2026 akşam, Opus oturumu.
+Son güncelleme: 11 Kasım 2026, Opus oturumu.
 
 ## Şu anki durum
 
-- Yayındaki sürüm: `main` = 2.7.2.
-- Bekleyen PR: **#1** (`claude/program-zaman-cizgisi`) = 2.8.0. Kerem merge edecek.
-- Bekleyen PR: **Opus işleri** (`claude/opus-gunluk-bos-formlar`) = 2.8.1, PR #1'in
-  üstüne açıldı (tabanı `claude/program-zaman-cizgisi`). Önce #1, sonra bu merge edilir.
-- 2.8 tasarım dokümanı artık repoda: `docs/superpowers/specs/2026-11-10-hayat-28-akicilik-design.md`.
+- Yayındaki sürüm: `main` = 2.9.0 (`hayat-v290`). PR #1, #3 ve #4 merge edildi.
+- PR #2 (Opus, `claude/opus-gunluk-bos-formlar`) `main`'i içine aldı: **2.9.1 / `hayat-v291`**.
+  Bundan sonraki PR **2.9.2 / `hayat-v292`** olsun.
+- 2.8 "akıcılık" tasarım dokümanı repoda: `docs/superpowers/specs/2026-11-10-hayat-28-akicilik-design.md`.
+
+### Sohbet modu (PR #3) ve brifing komutları
+
+- Brifing metninde `[[bolum Ad]]` satırları varsa Dinle ekranı konu konu okur ve her konudan sonra cevap
+  dinler; cevaplar sohbet bitince `🎧 … brifingindeki sorulara cevaplarım` diye başlayan TEK mesajda gelen
+  kutusuna düşer (her satır: konu · "koçun sorusu" → Kerem'in cevabı). Bu mesaj yankı değildir; "Hayat
+  Anında" ve saatlik gelen kutusu görevleri onu Kerem'in kendi sözleri olarak işlemeli.
+- PR #3 merge edilmeden önce de zararsızdır: eski sürümler işaretleri gizli blok sayıp atlar.
+- Tek ses dosyası (Kerem'in isteği, 10 Kasım): Gemini sesi açıkken bütün sohbet TEK istekte seslendirilir;
+  konu aralarına `[long pause]` etiketi konur, uygulama ses dalgasında bu uzun sessizlikleri bulup dosyayı
+  her soruda durdurur, cevaptan sonra kaldığı yerden sürdürür (`sohbetTek`, `kesimHesapla`, `sohbetTekCal`).
+  Aralar güvenle bulunamazsa konu konu seslendirmeye döner; iki kez üst üste olmazsa kendini kapatır
+  (Ayarlar > Ses > "Sohbette tek ses dosyası"). Sentetik sesle sınandı; Gemini'nin etiketi gerçekten
+  uzun sessizliğe çevirdiği ve iPhone'da kaldığı yerden devam ettiği gerçek telefonda DOĞRULANMADI.
+  Komut yazarken: konu metinlerinin içinde `[long pause]` kullanma, toplam metin 4500 karakteri geçmesin
+  (geçerse uygulama konu konu seslendirir).
+- Akşam brifingi görevinin komutu 10 Kasım'da Fable oturumunca bu biçime göre yeniden yazıldı (deneme).
+  Sabah ve öğle komutları eski biçimde; Kerem beğenirse onlar da çevrilecek.
+
+### Alan sayfaları (2.9.0, `claude/detay-sayfalari`)
+
+- Bugün'deki karolar, Para ve Sigara kartları ve yeni "Nasıl hissediyorum" kartı kendi sayfasına açılır:
+  `#/su`, `#/sigara`, `#/tuvalet` (çiş + büyük), `#/his`, `#/uyku`, `#/para`, diğer alışkanlıklar `#/<anahtar>`.
+  Sayfa `#view`'ın üstünde ayrı katmandır (`#detay`); sekme (`S.tab`) değişmez, `S.detay` dolar.
+- Kod tek blokta: `/* ==== DETAY SAYFALARI ==== */` işaretleri arasında (CSS'te de aynı işaret). Yeni bir alan için
+  `ALAN`'a satır ve `detayHtml`'de bir kurucu eklemek yeter.
+- Karo davranışı değişti: işaretli karolarda yalnızca sağdaki yuvarlak (`button.dot`) işaretler, karonun geri
+  kalanı sayfayı açar (`.kr-ac`). Sayaçlarda artı/eksi aynen çalışır. Karolara dokunan testler buna göre yazılmalı.
+- Yeni veri (hepsi eklemedir, eski alanlar aynı): güne `iz` = `{su: ["09:10", …], cis: […]}` (+ basılan saatler;
+  sigara eskisi gibi `sigaraSaat`'te), ayarlara `gunHedef` = `{su: 8, …}` ve `koc` = `{su: {metin, zaman}}`.
+- **Brifing/gelen kutusu komutlarını yazan oturum için:** bir alanın sayfasındaki "Koçun diyor ki" kartına not
+  düşmek istersen cevabın sonundaki gizli bloğa şu op'u koy; uygulama 7 gün gösterir, sonra kendi kurallarına döner:
+  `[[uygula {"ops":[{"op":"koc","alan":"su","metin":"…"}]}]]` (alan: `su`, `sigara`, `tuvalet`, `his`, `uyku`,
+  `para` ya da bir alışkanlık anahtarı). Komutlara henüz eklenmedi; `sunucu/Code.js` değişmedi.
+- Sürüm: bu PR 2.9.0 / `hayat-v290` idi. PR #2 main'i alıp 2.9.1 / `hayat-v291` oldu.
 
 ## PR #1'de olanlar
 
@@ -36,25 +70,20 @@ Son güncelleme: 10 Kasım 2026 akşam, Opus oturumu.
 
 | İş | Kim | Not |
 |---|---|---|
-| D2 Aylık tablo bugünün sütununa kaysın, sütun vurgulansın | Opus | **bitti (2.8.1)** |
-| D3 Boş ekranlara ikonlu, düğmeli kartlar | Opus | **bitti (2.8.1)** |
-| D4 Para / Yeni hedef / Odak formları "+ Ekle" arkasında | Opus | **bitti (2.8.1)** |
-| B3 Günlük doluluk işaretleri + Günlük çipleri ve kapanır kartları | Opus | **bitti (2.8.1)** |
+| D2 Aylık tablo bugünün sütununa kaysın, sütun vurgulansın | Opus | **bitti (2.9.1, PR #2)** |
+| D3 Boş ekranlara ikonlu, düğmeli kartlar | Opus | **bitti (2.9.1, PR #2)** |
+| D4 Para / Yeni hedef / Odak formları "+ Ekle" arkasında | Opus | **bitti (2.9.1, PR #2)** |
+| B3 Günlük doluluk işaretleri + Günlük çipleri ve kapanır kartları | Opus | **bitti (2.9.1, PR #2)** |
 | A1 Ayarlar ayrı ekran (⚙︎, sağdan kayarak) | Fable | yapısal değişiklik |
 | C2 Çekerek yenileme + "Kaydedildi / Kaydediliyor / Çevrimdışı" yazısı | Fable | |
 | C3 Mikrofona basılı tutunca hızlı menü | Fable | |
 | Brifingler, görev istemleri, `sunucu/Code.js`, koç kimliği | Opus | Fable bunlara dokunmuyor |
 
-## Opus 2.8.1'de eklenenler (Fable'ın bilmesi gerekenler)
+## Opus 2.9.1'de eklenenler (PR #2) (Fable'ın bilmesi gerekenler)
 
 - **A1 için:** iki düğme hâlâ eski yolu kullanıyor: `data-act="seggo" data-tab="claude" data-g="claude" data-v="ayarlar"`.
   Biri boş Bildirimler ekranındaki "Bildirim ayarları", diğeri Para'daki "Aylık bütçe belirle →".
   Ayarlar ayrı ekran olunca bunları ilgili alt sayfaya (Bildirimler, Para) yönlendir.
-- **Sürüm:** `SURUM` 2.8.1, `CACHE` `hayat-v281`. Senin sonraki PR'ın 2.8.2 / `hayat-v282` olsun.
-- **Mevcut testte iki hata, PR #1'den geliyor (benim değişikliğimden önce de vardı):**
-  - Sayfa giriş animasyonu testi `#view` üzerinde `giris` sınıfını arıyor; sen `gir` yaptın.
-  - Bugün'den sola kaydırınca ertesi güne geçiş testi geçmiyor (2026-11-10 → 2026-11-11 bekleniyor).
-  Bilerek mi değişti, bir bak.
 
 ## Kod içinde hazır duran parçalar
 

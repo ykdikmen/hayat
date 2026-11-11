@@ -778,8 +778,162 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 .sheet .grab{position:relative}
 .sheet .grab::before{content:"";position:absolute;inset:-12px -60px}
 
+/* 2.8.1 sohbet modu: konu şeridi */
+.sohbet-yol{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0 2px;padding:0}
+.sohbet-yol li{padding:5px 11px;border-radius:99px;font-size:12.5px;font-weight:700;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line)}
+.sohbet-yol li.gecti{color:var(--ink-2);text-decoration:line-through;text-decoration-color:var(--line-2)}
+.sohbet-yol li.simdi{color:var(--on-mint);background:var(--mint);border-color:transparent}
+
 .adimlar{margin:0 0 10px;padding-left:18px;color:var(--ink-2);display:grid;gap:4px}
 
+/* ==== DETAY SAYFALARI ==== */
+#detay{position:fixed;inset:0;z-index:35;--ar:var(--mint)}
+#detay[hidden]{display:none}
+#detay.hrksiz *,#detay.hrksiz *::before,#detay.hrksiz *::after{animation:none!important;transition:none!important}
+.dt-yuzey{position:absolute;inset:0;background:var(--bg);transform-origin:0 0;overflow:hidden}
+.dt-yuzey::before{content:"";position:absolute;inset:0;background:radial-gradient(130% 52% at 50% -8%,color-mix(in oklab,var(--ar) 36%,transparent),transparent 72%),radial-gradient(70% 30% at 100% 100%,color-mix(in oklab,var(--ar) 12%,transparent),transparent 70%)}
+.dt-ic{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:calc(env(safe-area-inset-top) + 10px) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 36px) max(16px,env(safe-area-inset-left))}
+.dt-ic>*{max-width:560px;margin-left:auto;margin-right:auto}
+.dt-ic>*+*{margin-top:12px}
+.dt-ust{display:flex;align-items:center;gap:12px}
+.dt-ust .iconbtn{flex:none;width:44px;height:44px;background:var(--cam)}
+.dt-ust .iconbtn svg{width:22px;height:22px;stroke-width:2.4}
+.dt-ust h1{display:flex;align-items:center;gap:9px;font-size:24px;margin:0;min-width:0}
+.dt-ust h1 i{font-style:normal;font-size:22px;flex:none}
+.dt-ust h1 span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dt-hero{position:relative;display:flex;align-items:center;gap:18px;padding:16px 4px 4px}
+.dt-hero-s{min-width:0;flex:1}
+.dt-gun{font-size:13.5px;font-weight:800;color:color-mix(in oklab,var(--ar) 72%,var(--ink))}
+.dt-sayi-s{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.dt-sayi{display:inline-block;font-family:var(--font-display);font-size:68px;font-weight:700;line-height:.98;letter-spacing:-.02em;transform-origin:0 100%}
+.dt-sayi.uzun{font-size:52px}
+.dt-sayi.bos{font-size:40px;color:var(--ink-3)}
+.dt-sayi.zipla{animation:dtZipla .42s cubic-bezier(.3,1.7,.5,1)}
+@keyframes dtZipla{0%{transform:scale(1)}35%{transform:scale(1.14)}100%{transform:scale(1)}}
+.dt-birim{font-size:17px;font-weight:800;color:var(--ink-2)}
+.dt-alt{margin:6px 0 0;font-size:13.5px;line-height:1.4;color:var(--ink-2)}
+.dt-alt b{color:var(--ink)}
+.dt-rozet{flex:none;align-self:flex-start;background:color-mix(in oklab,var(--ar) 20%,transparent);color:var(--ink);border-radius:999px;padding:6px 11px;font-size:12.5px;font-weight:800;white-space:nowrap}
+.dt-kontrol{display:grid;gap:8px}
+.dt-step{gap:10px}
+.dt-step button{flex:none;width:64px;height:54px;border-radius:17px;font-size:24px;background:var(--cam)}
+.dt-step button.arti{flex:1;width:auto;background:var(--ar);color:#08131d;border-color:transparent;font-size:16px;font-weight:800}
+.dt-satir{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cam);border:1px solid var(--line);border-radius:16px;padding:10px 12px;font-weight:800}
+.dt-satir>span:first-child{display:flex;align-items:center;gap:8px;min-width:0}
+.dt-satir .stepper{gap:10px;flex:none}
+.dt-satir .stepper button{width:46px;height:44px}
+.dt-satir .stepper button[data-n="1"]{background:var(--ar);color:#08131d;border-color:transparent}
+.dt-satir output{min-width:34px}
+.dt-isaret{height:54px;border-radius:17px;background:var(--ar);color:#08131d;font-size:16px}
+.dt-isaret[aria-pressed="true"]{background:color-mix(in oklab,var(--ar) 20%,transparent);color:var(--ink);box-shadow:inset 0 0 0 2px var(--ar)}
+.dt-seg{background:var(--cam)}
+.dt-seg button[aria-pressed="true"]{background:var(--ar);color:#08131d}
+.dt-grafik{padding-top:18px}
+.dt-grafik.canli{animation:dgGel .3s ease-out}
+@keyframes dgGel{from{opacity:0;transform:translateY(8px)}}
+.dg-bars{position:relative;display:flex;align-items:flex-end;gap:6px;height:150px;padding-bottom:20px}
+.dg-bars.sik{gap:2px}
+.dg-bars.saat,.dg-bars.hg{height:112px}
+.dg-b{position:relative;flex:1;min-width:0;height:100%;border:0;background:transparent;padding:0;display:flex;align-items:flex-end;justify-content:center;color:inherit}
+.dg-b i{display:block;width:100%;max-width:36px;height:100%;overflow:hidden;border-radius:0 0 3px 3px}
+.dg-b i::before{content:"";display:block;height:100%;border-radius:8px 8px 0 0;background:color-mix(in oklab,var(--ar) 34%,var(--surface-3));transform:translateY(calc((1 - var(--h)) * 100%));animation:dgBar .5s cubic-bezier(.22,1.1,.36,1) backwards;animation-delay:calc(var(--j) * 32ms + 90ms)}
+.dg-bars.sik .dg-b i::before{border-radius:4px 4px 0 0}
+@keyframes dgBar{from{transform:translateY(100%)}}
+.dg-b.iyi i::before{background:color-mix(in oklab,var(--ar) 62%,var(--surface-3))}
+.dg-b.sec i::before{background:var(--ar)}
+.dg-b.bos i{height:4px;border-radius:2px;background:var(--line-2)}
+.dg-b.bos i::before{display:none}
+.dg-b>span{position:absolute;bottom:-19px;left:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--ink-3);white-space:nowrap}
+.dg-b.sec>span{color:var(--ink)}
+.dg-hedef{position:absolute;left:0;right:0;bottom:calc(20px + (100% - 20px) * var(--y));border-top:1.5px dashed color-mix(in oklab,var(--ink) 42%,transparent);pointer-events:none;z-index:1}
+.dg-hedef em{position:absolute;left:0;top:-17px;font-size:10.5px;font-style:normal;font-weight:800;color:var(--ink-2)}
+.dg-alt{margin:10px 0 0;text-align:center;font-weight:700}
+.dg-bos{margin:0;padding:22px 0;text-align:center}
+.dg-ac{overflow:hidden;animation:dgAcL .8s cubic-bezier(.3,.1,.2,1) .1s backwards}
+.dg-ac-ic{animation:dgAcR .8s cubic-bezier(.3,.1,.2,1) .1s backwards}
+@keyframes dgAcL{from{transform:translateX(-100%)}}
+@keyframes dgAcR{from{transform:translateX(100%)}}
+.dg-cizgi{display:block;width:100%;height:auto}
+.dg-lejant{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.dg-lejant i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.dg-halka{display:grid;grid-template-columns:124px minmax(0,1fr);gap:14px;align-items:center}
+.dg-halka svg{width:124px;height:124px;animation:dgHalka .6s cubic-bezier(.22,1.1,.36,1) .1s backwards}
+@keyframes dgHalka{from{transform:rotate(-70deg) scale(.82);opacity:0}}
+.hk-b{font:700 17px var(--font-display);fill:var(--ink)}
+.hk-k{font:700 10px var(--font-body);fill:var(--ink-3)}
+.dg-liste{list-style:none;margin:0;padding:0;display:grid;gap:7px;font-size:13px}
+.dg-liste li{display:grid;grid-template-columns:10px minmax(0,1fr) auto 36px;gap:8px;align-items:center}
+.dg-liste i{width:10px;height:10px;border-radius:3px}
+.dg-liste span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.dg-liste em{font-style:normal;color:var(--ink-3);text-align:right;font-size:12px}
+.dt-yer{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.dt-yer li{position:relative;display:flex;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;padding-bottom:9px}
+.dt-yer li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dt-yer li i{position:absolute;left:0;right:0;bottom:0;height:5px;border-radius:3px;background:var(--ar);transform:scaleX(var(--w));transform-origin:0 50%;animation:dgYer .5s cubic-bezier(.22,1,.36,1) backwards;animation-delay:calc(var(--j) * 60ms + 120ms)}
+@keyframes dgYer{from{transform:scaleX(0)}}
+.dt-tx{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.dt-tx li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:10px;align-items:center}
+.dt-tx i{width:10px;height:10px;border-radius:50%}
+.dt-tx span{font-weight:700;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dt-tx small{display:block;font-weight:600;font-size:11.5px;color:var(--ink-3)}
+.dt-tx b{font-family:var(--font-display);font-size:17px}
+.dt-tx b.in{color:var(--mint)}
+.dt-yazi{margin:0;font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.dt-yazi b{color:var(--ink)}
+.dt-koc{background:linear-gradient(135deg,color-mix(in oklab,var(--ar) 18%,var(--cam)),var(--cam));border-color:color-mix(in oklab,var(--ar) 38%,var(--line))}
+.dt-koc .dt-yazi{color:var(--ink);font-size:15px}
+.dt-hedef-s{display:flex;align-items:center;gap:14px}
+.dt-hedef-s .stepper{gap:10px;flex:none}
+.dt-hedef-s .stepper button{width:44px;height:44px}
+.dt-hedef-s output{min-width:40px}
+.dt-iliski{list-style:none;margin:0;padding:0;display:grid;gap:9px;font-size:13.5px}
+.dt-iliski li{display:flex;justify-content:space-between;gap:10px;font-weight:700}
+.dt-iliski em{font-style:normal;font-weight:600;color:var(--ink-2);text-align:right}
+.dt-ic.sakin .dg-b i::before,.dt-ic.sakin .dg-ac,.dt-ic.sakin .dg-ac-ic,.dt-ic.sakin .dg-halka svg,.dt-ic.sakin .dt-yer li i{animation:none}
+.dt-ic.sakin .canli .dg-b i::before{animation:dgBar .5s cubic-bezier(.22,1.1,.36,1) backwards;animation-delay:calc(var(--j) * 32ms + 60ms)}
+.dt-ic.sakin .canli .dg-ac{animation:dgAcL .8s cubic-bezier(.3,.1,.2,1) backwards}
+.dt-ic.sakin .canli .dg-ac-ic{animation:dgAcR .8s cubic-bezier(.3,.1,.2,1) backwards}
+.his-gir{display:grid;gap:12px;padding:14px}
+.his-sec{display:grid;gap:6px}
+.his-sec>span{font-size:12.5px;font-weight:800;color:var(--ink-2)}
+.his-nokta{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.his-nokta button{height:40px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink-3);padding:0;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.his-nokta button.dolu{background:color-mix(in oklab,var(--c) 30%,var(--surface-2));color:var(--ink);border-color:transparent}
+.his-nokta button[aria-pressed="true"]{background:var(--c);color:#08131d;transform:scale(1.08)}
+.su-bardak{flex:none;position:relative;width:74px;height:104px;border:3px solid color-mix(in oklab,var(--ink) 32%,transparent);border-top-width:0;border-radius:6px 6px 20px 20px;overflow:hidden;background:color-mix(in oklab,var(--ar) 9%,transparent)}
+.su-sivi{position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in oklab,var(--ar) 82%,#fff),var(--ar));transform:translateY(calc((1 - var(--dol)) * 100%));transition:transform .7s cubic-bezier(.22,1.1,.36,1)}
+.su-dalga{position:absolute;left:0;top:-9px;width:200%;height:10px;fill:color-mix(in oklab,var(--ar) 82%,#fff);animation:suDalga 2.6s linear infinite}
+@keyframes suDalga{to{transform:translateX(-50%)}}
+/* Bugün: karolar ve kartlar sayfa açar; kayıt düğmeleri (artı, eksi, işaret) üstte kalır */
+.habchip.karo,.counter.karo{position:relative;--ar:var(--mint);transition:transform .34s cubic-bezier(.3,1.6,.5,1)}
+.kr-ac{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:0;margin:0;min-width:0;display:flex;align-items:center;gap:7px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.kr-ac::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.kr-ok{font-style:normal;color:var(--ink-3);font-weight:800;font-size:17px;line-height:1;margin-left:auto;flex:none}
+.karo .stepper,.karo .olcum,.habchip.karo button.dot{position:relative;z-index:1}
+.karo:has(.kr-ac:active),[data-act="detay"]:not(.kr-ac):active{transform:scale(.97);transition-duration:.09s}
+[data-act="detay"]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mrow[data-act],.sig-ust[data-act],.his-ozet{transition:transform .34s cubic-bezier(.3,1.6,.5,1)}
+.habchip.karo button.dot{padding:0;background:transparent;width:34px;height:34px;border-radius:50%;justify-self:end;cursor:pointer;color:inherit}
+.habchip.karo button.dot::before{content:"";position:absolute;inset:-7px}
+.habchip.karo button.dot svg{width:17px;height:17px}
+.habchip.karo[data-on="true"]{background:color-mix(in oklab,var(--ar) 15%,var(--surface-2));border-color:var(--ar);color:var(--ink)}
+.habchip.karo[data-on="true"] .dot{background:var(--ar);border-color:var(--ar)}
+.habchip.karo[data-on="true"] .dot svg{opacity:1;stroke:#08131d}
+.habchip.karo .kr-gun i.v{background:var(--ar)}
+.counter.karo .stepper button[data-n="1"],.counter.karo .stepper button[data-n="0.5"]{background:var(--ar);color:#08131d}
+.counter.karo .kr-graf i.b{background:var(--ar)}
+.counter.karo .kr-graf i.b.cok{background:var(--coral)}
+.kr-git{position:absolute;top:2px;right:2px;width:40px;height:40px;border:0;background:transparent;color:var(--ink-3);font-size:18px;font-weight:800;padding:0;z-index:1}
+.stepper button{position:relative;overflow:hidden}
+.stepper button::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle,rgba(255,255,255,.5),transparent 65%);opacity:0;transform:scale(.4);transition:opacity .45s,transform .45s;pointer-events:none}
+.stepper button:active::after{opacity:.6;transform:scale(1.4);transition:none}
+.his-ozet{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:center}
+.his-h{position:relative;overflow:hidden;background:var(--surface-2);border-radius:14px;padding:10px 12px;display:grid;gap:2px}
+.his-h i{position:absolute;inset:0;background:color-mix(in oklab,var(--c) 24%,transparent);transform:translateY(calc((1 - var(--h)) * 100%))}
+.his-h b{position:relative;font-family:var(--font-display);font-size:24px;line-height:1}
+.his-h small{position:relative;font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.his-bos{grid-column:1/4;color:var(--ink-2);font-size:14px;padding:6px 0}
+/* ==== /DETAY SAYFALARI ==== */
 </style>
 </head>
 <body>
@@ -792,6 +946,7 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
   <a href="#gunluk" data-tab="gunluk"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6"/></svg>Günlük</a>
   <a href="#ilerleme" data-tab="ilerleme"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>İlerleme</a>
 </nav>
+<div id="detay" hidden><div class="dt-yuzey"></div><div class="dt-ic" id="detayIc"></div></div>
 <div id="sheet" hidden></div>
 <div id="ses" hidden></div>
 <div id="toast" class="toast" hidden></div>
@@ -812,7 +967,7 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.8.1";
+const SURUM = "2.9.1";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -1029,9 +1184,10 @@ function saveDay(date, delay){
   queueSave("days/" + date, clone(d), delay);
 }
 function editDay(date, fn, delay){
-  const d = S.days[date] ? S.days[date] : (S.days[date] = blankDay(date)), once = Number((d.counts || {}).sigara) || 0;
+  const d = S.days[date] ? S.days[date] : (S.days[date] = blankDay(date)), once = Number((d.counts || {}).sigara) || 0, onceSayac = Object.assign({}, d.counts);
   fn(d);
   if (typeof sigaraIz === "function") sigaraIz(date, d, once);
+  if (typeof izYaz === "function") izYaz(date, d, onceSayac);
   saveDay(date, delay);
   if (typeof bildirimSenk === "function" && (date === S.today || date === addDays(S.today, 1))) bildirimSenk();
 }
@@ -1177,6 +1333,12 @@ function claudeUygula(){
         [].concat(o.ekle || []).forEach(x => { const b = String((x && x.baslik) || "").trim().slice(0, 120); if (b && !r.some(y => trLow(y.baslik) === trLow(b))) { r.push({id: uid(), saat: /^\d{2}:\d{2}$/.test(x.saat || "") ? x.saat : "", baslik: b}); n++; } });
         [].concat(o.sil || []).forEach(t => { const k = trLow(String(t)); const once = r.length; r = r.filter(y => !trLow(y.baslik).includes(k)); if (r.length < once) n++; });
         S.settings = Object.assign({}, S.settings || {}, {habits: habits(), rutin: r}); saveSettings();
+        return;
+      }
+      if (o.op === "koc") {   /* koçun bir alan için notu: o alanın sayfasında "Koçun diyor ki" kartında 7 gün görünür */
+        const alan = String(o.alan || "").toLowerCase(), metin = String(o.metin || "").trim().slice(0, 400);
+        if (!/^[a-z0-9_-]{1,24}$/.test(alan) || !metin) return;
+        S.settings = Object.assign({}, S.settings || {}, {habits: habits(), koc: Object.assign({}, (S.settings || {}).koc, {[alan]: {metin, zaman: S.today}})}); saveSettings(); n++;
         return;
       }
       const tarih = /^\d{4}-\d{2}-\d{2}$/.test(o.tarih || "") ? o.tarih : S.today, key = g.id + "_" + i;
@@ -1599,6 +1761,7 @@ function viewBugun(){
   h += kapanir("turlar", "Turlar", () => { const t = toursFor(date); return !t ? "yükleniyor" : t.count ? `${t.count} tur · ${t.pax} kişi` : "yok"; }, turKart(date));
   if (isToday && claudeVar()) h += kapanir("posta", "Posta", postaOzet, postaKart());
   h += kapanir("aliskanlik", "Alışkanlıklar", () => aliskanlikOzet(d), aliskanlikKart(date, d));
+  h += kapanir("his", "Nasıl hissediyorum", () => hisOzet(d), hisKart(date, d));
   if (isToday) h += kapanir("sigara", "Son sigaradan beri", () => { const g = sigaraDurum(); return g ? sureYaz(g.gecen) : "henüz kayıt yok"; }, sigaraKart());
   h += kapanir("para", "Para", () => paraOzet(date, d), paraMini(date, d));
   return h;
@@ -1772,18 +1935,19 @@ function aliskanlikKart(date, d){
     const v = gunler.map(g => !!((getDay(g).checks || {})[x.key])), n = v.filter(Boolean).length;
     let seri = 0; for (let i = v[6] ? 6 : 5; i >= 0 && v[i]; i--) seri++;
     const not = seri >= 2 ? `🔥 ${seri}` : `${n}/7`;
-    return `<button class="habchip karo" data-act="habcheck" data-k="${esc(x.key)}" aria-pressed="${v[6]}" aria-label="${esc(x.label)}${seri >= 2 ? `, ${seri} gün üst üste` : `, son 7 günde ${n}`}"><span class="kr-ad">${habEm(x.key)}<span>${esc(x.label)}</span></span><span class="dot">${I.check}</span>
-      <span class="kr-alt"><span class="kr-gun" aria-hidden="true">${v.map((y, i) => `<i class="${y ? "v" : ""}${i === 6 ? " b" : ""}"></i>`).join("")}</span><span class="kr-not">${not}</span></span></button>`;
+    return `<div class="habchip karo" data-k="${esc(x.key)}" data-detay="${esc(x.key)}" data-on="${v[6]}" style="--ar:${alanRenk(x.key)}"><button class="kr-ac" data-act="detay" data-k="${esc(x.key)}" aria-label="${esc(x.label)} ayrıntıları"><span class="kr-ad">${habEm(x.key)}<span>${esc(x.label)}</span></span></button>
+      <button class="dot" data-act="habcheck" data-k="${esc(x.key)}" aria-pressed="${v[6]}" aria-label="${esc(x.label)}${seri >= 2 ? `, ${seri} gün üst üste` : `, son 7 günde ${n}`}">${I.check}</button>
+      <span class="kr-alt"><span class="kr-gun" aria-hidden="true">${v.map((y, i) => `<i class="${y ? "v" : ""}${i === 6 ? " b" : ""}"></i>`).join("")}</span><span class="kr-not">${not}</span></span></div>`;
   }).join("");
   const alt = (g, birim) => `<span class="kr-alt">${g.html}<span class="kr-not">${g.ort == null ? "" : "ort " + nf1.format(g.ort) + (birim || "")}</span></span>`;
   let h = `<section class="card"><div class="card-h"><h2>Alışkanlıklar</h2><a class="linkbtn" href="#gunluk">Günlük →</a></div>${isaret ? `<div class="karolar">${isaret}</div>` : ""}<div class="counters">` +
     hs.filter(x => x.type === "count").map(x => { const g = habGraf(gunler.map(gn => { const c = (getDay(gn).counts || {})[x.key]; return c == null ? null : Number(c) || 0; }), !!x.lower);
-      return `<div class="counter karo"><span class="lbl">${habEm(x.key)}<span>${esc(x.label)}</span></span><span class="stepper">
+      return `<div class="counter karo" data-detay="${detayAnahtar(x.key)}" style="--ar:${alanRenk(x.key)}"><button class="kr-ac lbl" data-act="detay" data-k="${esc(x.key)}" aria-label="${esc(x.label)} ayrıntıları">${habEm(x.key)}<span>${esc(x.label)}</span><i class="kr-ok" aria-hidden="true">›</i></button><span class="stepper">
       <button data-act="cnt" data-k="${esc(x.key)}" data-n="-1" aria-label="${esc(x.label)} azalt">−</button><output>${(d.counts||{})[x.key] ?? 0}</output>
       <button data-act="cnt" data-k="${esc(x.key)}" data-n="1" aria-label="${esc(x.label)} artır">+</button></span>${alt(g)}</div>`; }).join("") +
-    hs.filter(x => x.type === "olcum").map(x => `<div class="counter karo"><label class="lbl" for="olc-${esc(x.key)}">${habEm(x.key)}<span>${esc(x.label)}</span></label><span class="olcum"><input class="field" id="olc-${esc(x.key)}" data-olcum="${esc(x.key)}" inputmode="decimal" value="${(d.counts||{})[x.key] ?? ""}" placeholder="—"></span></div>`).join("") +
+    hs.filter(x => x.type === "olcum").map(x => `<div class="counter karo" data-detay="${esc(x.key)}" style="--ar:${alanRenk(x.key)}"><button class="kr-git" data-act="detay" data-k="${esc(x.key)}" aria-label="${esc(x.label)} ayrıntıları">›</button><label class="lbl" for="olc-${esc(x.key)}">${habEm(x.key)}<span>${esc(x.label)}</span></label><span class="olcum"><input class="field" id="olc-${esc(x.key)}" data-olcum="${esc(x.key)}" inputmode="decimal" value="${(d.counts||{})[x.key] ?? ""}" placeholder="—"></span></div>`).join("") +
     (() => { const g = habGraf(gunler.map(gn => { const u = getDay(gn).sleep; return u == null ? null : Number(u) || 0; }), false);
-      return `<div class="counter karo"><span class="lbl"><i class="kr-em" aria-hidden="true">😴</i><span>Uyku (saat)</span></span><span class="stepper">
+      return `<div class="counter karo" data-detay="uyku" style="--ar:${ALAN.uyku.renk}"><button class="kr-ac lbl" data-act="detay" data-k="uyku" aria-label="Uyku ayrıntıları"><i class="kr-em" aria-hidden="true">😴</i><span>Uyku (saat)</span><i class="kr-ok" aria-hidden="true">›</i></button><span class="stepper">
       <button data-act="sleep" data-n="-0.5" aria-label="Uyku azalt">−</button><output>${d.sleep == null ? "—" : nf1.format(d.sleep)}</output>
       <button data-act="sleep" data-n="0.5" aria-label="Uyku artır">+</button></span>${alt(g, " sa")}</div>`; })() + `</div></section>`;
   return h;
@@ -1793,7 +1957,7 @@ function paraMini(date, d){
   const gi = (d.para || []).filter(x => x.tip === "gelir").reduce((a,x) => a + (Number(x.tutar)||0), 0);
   const ay = paraAy(date.slice(0,7)), a = ayar();
   return `<section class="card"><div class="card-h"><h2>Para</h2><a class="linkbtn" href="#para">Aylık görünüm →</a></div>
-    <div class="mrow"><div class="mtile out"><span>${date === S.today ? "Bugün" : fmtShort(date)} gider</span><b class="num">${eur2(g)}</b></div>
+    <div class="mrow" role="button" tabindex="0" data-act="detay" data-k="para" data-detay="para" aria-label="Para ayrıntıları"><div class="mtile out"><span>${date === S.today ? "Bugün" : fmtShort(date)} gider</span><b class="num">${eur2(g)}</b></div>
     <div class="mtile"><span>${AY[+date.slice(5,7)-1]} gider${a.butce ? " / bütçe" : ""}</span><b class="num">${eur(ay.gider)}${a.butce ? `<span class="muted" style="font-size:14px"> / ${eur(a.butce)}</span>` : ""}</b></div></div>
     ${gi ? `<p class="small muted" style="margin:8px 0 0">Gelir: ${eur2(gi)}</p>` : ""}
     <button class="btn soft wide" style="margin-top:12px" data-act="paragit">+ Harcama ya da gelir ekle</button></section>`;
@@ -2131,7 +2295,10 @@ function sesAyarKart(){
       <p class="small muted" style="margin:0">Gemini'ye ulaşılamazsa (internet, günlük ücretsiz hak) yedek sesle devam eder. Yedeği iyileştirmek için iPhone Ayarlar → Erişilebilirlik → Seslendirilen İçerik → Sesler → Türkçe → “Gelişmiş” bir ses indir. Anahtar yalnızca bu telefonda saklanır. Ücretsiz kullanımda Google okunan metni hizmetini geliştirmek için kullanabilir.</p>
       ${ttsSonHata ? `<p class="small" style="margin:0;color:var(--amber)">Son denemede: ${esc(ttsSonHata)}</p>` : ""}
       <div class="acts" style="margin:0"><button class="btn">Kaydet</button><button type="button" class="btn soft" data-act="sesdene">Sesi dene</button></div>
-    </form></section>`;
+    </form>
+    <div class="ayar-b" style="margin-top:14px"><div class="small" style="font-weight:800;margin-bottom:6px">Sohbette tek ses dosyası</div>
+      <div class="seg">${[["1","Açık"],["0","Kapalı"]].map(([v,l]) => `<button type="button" data-act="tekses" data-v="${v}" aria-pressed="${tekSesAcik() === (v === "1")}">${l}</button>`).join("")}</div>
+      <p class="small muted" style="margin:6px 0 0">Açıkken sohbetli brifing tek istekte seslendirilir ve sen cevap verirken ses dosyası olduğu yerde bekler; günlük ücretsiz hakkı korur. ${(LS.get("hayat.tekSesHata") || 0) >= 2 ? "Konu araları iki kez bulunamadığı için kendiliğinden kapandı; Açık'a basarsan yeniden dener." : "Konu araları bulunamazsa konu konu seslendirmeye döner."}</p></div></section>`;
 }
 function profilKart(){
   const a = ayar(), cv = claudeVar(), k = S.kimlik;
@@ -2391,6 +2558,11 @@ function efektSes(tur){
       g.gain.setValueAtTime(0, t + dt); g.gain.linearRampToValueAtTime(v, t + dt + .01); g.gain.exponentialRampToValueAtTime(.001, t + dt + .2);
       o.connect(g).connect(cik); o.start(t + dt); o.stop(t + dt + .22);
     });
+  } else if (tur === "sayfa") {   /* sayfa açılışı: kısa, alçak bir yükseliş */
+    const o = c.createOscillator(), g = c.createGain(); o.type = "sine";
+    o.frequency.setValueAtTime(420, t); o.frequency.exponentialRampToValueAtTime(760, t + .13);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.12, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + .19);
+    o.connect(g).connect(cik); o.start(t); o.stop(t + .2);
   } else if (tur === "ding" || tur === "kutlama") {
     const notalar = tur === "ding" ? [[0, 1318.5], [0, 1975.5]] : [[0, 1046.5], [.09, 1318.5], [.18, 1568], [.27, 2093]];
     notalar.forEach(([dt, fr]) => {
@@ -2416,7 +2588,8 @@ function efekt(el, tur){
   if (!el || !el.getBoundingClientRect) return;
   const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
   if (AZ_HAREKET()) { if (tur === "arti" || tur === "duman" || tur === "damla") fxParca("fx-arti", x, r.top, {}, 900); return; }
-  if (tur === "duman") for (let i = 0; i < 5; i++) fxParca("fx-duman", x - 15 + (Math.random() * 10 - 5), r.top - 4, {"--dx": (Math.random() * 44 - 22).toFixed(0) + "px", "animation-delay": i * 120 + "ms"}, 2300 + i * 120);
+  if (tur === "duman") for (let i = 0; i < 7; i++) { const b = (22 + Math.random() * 22).toFixed(0) + "px";   /* yedi puf, her biri başka boyda ve yöne */
+    fxParca("fx-duman", x - 15 + (Math.random() * 16 - 8), r.top - 4, {"--dx": (Math.random() * 64 - 32).toFixed(0) + "px", width: b, height: b, "animation-delay": i * 95 + "ms"}, 2300 + i * 95); }
   else if (tur === "damla") { fxParca("fx-damla", x - 7, r.top - 8, {}, 700); fxParca("fx-halka", x - 18, y - 18, {"animation-delay": "420ms"}, 1300); }
   else if (tur === "konfeti" || tur === "buyukkonfeti") {
     const n = tur === "konfeti" ? 16 : 44, renk = ["var(--mint)", "var(--sky)", "var(--rose)", "#f6c95a", "#ff7a59"];
@@ -2510,7 +2683,7 @@ function sigaraKart(){
   if (!s) return `<section class="card sig"><div class="card-h"><h2>Son sigaradan beri</h2></div><p class="small muted" style="margin:0">Sigara sayacında + bastığında saat de tutulur; burada son sigaradan beri geçen süre, rekorun ve vücudundaki değişim görünür.</p></section>`;
   const yeni = s.rekor > 0 && s.gecen > s.rekor;
   return `<section class="card sig"><div class="card-h"><h2>Son sigaradan beri</h2><span class="meta">${yeni ? "yeni rekor 🎉" : s.rekor ? "rekor " + sureYaz(s.rekor) : ""}</span></div>
-    <div class="sig-ust"><b class="num sig-sure" id="sigSure">${sureYaz(s.gecen)}</b><span class="muted small">son: ${new Date(s.son).toLocaleTimeString("tr-TR", {hour: "2-digit", minute: "2-digit", timeZone: TZ})}</span></div>
+    <div class="sig-ust" role="button" tabindex="0" data-act="detay" data-k="sigara" aria-label="Sigara ayrıntıları"><b class="num sig-sure" id="sigSure">${sureYaz(s.gecen)}</b><span class="muted small">son: ${new Date(s.son).toLocaleTimeString("tr-TR", {hour: "2-digit", minute: "2-digit", timeZone: TZ})}</span></div>
     <div class="sig-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(s.oran * 100)}" aria-label="Sıradaki eşiğe ilerleme"><i id="sigBar" style="width:${(s.oran * 100).toFixed(1)}%"></i></div>
     <p class="small sig-not" id="sigNot">${s.sonraki ? `<b>${sureYaz(s.sonraki[0] * 60e3)}</b> olunca: ${esc(s.sonraki[1])}` : esc(SIGARA_ESIK[SIGARA_ESIK.length - 1][1])}</p></section>`;
 }
@@ -3240,6 +3413,7 @@ function render(focusId){
   canliRender();
   hareketRender();
   seritRender();
+  detayRender();
   tabloKaydir();
 }
 /* Aylık tablo: ilk açılışta bugünün sütununa kayar; sonra her yeniden çizimde bıraktığı yerde kalır (ay başına hatırlanır). */
@@ -3255,7 +3429,7 @@ function tabloKaydir(){
 }
 
 /* ---------- kompakt şerit: aşağı inince üstte kalır; gün okları, zil ve bölüm çipleri hep elinin altında ---------- */
-const SERIT_KART = {program: "Program", turlar: "Turlar", posta: "Posta", aliskanlik: "Alışkanlık", sigara: "Sigara", para: "Para",
+const SERIT_KART = {program: "Program", turlar: "Turlar", posta: "Posta", aliskanlik: "Alışkanlık", his: "His", sigara: "Sigara", para: "Para",
   sesli: "Sesli", nasilsin: "Nasılsın", uyku: "Uyku", sabah: "Sabah", aksam: "Akşam", kazanim: "Kazanımlar", saglik: "Sağlık", ruh: "Takvim", tani: "Kalıplar", gecmis: "Geçmiş"};
 function seritRender(){
   const el = document.getElementById("serit"); if (!el) return;
@@ -3325,12 +3499,17 @@ document.getElementById("tabs").addEventListener("click", e => {
 const ESKI = {hafta: ["ilerleme","hafta"], aliskanlik: ["ilerleme","aliskanlik"], hedefler: ["ilerleme","hedefler"], koc: ["claude","sohbet"], ayarlar: ["claude","ayarlar"], ses: ["claude","ayarlar"]};
 function readHash(){
   const h = location.hash.replace("#", "");
+  if (h.charAt(0) === "/" && /^[a-z0-9_-]{1,24}$/.test(h.slice(1))) { S.detay = h.slice(1); return; }   /* #/su, #/para …: sekme değişmez, sayfa üstte açılır */
+  S.detay = null;
   if (ESKI[h]) { S.tab = ESKI[h][0]; S.ui.seg[ESKI[h][0]] = ESKI[h][1]; return; }
   S.tab = ["bugun","para","gunluk","ilerleme","claude"].includes(h) ? h : "bugun";
 }
 window.addEventListener("hashchange", () => {
   if (/^#giris=/.test(location.hash)) { const l = location.hash.slice(7); try { history.replaceState(null, "", location.pathname + "#bugun"); } catch (e) {} girisYap(l); }
-  readHash(); hideTip(); S.agent.open = false; renderSheet(); render();
+  const oncekiSekme = S.tab, oncekiDetay = S.detay || null;
+  readHash(); hideTip(); S.agent.open = false; renderSheet();
+  if (S.tab === oncekiSekme && (S.detay || null) !== oncekiDetay) detayRender();   /* yalnızca alan sayfası açılıp kapanıyorsa alttaki ekranı baştan çizme: geçiş ilk karede takılmasın */
+  else render();
 });
 function setSel(d){ S.sel = d; S.month = d.slice(0,7); watchTours(); render(); }
 function gotoTab(tab){ if (location.hash !== "#" + tab) location.hash = "#" + tab; else { readHash(); render(); } }
@@ -3415,6 +3594,7 @@ document.addEventListener("click", e => {
     case "renk": { const v = b.dataset.v, uygula = () => { LS.set("hayat.renk", v); renkUygula(); render(); }; if (document.startViewTransition && hareketAcik()) document.startViewTransition(uygula); else uygula(); break; }
     case "hareket": LS.set("hayat.hareket", b.dataset.v === "1"); renkUygula(); render(); break;
     case "titresim": LS.set("hayat.titresim", b.dataset.v === "1"); render(); if (b.dataset.v === "1") titret(); break;
+    case "tekses": LS.set("hayat.tekSes", b.dataset.v === "1"); LS.set("hayat.tekSesHata", 0); render(); break;
     case "sesler": LS.set("hayat.sesler", b.dataset.v === "1"); render(); if (b.dataset.v === "1") efektSes("ding"); break;
     case "gkmic": gkMic(); break;
     case "gkkaydet": gkKaydet(); break;
@@ -3536,9 +3716,438 @@ setInterval(() => {
 }, 60000);
 
 /* ---------- example data (local preview and the published preview only) ---------- */
+/* ==== DETAY SAYFALARI ====
+   Bugün'deki her alan kartı kendi sayfasına açılır: #/su, #/sigara, #/tuvalet, #/his, #/uyku, #/para, #/<alışkanlık>.
+   Sayfa #view'ın üstünde ayrı bir katmandır (#detay); ana sayfa altında olduğu gibi durur.
+   Geçişlerde yalnızca transform ve opacity oynar. Sayfa, Bugün'de seçili günü (S.sel) gösterir. */
+const ALAN = {para: {ad: "Para", em: "💰", renk: "#2fbf8a"}, su: {ad: "Su", em: "💧", renk: "#3d9dff"}, sigara: {ad: "Sigara", em: "🚬", renk: "#f2a03d"},
+  tuvalet: {ad: "Tuvalet", em: "🚽", renk: "#22b8c2"}, his: {ad: "Nasıl hissediyorum", em: "🙂", renk: "#a68bff"}, uyku: {ad: "Uyku", em: "😴", renk: "#7386ff"}};
+const ALAN_RENK = {spor: "#ff7a59", okuma: "#e2b23c", dis: "#4cc9e0", kahve: "#c58b5c", alkol: "#d86aa0", ekran: "#8f9bb3", yuruyus: "#5fcf7a", nefes: "#58c7b0", saglikli: "#7ecb52", sosyal: "#ff7fa3", kilo: "#9aa7ff"};
+const DT = {acik: null, rect: null, icten: false, seg: {}, kapan: null, kaydi: false, sonKayit: 0, deger: null};
+const detayAnahtar = k => (k === "cis" || k === "buyuk") ? "tuvalet" : k;
+const alanRenk = k => { const a = ALAN[detayAnahtar(k)]; return a ? a.renk : (ALAN_RENK[k] || "#7bdcb8"); };
+function alanBilgi(key){
+  if (ALAN[key]) return Object.assign({key, tip: key}, ALAN[key]);
+  const h = habits().find(x => x.key === key); if (!h) return null;
+  return {key, tip: h.type, ad: h.label, em: HAB_EM[key] || "✨", renk: alanRenk(key), lower: !!h.lower};
+}
+
+/* ---- veri ---- */
+function dDeger(key, date){   /* o günün değeri; kayıt yoksa null */
+  const d = S.days[date]; if (!d) return null;
+  const c = d.counts || {}, n = v => v == null || v === "" ? null : Number(v) || 0;
+  if (key === "uyku") return n(d.sleep);
+  if (key === "his") return n(d.mood);
+  if (key === "tuvalet") return c.cis == null && c.buyuk == null ? null : (Number(c.cis) || 0) + (Number(c.buyuk) || 0);
+  if (key === "para") return (d.para || []).filter(x => x.tip !== "gelir").reduce((a, x) => a + (Number(x.tutar) || 0), 0);
+  const h = habits().find(x => x.key === key);
+  if (h && h.type === "check") return d.checks && key in d.checks ? (d.checks[key] ? 1 : 0) : null;
+  return n(c[key]);
+}
+const dGunler = (n, son) => Array.from({length: n}, (_, i) => addDays(son || S.sel, i - n + 1));
+const dOrt = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((p, q) => p + q, 0) / v.length : null; };
+const dDizi = (key, gunler) => gunler.map(g => dDeger(key, g));
+function gunHedef(key){
+  const h = (S.settings && S.settings.gunHedef) || {};
+  if (h[key] != null) return Number(h[key]);
+  if (key === "su") return 8;
+  if (key === "uyku") return 7.5;
+  if (key === "sigara") { const g = Object.values(S.goals || {}).map(x => String(x.title || "")).find(t => /sigara/i.test(t) && /\d+/.test(t)); return g ? Number(g.match(/\d+/)[0]) : null; }
+  return null;
+}
+function hedefTuttu(key, v){
+  const a = alanBilgi(key); if (!a || v == null) return false;
+  if (a.tip === "check") return v >= 1;
+  const h = gunHedef(key); if (h == null) return false;
+  return (a.lower || key === "sigara") ? v <= h : v >= h;
+}
+function dSeri(key){   /* hedefi üst üste tutan gün sayısı; bugün henüz tutmadıysa dünden sayılır */
+  let n = 0, g = S.today;
+  if (!hedefTuttu(key, dDeger(key, g))) g = addDays(g, -1);
+  for (let i = 0; i < 400 && hedefTuttu(key, dDeger(key, g)); i++) { n++; g = addDays(g, -1); }
+  return n;
+}
+/* sayaçlarda + basılan saat de tutulur (gün içi dağılım için): d.iz = {su: ["09:10", …]}. Sigara eskisi gibi d.sigaraSaat'te. */
+function izYaz(date, d, once){
+  DT.sonKayit = Date.now();
+  if (date !== S.today) return;
+  const c = d.counts || {};
+  for (const k of new Set(Object.keys(c).concat(Object.keys(once || {})))) {
+    if (k === "sigara") continue;
+    const h = habits().find(x => x.key === k); if (!h || h.type !== "count") continue;
+    const a = Number((once || {})[k]) || 0, b = Number(c[k]) || 0; if (a === b) continue;
+    d.iz = d.iz || {};
+    let l = Array.isArray(d.iz[k]) ? d.iz[k].slice() : [];
+    if (b > a) { const s = nowHM(); for (let i = a; i < b && i < a + 20; i++) l.push(s); } else l = l.slice(0, Math.max(0, l.length - (a - b)));
+    d.iz[k] = l.slice(-40);
+  }
+}
+const dSaatleri = (key, date) => { const d = S.days[date] || {}; return key === "sigara" ? (d.sigaraSaat || []) : key === "tuvalet" ? ((d.iz || {}).cis || []).concat((d.iz || {}).buyuk || []) : ((d.iz || {})[key] || []); };
+const kocNot = key => { const n = ((S.settings && S.settings.koc) || {})[key]; return n && n.metin && /^\d{4}-\d{2}-\d{2}$/.test(n.zaman || "") && daysBetween(n.zaman, S.today) <= 7 ? n : null; };
+
+/* ---- grafikler ---- */
+function dCubuk(gunler, vals, o){
+  o = o || {};
+  const say = vals.filter(v => v != null), taban = o.taban || 0, max = Math.max(taban + 1e-6, ...(say.length ? say : [1]), o.hedef || 0), n = gunler.length;
+  const sec = n - 1, oran = v => Math.max(.04, (v - taban) / (max - taban || 1));
+  const et = (g, i) => n <= 7 ? GUN_K[dow(g)] : ((n - 1 - i) % 5 === 0 ? String(d2u(g).getUTCDate()) : "");
+  const yazi = (g, v) => fmtShort(g) + " · " + (v == null ? "kayıt yok" : o.yaz ? o.yaz(v) : (o.on || "") + nf1.format(v) + (o.birim ? " " + o.birim : ""));
+  return `<div class="dg-bars${n > 10 ? " sik" : ""}">${o.hedef ? `<i class="dg-hedef" style="--y:${oran(o.hedef).toFixed(3)}"><em>hedef ${nf1.format(o.hedef)}</em></i>` : ""}` +
+    gunler.map((g, i) => { const v = vals[i], iyi = v != null && o.hedef ? (o.lower ? v <= o.hedef : v >= o.hedef) : false;
+      return `<button class="dg-b${v == null || (o.sifirBos && !v) ? " bos" : ""}${i === sec ? " sec" : ""}${iyi ? " iyi" : ""}" data-act="dgsec" data-t="${esc(yazi(g, v))}" style="--h:${v == null ? 0 : oran(v).toFixed(3)};--j:${(n > 10 ? i * .35 : i).toFixed(2)}" aria-label="${esc(yazi(g, v))}"><i></i><span>${et(g, i)}</span></button>`; }).join("") +
+    `</div><p class="dg-alt small muted" id="dgAlt">${esc(yazi(gunler[sec], vals[sec]))}</p>`;
+}
+function dSaatCubuk(saatler, bosMetin){   /* iki saatlik 12 dilim */
+  const kutu = Array(12).fill(0); saatler.forEach(s => { const h = Number(String(s).slice(0, 2)); if (h >= 0 && h < 24) kutu[Math.floor(h / 2)]++; });
+  const max = Math.max(...kutu);
+  if (!max) return `<p class="small muted dg-bos">${bosMetin}</p>`;
+  const tepe = kutu.indexOf(max);
+  return `<div class="dg-bars saat">${kutu.map((v, i) => `<span class="dg-b${v ? "" : " bos"}${i === tepe ? " sec" : ""}" style="--h:${v ? Math.max(.08, v / max).toFixed(3) : 0};--j:${i * .6}"><i></i><span>${i % 2 ? "" : String(i * 2).padStart(2, "0")}</span></span>`).join("")}</div>
+    <p class="dg-alt small muted">En yoğun: ${String(tepe * 2).padStart(2, "0")}:00–${String(tepe * 2 + 2).padStart(2, "0")}:00 (${max})</p>`;
+}
+const dTepeSaat = saatler => { const k = Array(12).fill(0); saatler.forEach(s => { const h = Number(String(s).slice(0, 2)); if (h >= 0 && h < 24) k[Math.floor(h / 2)]++; }); const m = Math.max(...k); return m >= 3 ? k.indexOf(m) * 2 : null; };
+function dCizgi(gunler, seriler){   /* seriler: [[ad, renk, değerler 1-10]] */
+  const W = 320, H = 132, n = gunler.length, x = i => 10 + i * (W - 20) / Math.max(1, n - 1), y = v => 16 + (10 - v) / 9 * (H - 40);
+  const ciz = seriler.map(([ad, renk, vals]) => {
+    const p = vals.map((v, i) => v == null ? null : [x(i), y(v)]).filter(Boolean); if (!p.length) return "";
+    return `<path d="${p.map((q, i) => (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" ")}" fill="none" stroke="${renk}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` +
+      (n <= 10 || p.length === 1 ? p.map(q => `<circle cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="3.2" fill="${renk}"/>`).join("") : "");
+  }).join("");
+  const eksen = [10, 5, 1].map(v => `<line x1="10" x2="${W - 10}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${W - 10}" y="${y(v) - 3}" text-anchor="end" class="ax">${v}</text>`).join("");
+  const gunEt = gunler.map((g, i) => (n <= 7 || (n - 1 - i) % 5 === 0) ? `<text x="${x(i).toFixed(1)}" y="${H - 4}" text-anchor="middle" class="ax">${n <= 7 ? GUN_K[dow(g)] : d2u(g).getUTCDate()}</text>` : "").join("");
+  return `<div class="dg-ac"><div class="dg-ac-ic"><svg class="chart dg-cizgi" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(seriler.map(s => s[0]).join(", "))} çizgisi">${eksen}${gunEt}${ciz}</svg></div></div>
+    <div class="dg-lejant">${seriler.map(([ad, renk, vals]) => { const o = dOrt(vals); return `<span><i style="background:${renk}"></i>${esc(ad)}${o == null ? "" : " · ort " + nf1.format(o)}</span>`; }).join("")}</div>`;
+}
+function dHalka(parcalar, orta, alt){   /* parcalar: [[ad, renk, tutar]] */
+  const top = parcalar.reduce((a, p) => a + p[2], 0), C = 2 * Math.PI * 42; let off = 0;
+  if (!top) return `<p class="small muted dg-bos">Bu dönemde kayıtlı harcama yok.</p>`;
+  const dil = parcalar.map(([ad, renk, t]) => { const len = t / top * C, s = `<circle cx="60" cy="60" r="42" fill="none" stroke="${renk}" stroke-width="15" stroke-dasharray="${Math.max(0, len - 1.5).toFixed(2)} ${(C - Math.max(0, len - 1.5)).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}"/>`; off += len; return s; }).join("");
+  return `<div class="dg-halka"><svg viewBox="0 0 120 120" role="img" aria-label="Kategori dağılımı"><g transform="rotate(-90 60 60)">${dil}</g><text x="60" y="58" text-anchor="middle" class="hk-b">${esc(orta)}</text><text x="60" y="73" text-anchor="middle" class="hk-k">${esc(alt)}</text></svg>
+    <ul class="dg-liste">${parcalar.slice(0, 6).map(([ad, renk, t]) => `<li><i style="background:${renk}"></i><span>${esc(ad)}</span><b class="num">${eur(t)}</b><em>%${Math.round(t / top * 100)}</em></li>`).join("")}</ul></div>`;
+}
+
+/* ---- parçalar ---- */
+const dKart = (baslik, govde, sinif, sag) => `<section class="card ${sinif || ""}"><div class="card-h"><h2>${baslik}</h2>${sag || ""}</div>${govde}</section>`;
+const dGunAd = () => S.sel === S.today ? "Bugün" : fmtShort(S.sel);
+function dHero(o){
+  const sayi = o.sayi == null ? "—" : (o.on || "") + trSayi(o.sayi, o.ond || 0);
+  return `<section class="dt-hero">${o.gorsel || ""}<div class="dt-hero-s"><span class="dt-gun">${esc(o.ust || dGunAd())}</span>
+    <div class="dt-sayi-s"><b class="dt-sayi num${o.sayi == null ? " bos" : sayi.length > 6 ? " uzun" : ""}"${o.sayi != null ? ` data-say="${o.sayi}" data-ond="${o.ond || 0}" data-on="${o.on || ""}"` : ""}>${sayi}</b>${o.birim ? `<span class="dt-birim">${esc(o.birim)}</span>` : ""}</div>
+    ${o.alt ? `<p class="dt-alt">${o.alt}</p>` : ""}</div>${o.rozet ? `<span class="dt-rozet">${o.rozet}</span>` : ""}</section>${o.kontrol ? `<div class="dt-kontrol">${o.kontrol}</div>` : ""}`;
+}
+const dAdim = (act, k, eksi, arti, artiYazi) => `<span class="stepper dt-step"><button data-act="${act}"${k ? ` data-k="${esc(k)}"` : ""} data-n="${eksi}" aria-label="Azalt">−</button><button class="arti" data-act="${act}"${k ? ` data-k="${esc(k)}"` : ""} data-n="${arti}">${artiYazi}</button></span>`;
+function dHedefKart(key, birim, adim, lower){
+  const h = gunHedef(key), s = dSeri(key);
+  return `<section class="card dt-hedef"><div class="card-h"><h2>Günlük hedef</h2>${s >= 2 ? `<span class="dt-rozet">🔥 ${s} gün üst üste</span>` : ""}</div>
+    <div class="dt-hedef-s"><span class="stepper"><button data-act="dhedef" data-k="${esc(key)}" data-n="${-adim}" aria-label="Hedefi azalt">−</button><output>${h == null ? "—" : nf1.format(h)}</output><button data-act="dhedef" data-k="${esc(key)}" data-n="${adim}" aria-label="Hedefi artır">+</button></span>
+    <span class="small muted">${lower ? "en fazla" : "en az"} ${esc(birim)} / gün${h == null ? " · henüz hedef yok" : ""}</span></div></section>`;
+}
+const dSegSec = (key, segs) => { const s = DT.seg[key] || "hafta"; return segs.some(x => x[0] === s) ? s : segs[segs.length > 1 ? 1 : 0][0]; };
+const SEG3 = [["gun", "Gün"], ["hafta", "Hafta"], ["ay", "Ay"]], SEG2 = [["hafta", "Hafta"], ["ay", "Ay"]];
+const dFark = (a, b, birim) => a == null || b == null ? "" : Math.abs(a - b) < .05 ? "önceki haftayla aynı" : `önceki haftaya göre günde ${nf1.format(Math.abs(a - b))} ${birim} ${a < b ? "az" : "fazla"}`;
+
+/* ---- alanlar ---- */
+function dSayac(key, a){   /* su, sigara ve diğer sayaçlar; ölçümler (kilo) de buradan */
+  const segs = a.tip === "olcum" ? SEG2 : SEG3, seg = dSegSec(key, segs), bugun = S.sel === S.today;
+  const v = dDeger(key, S.sel), g7 = dGunler(7), v7 = dDizi(key, g7), g30 = dGunler(30), v30 = dDizi(key, g30);
+  const ort7 = dOrt(v7), once7 = dOrt(dDizi(key, dGunler(7, addDays(S.sel, -7)))), hedef = gunHedef(key), lower = a.lower || key === "sigara";
+  const birim = key === "su" ? "bardak" : key === "sigara" ? "adet" : a.tip === "olcum" ? "" : "kez", seri = dSeri(key);
+  const taban = a.tip === "olcum" ? Math.max(0, Math.min(...v30.filter(x => x != null).concat([1e9])) * .97) : 0;
+  const o = {segs, seg, sayi: a.tip === "olcum" ? v : (v || 0), ond: a.tip === "olcum" && v != null && v % 1 ? 1 : 0, birim: key === "su" ? "bardak" : "", rozet: seri >= 2 ? `🔥 ${seri} gün` : ""};
+  const saatler30 = [].concat(...g30.map(g => dSaatleri(key, g)));
+  o.grafik = seg === "gun" ? dSaatCubuk(dSaatleri(key, S.sel), bugun ? "Bugün + bastıkça saatler burada birikir." : "Bu gün için saat kaydı yok.")
+    : dCubuk(seg === "ay" ? g30 : g7, seg === "ay" ? v30 : v7, {hedef: a.tip === "olcum" ? 0 : hedef, lower, birim, taban});
+  if (a.tip !== "olcum") o.kontrol = dAdim("cnt", key, -1, 1, key === "su" ? "+ Bir bardak" : key === "sigara" ? "+ Bir sigara" : "+ Ekle");
+  if (a.tip !== "olcum") o.hedef = dHedefKart(key, birim, 1, lower);
+  const ortYazi = ort7 == null ? "" : `Son 7 günün ortalaması <b>${nf1.format(ort7)}</b>${once7 != null ? `; ${dFark(ort7, once7, birim)}` : ""}.`;
+  if (key === "su") {
+    const dol = Math.min(1, (v || 0) / (hedef || 8)), kalan = Math.max(0, (hedef || 8) - (v || 0));
+    o.gorsel = `<div class="su-bardak" aria-hidden="true" style="--dol:${dol.toFixed(3)}"><div class="su-sivi"><svg class="su-dalga" viewBox="0 0 200 12" preserveAspectRatio="none"><path d="M0 6 Q12.5 0 25 6 T50 6 T75 6 T100 6 T125 6 T150 6 T175 6 T200 6 V12 H0Z"/></svg></div></div>`;
+    o.alt = `${trSayi((v || 0) * 250, 0)} ml${hedef ? ` · hedef ${nf1.format(hedef)} bardak` : ""}`;
+    o.ne = ort7 == null ? "Henüz yeterli kayıt yok. Birkaç gün gir, ortalaman burada görünür." :
+      `Son 7 günde günde ortalama <b>${nf1.format(ort7)} bardak</b>, yani yaklaşık <b>${nf1.format(ort7 * .25)} L</b> su içtin (bir bardak 250 ml sayılır). Çoğu yetişkin için günde toplam 2–2,5 L sıvı önerilir; bir kısmı yemeklerden gelir.`;
+    o.koc = hedef && (v || 0) >= hedef ? `Bugünkü hedef tamam${seri >= 2 ? `, üstelik ${seri} gün üst üste` : ""}. Vücudun teşekkür ediyor, ben de.` :
+      bugun && romeHour() < 12 && (v || 0) < 2 ? "Güne bir bardakla başla. İlk turdan önce içilen su, günün en kolay kazanılan puanı." :
+      kalan <= 2 ? `Hedefe ${nf1.format(kalan)} bardak kaldı: biri yemekle, biri yatmadan önce, tamamdır.` :
+      ort7 != null && (v || 0) > ort7 ? "Bugün kendi ortalamanın üstündesin, böyle devam." :
+      `Hedefe ${nf1.format(kalan)} bardak var. Tur aralarında şişeni doldurmak işin yarısını halleder.`;
+  } else if (key === "sigara") {
+    const s = bugun ? sigaraDurum() : null, paket = Number(ayar().paket) || 0, tepe = dTepeSaat(saatler30);
+    o.alt = (s ? `son sigaradan beri <b>${sureYaz(s.gecen)}</b>` : "") + (hedef != null ? `${s ? " · " : ""}hedef en fazla ${nf1.format(hedef)}` : "");
+    o.ekler = dKart("En çok içtiğin saatler", dSaatCubuk(saatler30, "Saatler, sigara sayacında + bastıkça tutulur; birkaç gün sonra burada görünür."), "", `<span class="meta">son 30 gün</span>`);
+    o.ne = `${dGunAd()} <b>${v || 0}</b> sigara. ${ortYazi}${ort7 != null && paket ? ` Bu tempo ayda yaklaşık <b>${eur(ort7 / 20 * paket * 30)}</b> ediyor.` : ""}${hedef != null && ort7 != null ? ` Hedefine uzaklık: günde <b>${nf1.format(Math.max(0, ort7 - hedef))}</b>.` : ""}`;
+    o.koc = ort7 != null && once7 != null && ort7 < once7 - .2 ? `Geçen haftaya göre günde ${nf1.format(once7 - ort7)} daha az içiyorsun. Sessiz sedasız iyi iş çıkarıyorsun.` :
+      hedef != null && bugun && (v || 0) <= hedef ? "Şu an hedefin içindesin. Bir sonrakini yirmi dakika ertelemek bile sayılır." :
+      tepe != null ? `En çok ${String(tepe).padStart(2, "0")}:00–${String(tepe + 2).padStart(2, "0")}:00 arası içiyorsun. O saate bir bardak su ya da kısa bir yürüyüş koymak işe yarayabilir.` :
+      "Ertelenen her sigara bir kazanım. Sayıyı görmek zaten işin yarısı.";
+  } else {
+    o.alt = hedef != null ? `hedef ${lower ? "en fazla" : "en az"} ${nf1.format(hedef)}` : "";
+    o.ne = a.tip === "olcum" ? (v30.some(x => x != null) ? `Son kayıt <b>${nf1.format(v30.filter(x => x != null).slice(-1)[0])}</b>; son 30 günde ${v30.filter(x => x != null).length} ölçüm var. Değeri ana sayfadaki kutudan girersin.` : "Henüz ölçüm yok. Değeri ana sayfadaki kutudan girersin.")
+      : (ort7 == null ? "Henüz yeterli kayıt yok. Birkaç gün gir, ortalaman burada görünür." : `${dGunAd()} <b>${v || 0}</b>. ${ortYazi}`);
+    o.koc = a.tip === "olcum" ? "Tek ölçüm bir şey söylemez, çizgi söyler. Haftada bir iki kez, aynı saatte tartıl yeter." :
+      hedef != null && hedefTuttu(key, v) ? `Hedef tutuyor${seri >= 2 ? `, ${seri} gün üst üste` : ""}. Güzel gidiyor.` :
+      lower ? "Azaltmak istediğin bir şeyi saymak, onu azaltmanın ilk adımı. Sayı zaten senin tarafında." : "Kayıt tutman bile farkındalık. Küçük bir hedef koyarsan seriyi de sayarım.";
+  }
+  return o;
+}
+function dTuvalet(){
+  const seg = dSegSec("tuvalet", SEG3), d = getDay(S.sel), c = d.counts || {}, cis = Number(c.cis) || 0, buyuk = Number(c.buyuk) || 0;
+  const g7 = dGunler(7), g30 = dGunler(30), cis7 = dOrt(dDizi("cis", g7)), buyuk7 = dOrt(dDizi("buyuk", g7)), su7 = dOrt(dDizi("su", g7));
+  const var_ = k => habits().some(x => x.key === k);
+  const satir = (k, ad, n) => var_(k) ? `<div class="dt-satir"><span><i class="kr-em" aria-hidden="true">${HAB_EM[k]}</i>${ad}</span><span class="stepper"><button data-act="cnt" data-k="${k}" data-n="-1" aria-label="${ad} azalt">−</button><output>${n}</output><button data-act="cnt" data-k="${k}" data-n="1" aria-label="${ad} artır">+</button></span></div>` : "";
+  const gunler = seg === "ay" ? g30 : g7;
+  return {segs: SEG3, seg, sayi: cis + buyuk, birim: "kez", alt: `çiş ${cis} · büyük ${buyuk}`, kontrol: satir("cis", "Çiş", cis) + satir("buyuk", "Büyük tuvalet", buyuk),
+    grafik: seg === "gun" ? dSaatCubuk(dSaatleri("tuvalet", S.sel), S.sel === S.today ? "Bugün + bastıkça saatler burada birikir." : "Bu gün için saat kaydı yok.") : dCubuk(gunler, dDizi("tuvalet", gunler), {birim: "kez"}),
+    ne: `${cis + buyuk ? `${dGunAd()} <b>${cis}</b> kez çiş, <b>${buyuk}</b> kez büyük tuvalet` : `${dGunAd()} için henüz kayıt yok`}${cis7 != null ? `; son 7 günün ortalaması çişte ${nf1.format(cis7)}${buyuk7 != null ? `, büyükte ${nf1.format(buyuk7)}` : ""}` : ""}. Çoğu yetişkin günde 4–10 kez idrara çıkar; büyük tuvalette günde 3 ile haftada 3 arası olağan sayılır. Belirgin ve süren bir değişiklik olursa doktora danışmak iyi olur.`,
+    koc: cis7 != null && cis7 < 4 && su7 != null && su7 < 5 ? "Çiş sayısı az gidiyorsa çoğu zaman su azdır. Günde bir bardak fazlası fena olmaz." :
+      buyuk7 != null && buyuk7 >= .7 ? "Düzenin yerinde görünüyor. Vücudun saat gibi çalışıyor, tur programından bile dakik." : "Burada iyi haber şu: saymaya başladın. Birkaç gün sonra kendi düzenini net görürsün."};
+}
+function dIsaret(key, a){
+  const seg = dSegSec(key, SEG2), g7 = dGunler(7), g30 = dGunler(30), v7 = dDizi(key, g7), v30 = dDizi(key, g30);
+  const n7 = v7.filter(x => x).length, n30 = v30.filter(x => x).length, seri = dSeri(key), yapti = !!dDeger(key, S.sel), gunler = seg === "ay" ? g30 : g7;
+  return {segs: SEG2, seg, ust: "Seri", sayi: seri, birim: "gün üst üste", alt: `son 7 günde ${n7} · son 30 günde ${n30}`,
+    kontrol: `<button class="btn wide dt-isaret" data-act="habcheck" data-k="${esc(key)}" aria-pressed="${yapti}">${yapti ? "✓ " + esc(dGunAd()) + " yapıldı" : esc(dGunAd()) + " yaptım"}</button>`,
+    grafik: dCubuk(gunler, dDizi(key, gunler), {sifirBos: true, yaz: v => v >= 1 ? "yapıldı" : "yapılmadı"}),
+    ne: `<b>${esc(a.ad)}</b>: son 7 günde <b>${n7} gün</b>, son 30 günde <b>${n30} gün</b> işaretli${seri >= 2 ? `; şu an ${seri} gün üst üste` : ""}. Haftada üç dört gün bile düzenli sayılır; önemli olan arayı çok açmamak.`,
+    koc: seri >= 7 ? `${seri} gün üst üste. Bu artık heves değil, alışkanlık. Zinciri kırma.` : seri >= 3 ? `${seri} gün oldu. Zincir uzadıkça koparmak zorlaşır; iyi anlamda.` :
+      yapti ? "Bugünkü tamam. Yarın da küçük bir versiyonu sayılır." : n7 >= 3 ? "Bu hafta ritim fena değil. Bugün on dakikalık bir versiyonu bile seriyi başlatır." : "Büyük başlamak şart değil: on dakika yeter, gerisi kendiliğinden gelir."};
+}
+function dUyku(){
+  const seg = dSegSec("uyku", SEG2), v = dDeger("uyku", S.sel), g7 = dGunler(7), g30 = dGunler(30), v7 = dDizi("uyku", g7), ort7 = dOrt(v7), hedef = gunHedef("uyku"), seri = dSeri("uyku");
+  const saat = g30.map(g => (S.days[g] || {}).uykuSaat).filter(Boolean);
+  /* yatış gece yarısını aşabildiği için 12:00'den küçük saatler ertesi güne sayılır; kalkış düz ortalamadır */
+  const ortSaat = (l, gece) => { const dk = l.filter(x => /^\d{2}:\d{2}$/.test(x || "")).map(x => { const [h, m] = x.split(":").map(Number); return (gece && h < 12 ? h + 24 : h) * 60 + m; }); if (!dk.length) return "";
+    const o = Math.round(dk.reduce((a, b) => a + b, 0) / dk.length) % 1440; return String(Math.floor(o / 60)).padStart(2, "0") + ":" + String(o % 60).padStart(2, "0"); };
+  const yat = ortSaat(saat.map(x => x.yatis), true), kalk = ortSaat(saat.map(x => x.kalkis), false);
+  const gunler = seg === "ay" ? g30 : g7;
+  return {segs: SEG2, seg, sayi: v, ond: v != null && v % 1 ? 1 : 0, birim: "saat", rozet: seri >= 2 ? `🔥 ${seri} gün` : "",
+    alt: [hedef ? `hedef ${nf1.format(hedef)} saat` : "", yat ? `ort. yatış ${yat}` : "", kalk ? `kalkış ${kalk}` : ""].filter(Boolean).join(" · "),
+    kontrol: dAdim("sleep", "", -0.5, 0.5, "+ Yarım saat"),
+    grafik: dCubuk(gunler, dDizi("uyku", gunler), {hedef, birim: "saat"}),
+    ne: ort7 == null ? "Henüz uyku kaydı yok. Sabah kalkınca kaç saat uyuduğunu gir; birkaç gün sonra ortalaman görünür." : `Son 7 günde ortalama <b>${nf1.format(ort7)} saat</b> uyudun. Yetişkinler için 7–9 saat önerilir; düzenli saatlerde yatmak süre kadar önemlidir.`,
+    koc: ort7 == null ? "Uykuyu yazmak on saniye; karşılığında enerjinin neden inip çıktığını görürsün." : ort7 < 6.5 ? "Bu hafta uyku biraz kısa kalmış. Bu gece yarım saat erken yatmak, yarınki turlarda fark yaratır." :
+      ort7 >= 7 ? "Uykun yerinde. Enerjinin sigortası bu, primini düzenli ödüyorsun." : "Hedefe yakınsın. Yatmadan önceki son yarım saati ekransız geçirmek çoğu zaman o farkı kapatır.",
+    hedef: dHedefKart("uyku", "saat", .5, false)};
+}
+function dHis(){
+  const seg = dSegSec("his", SEG2), d = getDay(S.sel), gunler = dGunler(seg === "ay" ? 30 : 7), g60 = dGunler(60);
+  const al = (k, l) => l.map(g => { const v = (S.days[g] || {})[k]; return v == null ? null : Number(v); });
+  const m7 = dOrt(al("mood", dGunler(7))), e7 = dOrt(al("energy", dGunler(7))), f7 = dOrt(al("focus", dGunler(7)));
+  const satir = ([k, ad, renk]) => `<div class="his-sec"><span>${ad}</span><div class="his-nokta" role="group" aria-label="${ad}, 1 ile 10 arası">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button data-act="his" data-k="${k}" data-v="${n}" aria-pressed="${d[k] === n}" aria-label="${ad} ${n}"${d[k] != null && n <= d[k] ? ` class="dolu"` : ""} style="--c:${renk}">${n}</button>`).join("")}</div></div>`;
+  /* haftanın günlerine göre ruh hali ortalaması (Pzt → Paz) */
+  const hg = [1,2,3,4,5,6,0].map(w => dOrt(g60.filter(g => dow(g) === w).map(g => { const v = (S.days[g] || {}).mood; return v == null ? null : Number(v); })));
+  const hgMax = Math.max(...hg.map(x => x || 0)), enIyi = hgMax ? hg.indexOf(hgMax) : -1, GN = ["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
+  const haftaGun = hgMax ? `<div class="dg-bars hg">${hg.map((v, i) => `<span class="dg-b${v == null ? " bos" : ""}${i === enIyi ? " sec" : ""}" style="--h:${v == null ? 0 : (v / 10).toFixed(3)};--j:${i}"><i></i><span>${GN[i]}</span></span>`).join("")}</div><p class="dg-alt small muted">En iyi günün: ${GUN[[1,2,3,4,5,6,0][enIyi]]} (ort ${nf1.format(hgMax)})</p>` : `<p class="small muted dg-bos">Birkaç gün ruh halini girince burada haftanın günleri karşılaştırılır.</p>`;
+  /* ruh halinin uyku, su ve sporla ilişkisi: iki grup günün ortalaması */
+  const iliski = (ad, iyiAd, kotuAd, fn) => { const iyi = [], kotu = []; g60.forEach(g => { const x = S.days[g]; if (!x || x.mood == null) return; const r = fn(x); if (r == null) return; (r ? iyi : kotu).push(Number(x.mood)); });
+    if (iyi.length < 3 || kotu.length < 3) return {html: `<li><span>${ad}</span><em class="muted">yeterli gün yok</em></li>`, fark: null};
+    const a = dOrt(iyi), b = dOrt(kotu); return {html: `<li><span>${ad}</span><em>${iyiAd} <b>${nf1.format(a)}</b> · ${kotuAd} <b>${nf1.format(b)}</b></em></li>`, fark: a - b}; };
+  const il = [iliski("Uyku", "7+ saat", "daha az", x => x.sleep == null ? null : x.sleep >= 7), iliski("Su", "6+ bardak", "daha az", x => (x.counts || {}).su == null ? null : x.counts.su >= 6), iliski("Spor", "yaptığın gün", "yapmadığın", x => x.checks && "spor" in x.checks ? !!x.checks.spor : null)];
+  const enGuclu = il.map((x, i) => [x.fark, ["İyi uyuduğun", "Bol su içtiğin", "Spor yaptığın"][i]]).filter(x => x[0] != null && x[0] >= .5).sort((p, q) => q[0] - p[0])[0];
+  const son5 = al("mood", dGunler(5)).filter(x => x != null), dusuk = son5.length >= 3 && dOrt(son5) <= 4;
+  return {segs: SEG2, seg, sayi: d.mood == null ? null : Number(d.mood), birim: d.mood == null ? "" : "/ 10", ust: dGunAd() + " · ruh hali",
+    alt: d.mood == null ? "henüz girmedin; aşağıdan üç dokunuşla gir" : `enerji ${d.energy ?? "—"} · odak ${d.focus ?? "—"}`,
+    kontrol: `<div class="card his-gir">${MOODS.map(satir).join("")}</div>`,
+    grafik: dCizgi(gunler, MOODS.map(([k, ad, renk]) => [ad, renk, al(k, gunler)])),
+    ekler: dKart("Haftanın günleri", haftaGun, "", `<span class="meta">ruh hali, son 60 gün</span>`) + dKart("Neyle birlikte değişiyor?", `<ul class="dt-iliski">${il.map(x => x.html).join("")}</ul><p class="small muted" style="margin:8px 0 0">İki grup günün ruh hali ortalaması. Bir ilişkiyi gösterir, nedeni kanıtlamaz.</p>`),
+    ne: m7 == null ? "Henüz kayıt yok. Enerji, ruh hali ve odağı 1–10 arasında girince çizgiler oluşur." : `Son 7 günde ruh halin ortalama <b>${nf1.format(m7)}</b>${e7 != null ? `, enerjin <b>${nf1.format(e7)}</b>` : ""}${f7 != null ? `, odağın <b>${nf1.format(f7)}</b>` : ""} (10 üzerinden). 6 ve üstü çoğu insan için iyi bir gün demek; tek tek günlerden çok çizginin yönüne bak.`,
+    koc: dusuk ? "Son günler biraz ağır geçmiş gibi. Kendine yüklenme; bugün tek bir küçük şey seç, gerisi yarına kalabilir. Uzun sürerse güvendiğin biriyle konuşmak iyi gelir." :
+      enGuclu ? `${enGuclu[1]} günlerde ruh halin yaklaşık ${nf1.format(enGuclu[0])} puan daha yüksek. Tesadüf olabilir ama denemesi bedava.` :
+      d.mood == null && S.sel === S.today ? "Bugünü henüz girmedin. Üç dokunuş yeter; akşamki sohbette de sorarım, kaçış yok." :
+      m7 != null && m7 >= 6.5 ? "Çizgin güzel bir yerde. Ne iyi geldiyse not et, zor günde lazım olur." : "Dengeli gidiyorsun. Küçük bir iyilik: bugün seni en çok ne güldürdüyse Günlük'e yaz."};
+}
+function dParaDonem(seg){
+  const son = S.sel; let gunler, once, ad;
+  if (seg === "gun") { gunler = [son]; once = [addDays(son, -1)]; ad = ["gün", "bir önceki gün"]; }
+  else if (seg === "hafta") { gunler = dGunler(7, son); once = dGunler(7, addDays(son, -7)); ad = ["son 7 gün", "önceki 7 gün"]; }
+  else { const gun = Number(son.slice(8)); gunler = dGunler(gun, son); const os = addDays(son.slice(0, 8) + "01", -1), og = Math.min(gun, Number(os.slice(8))); once = dGunler(og, os.slice(0, 8) + String(og).padStart(2, "0")); ad = [AY[+son.slice(5, 7) - 1], "geçen ayın aynı günleri"]; }
+  const topla = l => { let gider = 0, gelir = 0; const kat = {}, yer = {}; l.forEach(g => ((S.days[g] || {}).para || []).forEach(x => { const t = Number(x.tutar) || 0; if (x.tip === "gelir") gelir += t; else { gider += t; kat[x.kat] = (kat[x.kat] || 0) + t; const y = String(x.not || "").trim() || katBul(x.kat, "gider").l; yer[y] = (yer[y] || 0) + t; } })); return {gider, gelir, kat, yer}; };
+  return {gunler, ad, simdi: topla(gunler), once: topla(once)};
+}
+function dPara(){
+  const seg = dSegSec("para", SEG3), p = dParaDonem(seg), s = p.simdi, o = p.once, a = ayar();
+  const fark = o.gider ? Math.round((s.gider - o.gider) / o.gider * 100) : null;
+  const katlar = Object.entries(s.kat).sort((x, y) => y[1] - x[1]).map(([k, t]) => { const b = katBul(k, "gider"); return [b.l, b.c, t]; });
+  const yerler = Object.entries(s.yer).sort((x, y) => y[1] - x[1]).slice(0, 5), yMax = yerler.length ? yerler[0][1] : 1;
+  const bugunList = ((S.days[S.sel] || {}).para || []).slice().sort((x, y) => (x.saat || "") < (y.saat || "") ? -1 : 1);
+  const liste = bugunList.length ? `<ul class="dt-tx">${bugunList.map(x => { const b = katBul(x.kat, x.tip); return `<li><i style="background:${b.c}"></i><span>${esc(x.not || b.l)}<small>${esc(b.l)}${x.saat ? " · " + esc(x.saat) : ""}</small></span><b class="num ${x.tip === "gelir" ? "in" : ""}">${x.tip === "gelir" ? "+" : "−"}${eur2(x.tutar)}</b></li>`; }).join("")}</ul>` : `<p class="small muted dg-bos">${esc(dGunAd())} için kayıt yok.</p>`;
+  const gunluk = p.gunler.map(g => dDeger("para", g));
+  const ayKalan = seg === "ay" && a.butce ? a.butce - s.gider : null, ayGun = seg === "ay" ? new Date(Date.UTC(+S.sel.slice(0, 4), +S.sel.slice(5, 7), 0)).getUTCDate() - Number(S.sel.slice(8)) : 0;
+  const enKat = katlar[0];
+  return {segs: SEG3, seg, ust: seg === "gun" ? dGunAd() + " gider" : seg === "hafta" ? "Son 7 gün gider" : p.ad[0] + " gider", sayi: Math.round(s.gider * 100) / 100, ond: s.gider % 1 ? 2 : 0, on: "€",
+    alt: `gelir <b>${eur(s.gelir)}</b> · net <b>${s.gelir - s.gider < 0 ? "−" : ""}${eur(Math.abs(s.gelir - s.gider))}</b>${fark == null ? "" : ` · ${p.ad[1]}ne göre <b>%${Math.abs(fark)} ${fark <= 0 ? "az" : "fazla"}</b>`}`,
+    kontrol: `<button class="btn soft wide" data-act="paragit">+ Harcama ya da gelir ekle</button>`,
+    grafik: seg === "gun" ? liste : dCubuk(p.gunler, gunluk, {birim: "", on: "€"}),
+    ekler: dKart("Nereye gitti?", dHalka(katlar, eur(s.gider), "gider")) +
+      (yerler.length ? dKart("En çok harcadığın yerler", `<ul class="dt-yer">${yerler.map(([ad, t], i) => `<li style="--w:${(t / yMax).toFixed(3)};--j:${i}"><span>${esc(ad)}</span><b class="num">${eur(t)}</b><i></i></li>`).join("")}</ul>`) : ""),
+    ne: !s.gider && !s.gelir ? "Bu dönemde kayıt yok. Harcamayı mikrofona söylemen yeter: “12 euro öğle yemeği”." :
+      `${seg === "gun" ? dGunAd() : seg === "hafta" ? "Son 7 günde" : p.ad[0] + " ayında bugüne kadar"} <b>${eur(s.gider)}</b> harcadın, <b>${eur(s.gelir)}</b> kazandın.${fark == null ? "" : ` ${p.ad[1][0].toLocaleUpperCase("tr") + p.ad[1].slice(1)} <b>${eur(o.gider)}</b> idi.`}${enKat ? ` En büyük kalem <b>${esc(enKat[0])}</b> (${eur(enKat[2])} · %${Math.round(enKat[2] / s.gider * 100)}).` : ""}`,
+    koc: ayKalan != null && ayKalan >= 0 && ayGun > 0 ? `Bütçeden ${eur(ayKalan)} kaldı; ay sonuna ${ayGun} gün var, günde ${eur(ayKalan / ayGun)} rahat rahat yeter. Rakamlar senin, karar senin.` :
+      ayKalan != null && ayKalan < 0 ? `Bu ay bütçeyi ${eur(-ayKalan)} geçtin. Olur böyle aylar; önümüzdeki hafta tek bir kalemi kısmak dengeyi toplar.` :
+      fark != null && fark <= -5 ? `Önceki döneme göre %${Math.abs(fark)} daha az harcamışsın. Cüzdanın sana selam söylüyor.` :
+      enKat ? `${enKat[0]} şu an en büyük kalem. Keyfine değiyorsa sorun yok; ben sadece ışığı tutuyorum.` : "Her kaydın bir sonraki kararını kolaylaştırır. Ben danışman değil, hesap arkadaşıyım; karar hep senin."};
+}
+
+/* ---- sayfa ---- */
+function detayHtml(key, a){
+  const o = a.tip === "para" ? dPara() : a.tip === "his" ? dHis() : a.tip === "uyku" ? dUyku() : a.tip === "tuvalet" ? dTuvalet() : a.tip === "check" ? dIsaret(key, a) : dSayac(key, a);
+  const not = kocNot(key);
+  return `<header class="dt-ust"><button class="iconbtn" data-act="detaygeri" aria-label="Geri">${I.l}</button><h1><i aria-hidden="true">${a.em}</i><span>${esc(a.ad)}</span></h1></header>` + dHero(o) +
+    (o.segs.length > 1 ? `<div class="seg dt-seg" role="group" aria-label="Dönem">${o.segs.map(([v, l]) => `<button data-act="dseg" data-v="${v}" aria-pressed="${v === o.seg}">${l}</button>`).join("")}</div>` : "") +
+    `<section class="card dt-grafik">${o.grafik}</section>` + (o.ekler || "") + dKart("Bu ne demek?", `<p class="dt-yazi">${o.ne}</p>`) +
+    `<section class="card dt-koc"><div class="card-h"><h2>Koçun diyor ki</h2>${not ? `<span class="meta">${esc(fmtShort(not.zaman))} notu</span>` : ""}</div><p class="dt-yazi">${not ? esc(not.metin) : o.koc}</p></section>` + (o.hedef || "");
+}
+const detayEl = () => document.getElementById("detay");
+function dSayBaslat(kok){
+  if (!hareketAcik()) return;
+  kok.querySelectorAll("[data-say]").forEach(el => {
+    const hedef = Number(el.dataset.say), ond = Number(el.dataset.ond) || 0, on = el.dataset.on || "", son = el.textContent;
+    if (!isFinite(hedef) || hedef === 0) return;
+    const bas = performance.now(), adim = now => { if (!el.isConnected) return; const p = Math.min(1, (now - bas) / 700), e = 1 - Math.pow(1 - p, 3); el.textContent = on + trSayi(hedef * e, ond); if (p < 1) requestAnimationFrame(adim); else el.textContent = son; };
+    requestAnimationFrame(adim);
+  });
+}
+function detayCiz(giris, grafikCanli){
+  const el = detayEl(), ic = document.getElementById("detayIc"); if (!el || !ic || !S.detay) return;
+  const a = alanBilgi(S.detay), kay = ic.scrollTop;
+  el.style.setProperty("--ar", a ? a.renk : "var(--mint)");
+  ic.innerHTML = a ? detayHtml(S.detay, a) : `<header class="dt-ust"><button class="iconbtn" data-act="detaygeri" aria-label="Geri">${I.l}</button><h1><span>Bulunamadı</span></h1></header><section class="card"><p class="dt-yazi">Bu alan artık listende yok.</p></section>`;
+  ic.classList.toggle("sakin", !giris); el.classList.toggle("hrksiz", !hareketAcik());
+  if (giris) { ic.scrollTop = 0; dSayBaslat(ic); DT.deger = null; DT.dol = "0"; } else ic.scrollTop = kay;
+  const bardak = ic.querySelector(".su-bardak");
+  if (bardak) { const yeniDol = bardak.style.getPropertyValue("--dol"), eskiDol = DT.dol; DT.dol = yeniDol;
+    if (eskiDol != null && eskiDol !== yeniDol && hareketAcik()) { bardak.style.setProperty("--dol", eskiDol); requestAnimationFrame(() => requestAnimationFrame(() => { if (bardak.isConnected) bardak.style.setProperty("--dol", yeniDol); })); } }
+  else DT.dol = null;
+  if (grafikCanli) { const g = ic.querySelector(".dt-grafik"); if (g) g.classList.add("canli"); const h = ic.querySelector(".dt-hero"); if (h) dSayBaslat(h); }
+  const say = ic.querySelector(".dt-sayi"), yeni = say ? say.textContent : null;
+  if (!giris && !grafikCanli && DT.deger != null && yeni !== DT.deger && say && hareketAcik()) say.classList.add("zipla");
+  DT.deger = yeni;
+}
+function detayBitir(){
+  const el = detayEl(); if (!el) return;
+  try { el.getAnimations({subtree: true}).forEach(a => a.cancel()); } catch (e) {}
+  el.hidden = true; el.style.transform = ""; el.style.pointerEvents = ""; DT.kapan = null;
+  const ic = document.getElementById("detayIc"); if (ic) ic.innerHTML = "";
+}
+const DT_YAY = "cubic-bezier(.22,1.1,.36,1)";
+function detayAcAnim(){
+  const el = detayEl(), yuzey = el.querySelector(".dt-yuzey"), ic = document.getElementById("detayIc"), ilk = !DT.acik;
+  if (DT.kapan) { DT.kapan.onfinish = null; DT.kapan = null; }
+  try { el.getAnimations({subtree: true}).forEach(a => a.cancel()); } catch (e) {}
+  DT.acik = S.detay; el.hidden = false; el.style.transform = ""; el.style.pointerEvents = "";
+  detayCiz(true);
+  const r = DT.rect; DT.rect = null;
+  if (!ilk || !DT.icten || !el.animate) return;
+  efektSes("sayfa");
+  if (!hareketAcik()) { el.animate([{opacity: 0}, {opacity: 1}], {duration: 140}); return; }
+  const W = window.innerWidth, H = window.innerHeight;
+  if (r && r.width) {
+    yuzey.animate([{transform: `translate(${r.left}px,${r.top}px) scale(${r.width / W},${r.height / H})`, opacity: .35}, {transform: "none", opacity: 1}], {duration: 420, easing: DT_YAY});
+    ic.animate([{opacity: 0, transform: "translateY(20px)"}, {opacity: 1, transform: "none"}], {duration: 300, delay: 120, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards"});
+  } else el.animate([{transform: "translateX(100%)"}, {transform: "none"}], {duration: 380, easing: "cubic-bezier(.2,.9,.25,1)"});
+}
+function detayKapatAnim(){
+  const el = detayEl(), key = DT.acik; DT.acik = null; DT.icten = false;
+  if (DT.kaydi || !hareketAcik() || !el.animate) { DT.kaydi = false; detayBitir(); return; }
+  const yuzey = el.querySelector(".dt-yuzey"), ic = document.getElementById("detayIc");
+  const iz = document.querySelector(`#view [data-detay="${key}"]`), hedef = iz && (iz.closest(".karo") || iz.closest(".card") || iz), r = hedef && hedef.getBoundingClientRect();
+  const W = window.innerWidth, H = window.innerHeight, gorunur = r && r.width && r.bottom > 40 && r.top < H - 40;
+  el.style.pointerEvents = "none";
+  ic.animate([{opacity: 1}, {opacity: 0}], {duration: 130, fill: "forwards"});
+  DT.kapan = gorunur ? yuzey.animate([{transform: "none", opacity: 1}, {transform: `translate(${r.left}px,${r.top}px) scale(${r.width / W},${r.height / H})`, opacity: 0}], {duration: 340, easing: "cubic-bezier(.3,.05,.2,1)", fill: "forwards"})
+    : el.animate([{transform: "none"}, {transform: "translateX(100%)"}], {duration: 300, easing: "cubic-bezier(.3,.05,.2,1)", fill: "forwards"});
+  DT.kapan.onfinish = detayBitir;
+}
+/* adres ile ekranı eşitler; her render'dan sonra çağrılır (hashchange de render eder) */
+function detayRender(){
+  const el = detayEl(); if (!el) return;
+  const once = DT.acik;
+  if (S.detay && DT.acik !== S.detay) detayAcAnim();
+  else if (!S.detay && DT.acik) detayKapatAnim();
+  else if (S.detay && once === S.detay) detayCiz(false);
+  kutlaKontrol();
+}
+function detayAc(k, b){
+  const key = detayAnahtar(k), kart = (b && (b.closest(".karo") || b.closest(".card"))) || b;
+  DT.rect = kart && kart.getBoundingClientRect ? kart.getBoundingClientRect() : null; DT.icten = true;
+  if (location.hash === "#/" + key) { S.detay = key; detayRender(); } else location.hash = "#/" + key;
+}
+function detayGeri(){
+  if (!S.detay) return;
+  if (DT.icten && history.length > 1) history.back();
+  else location.replace(location.pathname + location.search + "#" + (S.tab || "bugun"));
+}
+/* soldan kaydırarak geri: sayfa parmağı izler, bırakınca kapanır ya da yerine yaylanır */
+(() => {
+  const el = detayEl(); if (!el) return;
+  let x0 = 0, y0 = 0, t0 = 0, dx = 0, izle = false;
+  el.addEventListener("touchstart", e => { const t = e.touches[0]; izle = e.touches.length === 1 && t.clientX < 28 && !!DT.acik; x0 = t.clientX; y0 = t.clientY; dx = 0; t0 = e.timeStamp; }, {passive: true});
+  el.addEventListener("touchmove", e => {
+    if (!izle) return; const t = e.touches[0]; dx = Math.max(0, t.clientX - x0);
+    if (Math.abs(t.clientY - y0) > 44 && dx < 24) { izle = false; el.style.transform = ""; return; }
+    el.style.transform = `translateX(${dx}px)`;
+  }, {passive: true});
+  const bitir = e => {
+    if (!izle) return; izle = false;
+    const hiz = dx / Math.max(1, e.timeStamp - t0), kapat = dx > window.innerWidth * .33 || (dx > 60 && hiz > .6);   /* üçte birini geçince ya da hızlı bir fiskeyle */
+    if (!el.animate) { el.style.transform = ""; if (kapat) detayGeri(); return; }
+    if (kapat) { DT.kaydi = true; const an = el.animate([{transform: `translateX(${dx}px)`}, {transform: "translateX(100%)"}], {duration: 190, easing: "ease-out", fill: "forwards"});
+      an.onfinish = () => setTimeout(() => { if (S.detay) detayGeri(); else { DT.kaydi = false; } }, 0); }
+    else { el.animate([{transform: `translateX(${dx}px)`}, {transform: "none"}], {duration: 280, easing: DT_YAY}); el.style.transform = ""; }
+  };
+  el.addEventListener("touchend", bitir); el.addEventListener("touchcancel", bitir);
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && DT.acik && !S.agent.open) detayGeri(); });
+})();
+/* hedef tutunca küçük kutlama: sayaçlar hedefe ulaştığında, işaretliler seri 3, 7, 14, 30… olduğunda; günde bir kez */
+let kutlaHazir = false;
+function kutlaKontrol(){
+  if (!S.loaded) return;
+  const k = LS.get("hayat.kutla") || {}, taze = Date.now() - DT.sonKayit < 2500; let degisti = false;
+  habits().forEach(h => {
+    if (h.lower || (h.type !== "check" && h.type !== "count")) return;
+    const tuttu = hedefTuttu(h.key, dDeger(h.key, S.today));
+    if (!tuttu || k[h.key] === S.today) return;
+    const s = dSeri(h.key);
+    if (h.type === "check" && ![3, 7, 14, 21, 30, 50, 100].includes(s)) return;
+    k[h.key] = S.today; degisti = true;
+    if (!kutlaHazir || !taze) return;
+    const el = (DT.acik === detayAnahtar(h.key) && document.querySelector("#detay .dt-sayi")) || document.querySelector(`#view [data-detay="${detayAnahtar(h.key)}"]`);
+    efekt(el, "konfeti"); efektSes("ding");
+    toast(h.type === "check" ? `${h.label}: ${s} gün üst üste 🎉` : `${h.label}: bugünkü hedef tamam 🎉${s >= 2 ? ` · ${s} gün üst üste` : ""}`);
+  });
+  kutlaHazir = true;
+  if (degisti) LS.set("hayat.kutla", k);
+}
+/* Bugün'deki "Nasıl hissediyorum" kartı */
+function hisKart(date, d){
+  const var_ = MOODS.some(([k]) => d[k] != null);
+  return `<section class="card his-kart" style="--ar:${ALAN.his.renk}"><div class="card-h"><h2>Nasıl hissediyorum</h2><a class="linkbtn" href="#gunluk">Günlük →</a></div>
+    <div class="his-ozet" role="button" tabindex="0" data-act="detay" data-k="his" data-detay="his" aria-label="Nasıl hissediyorum ayrıntıları">${var_ ? MOODS.map(([k, ad, renk]) => `<span class="his-h" style="--c:${renk};--h:${d[k] == null ? 0 : (d[k] / 10).toFixed(2)}"><i></i><b class="num">${d[k] ?? "—"}</b><small>${ad}</small></span>`).join("")
+      : `<span class="his-bos">${date === S.today ? "Bugün henüz girmedin." : "Bu gün için kayıt yok."} Dokun, üç saniyede gir.</span>`}<i class="kr-ok" aria-hidden="true">›</i></div></section>`;
+}
+const hisOzet = d => MOODS.some(([k]) => d[k] != null) ? MOODS.map(([k, ad]) => `${ad.split(" ")[0].toLowerCase()} ${d[k] ?? "—"}`).join(" · ") : "henüz girilmedi";
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const k = b.dataset.k;
+  switch (b.dataset.act) {
+    case "detay": detayAc(k, b); break;
+    case "detaygeri": detayGeri(); break;
+    case "dseg": if (S.detay) { DT.seg[S.detay] = b.dataset.v; efektSes("tik"); detayCiz(false, true); } break;
+    case "dgsec": { const p = b.parentElement; p.querySelectorAll(".dg-b.sec").forEach(x => x.classList.remove("sec")); b.classList.add("sec"); const alt = p.parentElement.querySelector(".dg-alt"); if (alt) alt.textContent = b.dataset.t; break; }
+    case "his": { const v = Number(b.dataset.v); editDay(S.sel, d => { d[k] = d[k] === v ? null : v; }); efektSes("tik"); render(); break; }
+    case "dhedef": { const cur = gunHedef(k), a = alanBilgi(k), n = Number(b.dataset.n); let v;
+      if (cur == null) { const o = dOrt(dDizi(k, dGunler(7))); v = Math.max(1, o == null ? 1 : (a && (a.lower || k === "sigara") ? Math.floor(o) : Math.ceil(o))); }
+      else v = Math.max(0, Math.round((cur + n) * 2) / 2);
+      S.settings = Object.assign({}, S.settings || {}, {habits: habits(), gunHedef: Object.assign({}, (S.settings || {}).gunHedef, {[k]: v})}); saveSettings(); efektSes(n < 0 ? "eksi" : "tik"); render(); break; }
+  }
+});
+document.addEventListener("keydown", e => { const t = e.target; if ((e.key === "Enter" || e.key === " ") && t && t.matches && t.matches('[role="button"][data-act]')) { e.preventDefault(); t.click(); } });
+/* ==== /DETAY SAYFALARI ==== */
+
 function loadMock(){
   S.mode = "mock"; S.loaded = true; S.settings = {ayar: {ad: "Kerem"}};
   let seed = 11; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  let seed2 = 7; const rnd2 = () => (seed2 = (seed2 * 9301 + 49297) % 233280) / 233280;
   const titles = ["Ortaklarla haftalık toplantı","Paolo'yu ara (şirket evrakı)","GYG ilan fotoğraflarını güncelle","Spor: 45 dk","20 sayfa kitap","Muhasebe kontrolü","Vespa bakımı"];
   const notlar = ["Turlar akıcıydı, müşteriler çok memnundu.","Yorucu gün ama iyi bitti.","Ortaklarla iyi bir konuşma yaptık.","Erken kalkınca gün daha verimli geçiyor.",""];
   const kat = ["yemek","kahve","market","ulasim","sigara","yemek","kahve","vespa","eglence"];
@@ -3552,12 +4161,15 @@ function loadMock(){
       d.para = Array.from({length: 1 + Math.floor(rnd()*3)}, (_, j) => { const k = kat[Math.floor(rnd()*kat.length)]; return {id: uid(), tip: "gider", tutar: Math.round((k === "vespa" ? 40 : k === "market" ? 25 : 8) * (0.6 + rnd()) * 100)/100, kat: k, not: "", saat: ["09:10","13:20","20:40"][j]}; });
       if (i % 7 === -3) d.para.push({id: uid(), tip: "gelir", tutar: 420, kat: "tur", not: "Haftalık hak ediş", saat: "18:00"});
       if (i < 0) d.note = notlar[Math.floor(rnd()*notlar.length)];
+      const saatUret = (n, bas, son) => Array.from({length: n}, () => String(bas + Math.floor(rnd2() * (son - bas))).padStart(2, "0") + ":" + String(Math.floor(rnd2() * 60)).padStart(2, "0")).sort();
+      d.sigaraSaat = saatUret(d.counts.sigara, 9, 23); d.iz = {su: saatUret(d.counts.su, 8, 22), cis: saatUret(d.counts.cis, 7, 23), buyuk: saatUret(1, 8, 10)};
+      if (i < 0) d.uykuSaat = {yatis: ["23:40", "00:20", "01:05"][Math.floor(rnd2() * 3)], kalkis: ["07:30", "08:00", "08:20"][Math.floor(rnd2() * 3)]};
     }
     S.days[date] = d;
   }
   const t = S.days[S.today];
   t.plan = [{id: "p1", time: "08:00", title: "Uyan", done: true}, {id: "p2", time: "08:15", title: "Kahvaltı", done: true}, {id: "p3", time: "09:00", title: "Spor: Tom Holland workout", done: false, takvim: true}, {id: "p4", time: "10:30", title: "Claude ile kod: Hayat Paneli'ni geliştir", done: false}, {id: "p5", time: "", title: "Paolo'yu ara", done: false}];
-  t.counts = {sigara: 4, su: 3}; t.sleep = 7; t.mood = null;
+  t.counts = {sigara: 4, su: 3}; t.sleep = 7; t.mood = null; t.sigaraSaat = ["08:40", "10:15", "11:30", "12:50"]; t.iz = {su: ["08:20", "10:45", "13:10"]};
   t.gunluk = {niyet: "Sakin kal, sporu atlama"};
   S.goals = {g1: {title: "Hello Rides S.r.l. kuruluşunu bitirmek", horizon: S.today.slice(0,4), area: "is", progress: 60, next: "Paolo ile noter randevusu", createdAt: "1"},
              g2: {title: "Sigarayı günde 5'in altına indirmek", horizon: S.today.slice(0,4), area: "saglik", progress: 20, next: "İlk sigarayı kahvaltıdan sonraya at", createdAt: "2"}};
@@ -3855,9 +4467,167 @@ function sesBaslat(gid){
   if (S.agent.open) { S.agent.open = false; renderSheet(); }
   micKapat();
   sesAudioHazirla();
-  SES = {acik: true, oturum: uid(), durum: "okuyor", metin, kaynak, tur: 0, cevaplar: [], ara: "", hata: "", yerel: !g || !g.sonuc || kaynak.startsWith("Uygulamadan")};
+  sohbetGonder();   /* önceki sohbetten gönderilmemiş cevap kaldıysa kaybolmasın */
+  const yerel = !g || !g.sonuc || kaynak.startsWith("Uygulamadan"), bol = yerel ? null : sesBolumler(g.sonuc);
+  const gm = String((g && g.metin) || ""), slot = /SABAH/.test(gm) ? "Sabah" : /ÖĞLE/.test(gm) ? "Öğle" : /AKŞAM/.test(gm) ? "Akşam" : "";
+  SES = {acik: true, oturum: uid(), durum: "okuyor", metin, kaynak, tur: 0, cevaplar: [], ara: "", hata: "", yerel, bolumler: bol, bi: 0, sohbet: [], slot};
   renderSes();
+  if (bol) {
+    const o = SES.oturum; SES.yukleniyor = true; renderSes();
+    sohbetTek(bol).then(t => {
+      if (!SES.acik || SES.oturum !== o) return;
+      SES.yukleniyor = false; SES.tek = t && t.kesim ? t : null;
+      sesBolumOku();   /* sesBolumOku uyarıyı temizler; not ondan SONRA yazılır */
+      if (t && t.ayrilamadi && SES.acik && !SES.hata) { SES.hata = "Tek ses dosyasında konu araları bulunamadı; konu konu seslendiriyorum."; renderSes(); }
+    });
+    return;
+  }
   seslendir(metin + SES_SON, () => sesDinle(false), false, SES.yerel);
+}
+/* ---- Sohbet modu ----
+   Brifing metninde [[bolum Ad]] satırları varsa konu konu okunur: bir bölüm biter, sonundaki soruya cevabın dinlenir,
+   sonra sıradaki konuya geçilir. Basit kayıtlar ("3 su") anında işlenir; geri kalan cevaplar sohbet bitince TEK mesajda
+   Claude'a gider (soru + cevap birlikte, bağlam kaybolmasın). İşaret yoksa eski akış hiç değişmeden çalışır;
+   eski sürümler işaretleri zaten gizli blok sayıp atlar. */
+function sesBolumler(sonuc){
+  const ham = String(sonuc || ""), re = /\[\[bolum\s+([^\]\n]{1,40})\]\]/gi;
+  let m, son = 0, ad = null, giris = "", out = [];
+  while ((m = re.exec(ham))) { const parca = ham.slice(son, m.index); if (ad == null) giris = parca; else out.push({ad, ham: parca}); ad = m[1].trim(); son = re.lastIndex; }
+  if (ad == null) return null;
+  out.push({ad, ham: ham.slice(son)});
+  out = out.map(b => ({ad: b.ad, metin: sesTemiz(b.ham)})).filter(b => b.metin);
+  if (out.length < 2) return null;
+  const g = sesTemiz(giris); if (g) out[0].metin = g + "\n" + out[0].metin;
+  return out;
+}
+function sonSoru(metin){   /* bölümün sonundaki soru cümlesi (art arda birkaç soru olabilir) */
+  const c = String(metin).match(/[^.!?…\n]+[.!?…]+|[^.!?…\n]+$/g) || [], q = [];
+  for (let i = c.length - 1; i >= 0 && /\?\s*$/.test(c[i]); i--) q.unshift(c[i].trim());
+  return q.join(" ");
+}
+function sesOnHazirla(metin){   /* sıradaki bölümün doğal sesi, sen cevap verirken arka planda hazırlansın */
+  try {
+    const a = ttsAyar(); if (a.kaynak !== "gemini" || !a.anahtar || kotaDolu() || S.mode !== "live") return;
+    geminiSes(metin).catch(e => { const m = String(e.message || e); if (/^429/.test(m) && /PerDay|per day|daily/i.test(m)) kotaIsaretle(); });
+  } catch (e) {}
+}
+function sesBolumOku(){
+  if (!SES.acik || !SES.bolumler) return;
+  const i = SES.bi, b = SES.bolumler[i], o = SES.oturum;
+  Object.assign(SES, {durum: "okuyor", hata: "", yukleniyor: false}); renderSes();
+  const bitince = () => {
+    if (!SES.acik || SES.oturum !== o || SES.bi !== i) return;
+    if (/\?\s*$/.test(b.metin)) sesDinle(false); else sesBolumGec();
+  };
+  if (SES.tek) { soyledi(b.metin); sohbetTekCal(i, bitince); return; }
+  const sonra = SES.bolumler[i + 1]; if (sonra) sesOnHazirla(sonra.metin);
+  seslendir(b.metin, bitince, false, false);
+}
+/* ---- Sohbet: tek ses dosyası ----
+   Bütün brifing TEK istekte seslendirilir (ücretsiz günlük ses hakkını korur). Konu aralarına Gemini'nin [long pause]
+   etiketi konur; ses dalgasında bu uzun sessizlikler bulunur, dosya o noktalarda durdurulup cevabın dinlenir ve
+   sonra kaldığı yerden devam eder. Sessizlikler güvenle bulunamazsa (etiket uygulanmadıysa) konu konu seslendirmeye
+   dönülür; iki kez üst üste olmazsa bir daha denenmez (Ayarlar > Ses'ten yeniden açılır). */
+const TEK_ARA = "\n\n[long pause]\n\n";
+const tekSesAcik = () => LS.get("hayat.tekSes") !== false && (LS.get("hayat.tekSesHata") || 0) < 2;
+const tekHazir = new Map();
+function sohbetTek(bol){
+  let a; try { a = ttsAyar(); } catch (e) { return Promise.resolve(null); }
+  if (a.kaynak !== "gemini" || !a.anahtar || kotaDolu() || !tekSesAcik() || S.mode === "mock") return Promise.resolve(null);
+  const metin = bol.map(b => b.metin.replace(/\s*\n+\s*/g, " ")).join(TEK_ARA);
+  if (metin.length > 4500) return Promise.resolve(null);
+  const k = hashSes([a.ses, a.uslup, metin].join("|"));
+  if (!tekHazir.has(k)) tekHazir.set(k, (async () => {
+    const url = await geminiSes(metin);
+    const kesim = await sesKesimBul(url, bol.map(b => b.metin.length));
+    if (!kesim) { LS.set("hayat.tekSesHata", (LS.get("hayat.tekSesHata") || 0) + 1); return {ayrilamadi: true}; }
+    LS.set("hayat.tekSesHata", 0);
+    return {url, kesim};
+  })().catch(e => { const m = String((e && e.message) || e); if (/^429/.test(m) && /PerDay|per day|daily/i.test(m)) kotaIsaretle(); tekHazir.delete(k); return null; }));
+  return tekHazir.get(k);
+}
+async function sesKesimBul(url, uzunluklar){
+  try {
+    const buf = await (await fetch(url)).arrayBuffer();
+    const AC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!AC) return null;
+    const ctx = new AC(1, 1, 24000);
+    const ab = await new Promise((res, rej) => { const pr = ctx.decodeAudioData(buf, res, rej); if (pr && pr.then) pr.then(res, rej); });
+    return kesimHesapla(ab.getChannelData(0), ab.sampleRate, uzunluklar);
+  } catch (e) { return null; }
+}
+/* Ses örneklerinden konu aralarını bulur. uzunluklar: konuların karakter sayıları (sırayla). Emin değilse null döner. */
+function kesimHesapla(x, sr, uzunluklar){
+  const n = uzunluklar.length - 1; if (n < 1) return null;
+  const adim = Math.round(sr * 0.02), kare = Math.floor(x.length / adim); if (kare < 50) return null;
+  const rms = new Float32Array(kare); let tepe = 0;
+  for (let i = 0; i < kare; i++) { let t = 0; for (let j = i * adim, e = j + adim; j < e; j++) t += x[j] * x[j]; rms[i] = Math.sqrt(t / adim); if (rms[i] > tepe) tepe = rms[i]; }
+  if (tepe < 0.01) return null;
+  const esik = tepe * 0.035, bos = [];
+  for (let i = 0, bas = -1; i <= kare; i++) {
+    const sessiz = i < kare && rms[i] < esik;
+    if (sessiz && bas < 0) bas = i;
+    if (!sessiz && bas >= 0) { if (bas > 0 && i < kare && i - bas >= 10) bos.push({b: bas * 0.02, s: i * 0.02, u: (i - bas) * 0.02}); bas = -1; }
+  }
+  /* konu araları dosyadaki EN UZUN n sessizlik olmalı: en az 0,8 sn, geri kalan her sessizlikten 1,3 kat uzun
+     ve her biri metin uzunluğuna göre beklenen yerin yakınında */
+  const sirali = bos.slice().sort((p, q) => q.u - p.u); if (sirali.length < n) return null;
+  const secilen = sirali.slice(0, n).sort((p, q) => p.b - q.b), digerEnUzun = sirali.length > n ? sirali[n].u : 0;
+  const enKisa = Math.min(...secilen.map(g => g.u));
+  if (enKisa < 0.8 || enKisa < digerEnUzun * 1.3) return null;
+  const sure = kare * 0.02, toplam = uzunluklar.reduce((p, q) => p + q, 0), pencere = Math.max(4, sure * 0.12);
+  let kum = 0;
+  for (let k = 0; k < n; k++) { kum += uzunluklar[k]; if (Math.abs((secilen[k].b + secilen[k].s) / 2 - sure * kum / toplam) > pencere) return null; }
+  return secilen.map(g => ({dur: g.b + 0.2, devam: Math.max(g.b + 0.2, g.s - 0.12)}));
+}
+function sohbetTekCal(i, bitince){   /* tek dosyanın i. konusunu çal; konu bitince dur ve bitince()'yi çağır */
+  const t = SES.tek, a = sesAudio || (sesAudio = new Audio()), o = SES.oturum;
+  const bas = i === 0 ? 0 : t.kesim[i - 1].devam, son = i < t.kesim.length ? t.kesim[i].dur : Infinity;
+  let bitti = false; clearInterval(SES.tekZ);
+  const tamam = () => { if (bitti) return; bitti = true; clearInterval(z); a.onended = null; a.onerror = null; try { a.pause(); } catch (e) {} if (SES.acik && SES.oturum === o) bitince(); };
+  let z = null;
+  const basla = () => {
+    if (!SES.acik || SES.oturum !== o) return;
+    try { a.currentTime = bas; a.preservesPitch = true; a.playbackRate = ttsAyar().hiz || 1; } catch (e) {}
+    a.onended = tamam; a.onerror = tamam;
+    const pr = a.play();
+    if (pr && pr.catch) pr.catch(() => { if (SES.oturum !== o) return; clearInterval(z); SES.durum = "bekle"; SES.hata = "Ses başlatılamadı; “Baştan oku”ya dokun."; renderSes(); });
+    z = SES.tekZ = setInterval(() => { if (!SES.acik || SES.oturum !== o) { clearInterval(z); return; } if (a.currentTime >= son) tamam(); }, 40);
+  };
+  if (a.src !== t.url || a.readyState < 1) { a.src = t.url; a.addEventListener("loadedmetadata", basla, {once: true}); try { a.load(); } catch (e) {} }
+  else basla();
+}
+function sesBolumGec(){   /* sıradaki konu; konular bittiyse son bir "eklemek istediğin var mı" turu */
+  if (!SES.acik || !SES.bolumler) return;
+  sesZamanSil(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; sesDurdur();
+  Object.assign(SES, {oturum: uid(), ara: "", baz: "", sayiyor: false, elle: false, bekledi: false});
+  SES.bi++;
+  if (SES.bi < SES.bolumler.length) { sesBolumOku(); return; }
+  SES.bi = SES.bolumler.length; SES.durum = "okuyor"; renderSes();
+  seslendir("Benden bu kadar. Eklemek istediğin bir şey var mı?", () => sesDinle(false), false, true);
+}
+const SOHBET_BITIR = /^(kapat|bitir|bitirelim|görüşürüz|iyi geceler|bu kadar yeter|yeter)$/, SOHBET_GEC = /^(geç|geçelim|bunu geç|sonraki|sonrakine geç|atla|pas|devam|devam et)$/;
+function sesBolumCevap(t){
+  const sade = trLow(t).replace(/[.!,?]/g, "").trim();
+  if (SOHBET_BITIR.test(sade)) { sesBitir("Tamamdır, görüşürüz!"); return; }
+  const bitti = SES.bi >= SES.bolumler.length, b = bitti ? null : SES.bolumler[SES.bi];
+  if (!bitti && SOHBET_GEC.test(sade)) { sesBolumGec(); return; }
+  if (bitti && BITIS.test(sade)) { sesBitir(SES.sohbet.length ? "Tamam, hepsini ilettim. Görüşürüz!" : "Tamamdır, görüşürüz!"); return; }
+  let ozet;
+  if (localParse(t) || !claudeVar()) ozet = gonder(t).ozet;   /* basit kayıt: anında */
+  else { SES.sohbet.push({bolum: b ? b.ad : "Ek", soru: b ? sonSoru(b.metin) : "", cevap: t}); ozet = ""; }
+  SES.cevaplar.push({t, ozet, bolum: b ? b.ad : "Ek"}); SES.tur++;
+  render();
+  if (bitti) { sesBitir(SES.sohbet.length ? "Tamam, hepsini ilettim. Görüşürüz!" : "Tamamdır, görüşürüz!"); return; }
+  sesBolumGec();
+}
+function sohbetGonder(){   /* birikmiş cevapları tek mesaj olarak Claude'a ilet (yerel ayrıştırmaya sokmadan) */
+  const c = SES && SES.sohbet; if (!c || !c.length) return;
+  SES.sohbet = [];
+  const metin = `🎧 ${SES.slot ? SES.slot + " brifingindeki" : "Brifingdeki"} sorulara cevaplarım (tırnak içindeki koçun sorusu, okun sağındaki benim cevabım):\n` +
+    c.map(x => x.soru ? `${x.bolum} · “${x.soru}” → ${x.cevap}` : `${x.bolum}: ${x.cevap}`).join("\n");
+  const k = {id: "g" + uid(), metin, durum: "bekliyor", sonuc: "", zaman: new Date().toISOString(), gonderildi: false};
+  S.gelen.push(k); if (S.mode !== "mock") gelenGonder(k);
+  cacheSave(); render();
 }
 const SES_SON = "\nSen ne dersin? Dinliyorum.";
 /* prepare the newest briefing's voice in the background (one request), so "Dinle" starts at once */
@@ -3866,7 +4636,9 @@ function sesHazirla(){
     const a = ttsAyar(); if (a.kaynak !== "gemini" || !a.anahtar || kotaDolu() || S.mode !== "live") return;
     const g = sonKanal("brifing")[0]; if (!g || !g.sonuc || Date.now() - gZaman(g) > 16*3600e3) return;
     const k = "hayat.sesHazir." + g.id; if (LS.get(k)) return; LS.set(k, 1);
-    geminiSes(sesTemiz(g.sonuc) + SES_SON).catch(e => { if (/^429/.test(String(e.message || e)) && /PerDay|per day|daily/i.test(String(e.message || e))) kotaIsaretle(); });
+    const bol = sesBolumler(g.sonuc);
+    if (bol && tekSesAcik()) { sohbetTek(bol); return; }
+    geminiSes(bol ? bol[0].metin : sesTemiz(g.sonuc) + SES_SON).catch(e => { if (/^429/.test(String(e.message || e)) && /PerDay|per day|daily/i.test(String(e.message || e))) kotaIsaretle(); });
   } catch (e) {}
 }
 /* Dinleme: kısa duraklamada kesmez. Tanıma kendiliğinden biterse yeniden başlar ve söylenenler birikir.
@@ -3932,6 +4704,7 @@ function sesCevap(t){
   if (!SES.acik) return;
   if (!t) { SES.durum = "bekle"; renderSes(); return; }
   if (yankiMi(t)) { SES.durum = "bekle"; SES.hata = YANKI; renderSes(); return; }
+  if (SES.bolumler) { sesBolumCevap(t); return; }
   if (BITIS.test(trLow(t).replace(/[.!,]/g, "").trim())) { sesBitir("Tamamdır, görüşürüz!"); return; }
   const r = gonder(t);
   SES.cevaplar.push({t, yerel: r.yerel, ozet: r.ozet}); SES.tur++;
@@ -3943,11 +4716,12 @@ function sesCevap(t){
 }
 function sesBitir(son){
   if (!SES.acik) return;
+  sohbetGonder();
   sesZamanSil(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null;
   if (son) { SES.durum = "bitti"; renderSes(); const o = SES.oturum; seslendir(son, () => { if (SES.oturum === o) sesKapat(); }, false, true); }
   else sesKapat();
 }
-function sesKapat(){ sesZamanSil(); sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; SES = {acik: false}; renderSes(); }
+function sesKapat(){ sohbetGonder(); sesZamanSil(); sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (e) {} sesRec = null; SES = {acik: false}; renderSes(); }
 function renderSes(){
   const el = document.getElementById("ses"); if (!el) return;
   if (!SES.acik) { el.hidden = true; el.innerHTML = ""; return; }
@@ -3955,16 +4729,17 @@ function renderSes(){
   const etiket = d === "okuyor" ? (SES.yukleniyor ? "Sesim hazırlanıyor…" : "Okuyorum…") : d === "dinliyor" ? (SES.sayiyor ? "Gönderiyorum… konuşursan beklerim" : "Dinliyorum. Acele etme, bitince küreye dokun") : d === "bitti" ? "Görüşürüz" : "Konuşmak için dokun";
   el.innerHTML = `<div class="sheet-bg" data-act="sesbitir"></div><div class="sheet sesk" role="dialog" aria-modal="true" aria-labelledby="sesT"><div class="sheet-in">
     <div class="grab"></div>
-    <div class="card-h" style="margin:0"><div><h2 id="sesT">Sesli brifing</h2><span class="small muted">${esc(SES.kaynak || "")}</span></div><button class="x" data-act="sesbitir" aria-label="Kapat">×</button></div>
+    <div class="card-h" style="margin:0"><div><h2 id="sesT">${SES.bolumler ? "Sohbet" : "Sesli brifing"}</h2><span class="small muted">${esc(SES.kaynak || "")}</span></div><button class="x" data-act="sesbitir" aria-label="Kapat">×</button></div>
+    ${SES.bolumler ? `<ol class="sohbet-yol" aria-label="Konular">${SES.bolumler.map((b, i) => `<li class="${i < SES.bi ? "gecti" : i === SES.bi ? "simdi" : ""}"${i === SES.bi ? ' aria-current="step"' : ""}>${esc(b.ad)}</li>`).join("")}</ol>` : ""}
     <button class="orb ${d}${SES.sayiyor ? " sayiyor" : ""}" data-act="${d === "dinliyor" ? "sesgonder" : d === "okuyor" ? "sesatla" : "seskonus"}" aria-label="${esc(etiket)}"><span></span>${d === "dinliyor" ? I.mic : d === "okuyor" ? `<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>` : I.mic}</button>
     <p class="orbtxt" aria-live="polite">${esc(etiket)}${d === "okuyor" ? `<br><span class="small muted">Dokunursan okumayı geçip seni dinler</span>` : ""}</p>
     ${d === "dinliyor" ? `<p class="ara" id="sesAra">${esc(SES.ara || "")}</p>
       <div class="chiprow" style="justify-content:center;margin:-4px 0 6px"><button class="chip" data-act="sesgonder">Gönder</button><button class="chip" data-act="seselle" aria-pressed="${!!SES.elle}">${SES.elle ? "Kendim göndereceğim ✓" : "Bekle, düşünüyorum"}</button><button class="chip" data-act="sesduzelt">Düzelt</button></div>` : ""}
     ${SES.hata ? `<p class="small" style="color:var(--amber);margin:0;text-align:center">${esc(SES.hata)}</p>` : ""}
-    ${SES.cevaplar.length ? `<div class="reply">${SES.cevaplar.map(c => `<div class="you">Sen: ${esc(c.t)}</div><p style="margin:0 0 8px">${esc(c.ozet)}</p>`).join("")}</div>` : ""}
+    ${SES.cevaplar.length ? `<div class="reply">${SES.cevaplar.map(c => `<div class="you">${c.bolum ? esc(c.bolum) + " · " : ""}Sen: ${esc(c.t)}</div>${c.ozet ? `<p style="margin:0 0 8px">${esc(c.ozet)}</p>` : `<p style="margin:0 0 4px"></p>`}`).join("")}${SES.bolumler && SES.sohbet.length ? `<p class="small muted" style="margin:6px 0 0">Cevapların sohbet bitince tek mesajda Claude'a gidecek.</p>` : ""}</div>` : ""}
     <details class="sesmetin"><summary>Brifingin yazılı hâli</summary><div class="small" style="white-space:pre-wrap;color:var(--ink-2);margin-top:8px">${esc(SES.metin || "")}</div></details>
     <form class="comprow" id="f-ses"><textarea class="field" id="sesYaz" rows="1" placeholder="Ya da buraya yaz…" aria-label="Yazarak cevap ver"></textarea><button class="btn" aria-label="Gönder">${I.send}</button></form>
-    <div class="chiprow" style="justify-content:center"><button class="chip" data-act="sestekrar">Baştan oku</button><button class="chip" data-act="sesbitir">Bitir</button></div>
+    <div class="chiprow" style="justify-content:center">${SES.bolumler && SES.bi < SES.bolumler.length ? `<button class="chip" data-act="sesbolumgec">Bu konuyu geç</button>` : ""}<button class="chip" data-act="sestekrar">Baştan oku</button><button class="chip" data-act="sesbitir">Bitir</button></div>
   </div></div>`;
   sayfaAcilis(el); el.hidden = false;
 }
@@ -3977,7 +4752,10 @@ document.addEventListener("click", e => {
     case "sesdur": case "sesgonder": sesGonder(); break;
     case "seselle": SES.elle = !SES.elle; sesSessizlik(); renderSes(); break;
     case "sesduzelt": { const t = (SES.ara || "").trim(); sesZamanSil(); const r = sesRec; sesRec = null; try { if (r) r.abort(); } catch (er) {} Object.assign(SES, {durum: "bekle", ara: "", baz: "", sayiyor: false}); renderSes(); const f = document.getElementById("sesYaz"); if (f) { f.value = t; f.focus(); } break; }
-    case "sestekrar": { sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (er) {} sesRec = null; sesAudioHazirla(); const m = SES.metin; SES.oturum = uid(); SES.durum = "okuyor"; SES.hata = ""; renderSes(); seslendir(m + SES_SON, () => sesDinle(false), false, SES.yerel); break; }
+    case "sesbolumgec": sesBolumGec(); break;
+    case "sestekrar": { sesDurdur(); try { if (sesRec) sesRec.abort(); } catch (er) {} sesRec = null; sesAudioHazirla(); const m = SES.metin; SES.oturum = uid(); SES.durum = "okuyor"; SES.hata = ""; sesZamanSil();
+      if (SES.bolumler) { SES.bi = 0; sesBolumOku(); break; }
+      renderSes(); seslendir(m + SES_SON, () => sesDinle(false), false, SES.yerel); break; }
     case "sesdene": ttsFormKaydet(); sesDene(); break;
     case "sesbitir": sesKapat(); break;
   }
