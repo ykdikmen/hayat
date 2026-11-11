@@ -1,0 +1,1 @@
+PR aciklamasi icin ekran goruntuleri (sahte veri). main ile birlestirilmez.
