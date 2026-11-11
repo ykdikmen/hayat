@@ -4,16 +4,14 @@ Bu repo üzerinde iki ayrı Claude oturumu çalışıyor. Oturumlar birbirine me
 gönderemez; ortak defterimiz bu dosya ve PR'lar. Bir işe başlamadan önce burayı
 oku, bitirince güncelle.
 
-Son güncelleme: 10 Kasım 2026 akşam, Fable oturumu.
+Son güncelleme: 11 Kasım 2026, Opus oturumu.
 
 ## Şu anki durum
 
-- Yayındaki sürüm: `main` = 2.8.0 (`hayat-v280`). PR #1 merge edildi.
-- **İki açık PR var, ikisi de 2.8.1 / `hayat-v281` diyor:** PR #2 (Opus, `claude/opus-gunluk-bos-formlar`)
-  ve PR #3 (Fable, `claude/sohbet-brifing`, sohbet modu). Hangisi ikinci merge edilecekse önce `main`'i
-  içine alsın ve sürümü **2.8.2 / `hayat-v282`** yapsın. Çakışma beklenen yerler: `SURUM`, `sw.js` CACHE.
-- Opus oturumunun 2.8 "akıcılık" tasarım dokümanı (`hayat-2.8` dalı) GitHub'a hiç gönderilmemiş. Aşağıdaki
-  tablo o dokümanın Kerem'in onayladığı özetinden çıkarıldı.
+- Yayındaki sürüm: `main` = 2.9.0 (`hayat-v290`). PR #1, #3 ve #4 merge edildi.
+- PR #2 (Opus, `claude/opus-gunluk-bos-formlar`) `main`'i içine aldı: **2.9.1 / `hayat-v291`**.
+  Bundan sonraki PR **2.9.2 / `hayat-v292`** olsun.
+- 2.8 "akıcılık" tasarım dokümanı repoda: `docs/superpowers/specs/2026-11-10-hayat-28-akicilik-design.md`.
 
 ### Sohbet modu (PR #3) ve brifing komutları
 
@@ -48,9 +46,7 @@ Son güncelleme: 10 Kasım 2026 akşam, Fable oturumu.
   düşmek istersen cevabın sonundaki gizli bloğa şu op'u koy; uygulama 7 gün gösterir, sonra kendi kurallarına döner:
   `[[uygula {"ops":[{"op":"koc","alan":"su","metin":"…"}]}]]` (alan: `su`, `sigara`, `tuvalet`, `his`, `uyku`,
   `para` ya da bir alışkanlık anahtarı). Komutlara henüz eklenmedi; `sunucu/Code.js` değişmedi.
-- Sürüm: bu PR 2.9.0 / `hayat-v290`. PR #2 hâlâ 2.8.1 diyor; hangisi sonra merge olursa main'dekinden büyük
-  bir sürüm ve yeni bir `CACHE` vermeli. İkisi de `index.html`'de Bugün ve Günlük çevresine dokunduğu için
-  ikinci merge'de çakışma çıkabilir.
+- Sürüm: bu PR 2.9.0 / `hayat-v290` idi. PR #2 main'i alıp 2.9.1 / `hayat-v291` oldu.
 
 ## PR #1'de olanlar
 
@@ -74,16 +70,31 @@ Son güncelleme: 10 Kasım 2026 akşam, Fable oturumu.
 
 | İş | Kim | Not |
 |---|---|---|
-| D2 Aylık tablo bugünün sütununa kaysın, sütun vurgulansın | Opus | kendi içinde, küçük |
-| D3 Boş ekranlara ikonlu, düğmeli kartlar | Opus | Bildirimler düğmesi bildirim ayarlarına gider |
-| D4 Para / Yeni hedef / Odak formları "+ Ekle" arkasında | Opus | Bugün'deki "Harcama ekle"den gelince açık gelsin |
-| B3 Günlük doluluk işaretleri + Günlük çipleri ve kapanır kartları | Opus | `kapanir()` ve `seritRender()` hazır, Günlük kartlarına `data-kart` vermek yeterli |
+| D2 Aylık tablo bugünün sütununa kaysın, sütun vurgulansın | Opus | **bitti (2.9.1, PR #2)** |
+| D3 Boş ekranlara ikonlu, düğmeli kartlar | Opus | **bitti (2.9.1, PR #2)** |
+| D4 Para / Yeni hedef / Odak formları "+ Ekle" arkasında | Opus | **bitti (2.9.1, PR #2)** |
+| B3 Günlük doluluk işaretleri + Günlük çipleri ve kapanır kartları | Opus | **bitti (2.9.1, PR #2)** |
 | A1 Ayarlar ayrı ekran (⚙︎, sağdan kayarak) | Fable | yapısal değişiklik |
 | C2 Çekerek yenileme + "Kaydedildi / Kaydediliyor / Çevrimdışı" yazısı | Fable | |
 | C3 Mikrofona basılı tutunca hızlı menü | Fable | |
 | Brifingler, görev istemleri, `sunucu/Code.js`, koç kimliği | Opus | Fable bunlara dokunmuyor |
 
+## Opus 2.9.1'de eklenenler (PR #2) (Fable'ın bilmesi gerekenler)
+
+- **A1 için:** iki düğme hâlâ eski yolu kullanıyor: `data-act="seggo" data-tab="claude" data-g="claude" data-v="ayarlar"`.
+  Biri boş Bildirimler ekranındaki "Bildirim ayarları", diğeri Para'daki "Aylık bütçe belirle →".
+  Ayarlar ayrı ekran olunca bunları ilgili alt sayfaya (Bildirimler, Para) yönlendir.
+
 ## Kod içinde hazır duran parçalar
+
+- `bos(ikon, metin, düğme)`: boş durum kartı. İkonlar `BOS_I` (hedef, para, tur) ve `I` (bell, mail, chat).
+- `formAcik(f)`, `formAcBtn(f, metin)`: katlanan formlar. `S.ui.acik[f] = sekme` geçicidir;
+  `render()` sekme değişince temizler. Açmak için `data-act="formac" data-f="para|hedef|odak"`.
+  Odak ve kart kimlikleri `FORM_ODAK`, `FORM_KART`.
+- `gunlukDolu(gün)`, `GUNLUK_BOL`: Günlük'ün altı bölümünden hangilerinin dolu olduğu.
+  `gunlukDolulukYaz()` yazarken çubuğu ve şerit çiplerini günceller.
+- `tabloKaydir()`: render sonunda aylık tabloyu bugüne kaydırır; ay başına kaydırma `TABLO_KAY`'da tutulur.
+- `SERIT_KART` artık Günlük kimliklerini de içeriyor. Şerit çipleri Bugün ve Günlük'te çıkıyor.
 
 - `kapanir(kimlik, başlık, özetFonksiyonu, kartHtml)`: bir kartı kapanır yapar. Kart
   kimliği `data-kart` olarak yazılır; şerit çipleri bu özniteliği okur.
