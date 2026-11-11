@@ -33,6 +33,25 @@ Son güncelleme: 10 Kasım 2026 akşam, Fable oturumu.
 - Akşam brifingi görevinin komutu 10 Kasım'da Fable oturumunca bu biçime göre yeniden yazıldı (deneme).
   Sabah ve öğle komutları eski biçimde; Kerem beğenirse onlar da çevrilecek.
 
+### Alan sayfaları (2.9.0, `claude/detay-sayfalari`)
+
+- Bugün'deki karolar, Para ve Sigara kartları ve yeni "Nasıl hissediyorum" kartı kendi sayfasına açılır:
+  `#/su`, `#/sigara`, `#/tuvalet` (çiş + büyük), `#/his`, `#/uyku`, `#/para`, diğer alışkanlıklar `#/<anahtar>`.
+  Sayfa `#view`'ın üstünde ayrı katmandır (`#detay`); sekme (`S.tab`) değişmez, `S.detay` dolar.
+- Kod tek blokta: `/* ==== DETAY SAYFALARI ==== */` işaretleri arasında (CSS'te de aynı işaret). Yeni bir alan için
+  `ALAN`'a satır ve `detayHtml`'de bir kurucu eklemek yeter.
+- Karo davranışı değişti: işaretli karolarda yalnızca sağdaki yuvarlak (`button.dot`) işaretler, karonun geri
+  kalanı sayfayı açar (`.kr-ac`). Sayaçlarda artı/eksi aynen çalışır. Karolara dokunan testler buna göre yazılmalı.
+- Yeni veri (hepsi eklemedir, eski alanlar aynı): güne `iz` = `{su: ["09:10", …], cis: […]}` (+ basılan saatler;
+  sigara eskisi gibi `sigaraSaat`'te), ayarlara `gunHedef` = `{su: 8, …}` ve `koc` = `{su: {metin, zaman}}`.
+- **Brifing/gelen kutusu komutlarını yazan oturum için:** bir alanın sayfasındaki "Koçun diyor ki" kartına not
+  düşmek istersen cevabın sonundaki gizli bloğa şu op'u koy; uygulama 7 gün gösterir, sonra kendi kurallarına döner:
+  `[[uygula {"ops":[{"op":"koc","alan":"su","metin":"…"}]}]]` (alan: `su`, `sigara`, `tuvalet`, `his`, `uyku`,
+  `para` ya da bir alışkanlık anahtarı). Komutlara henüz eklenmedi; `sunucu/Code.js` değişmedi.
+- Sürüm: bu PR 2.9.0 / `hayat-v290`. PR #2 hâlâ 2.8.1 diyor; hangisi sonra merge olursa main'dekinden büyük
+  bir sürüm ve yeni bir `CACHE` vermeli. İkisi de `index.html`'de Bugün ve Günlük çevresine dokunduğu için
+  ikinci merge'de çakışma çıkabilir.
+
 ## PR #1'de olanlar
 
 | Konu | Not |

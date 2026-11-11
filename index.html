@@ -3441,7 +3441,10 @@ function readHash(){
 }
 window.addEventListener("hashchange", () => {
   if (/^#giris=/.test(location.hash)) { const l = location.hash.slice(7); try { history.replaceState(null, "", location.pathname + "#bugun"); } catch (e) {} girisYap(l); }
-  readHash(); hideTip(); S.agent.open = false; renderSheet(); render();
+  const oncekiSekme = S.tab, oncekiDetay = S.detay || null;
+  readHash(); hideTip(); S.agent.open = false; renderSheet();
+  if (S.tab === oncekiSekme && (S.detay || null) !== oncekiDetay) detayRender();   /* yalnızca alan sayfası açılıp kapanıyorsa alttaki ekranı baştan çizme: geçiş ilk karede takılmasın */
+  else render();
 });
 function setSel(d){ S.sel = d; S.month = d.slice(0,7); watchTours(); render(); }
 function gotoTab(tab){ if (location.hash !== "#" + tab) location.hash = "#" + tab; else { readHash(); render(); } }
@@ -3909,7 +3912,7 @@ function dPara(){
     ekler: dKart("Nereye gitti?", dHalka(katlar, eur(s.gider), "gider")) +
       (yerler.length ? dKart("En çok harcadığın yerler", `<ul class="dt-yer">${yerler.map(([ad, t], i) => `<li style="--w:${(t / yMax).toFixed(3)};--j:${i}"><span>${esc(ad)}</span><b class="num">${eur(t)}</b><i></i></li>`).join("")}</ul>`) : ""),
     ne: !s.gider && !s.gelir ? "Bu dönemde kayıt yok. Harcamayı mikrofona söylemen yeter: “12 euro öğle yemeği”." :
-      `${seg === "gun" ? dGunAd() : seg === "hafta" ? "Son 7 günde" : p.ad[0] + " ayında bugüne kadar"} <b>${eur(s.gider)}</b> harcadın, <b>${eur(s.gelir)}</b> kazandın.${fark == null ? "" : ` ${p.ad[1][0].toLocaleUpperCase("tr") + p.ad[1].slice(1)} <b>${eur(o.gider)}</b> idi.`}${enKat ? ` En büyük kalem <b>${esc(enKat[0])}</b> (${eur(enKat[2])}, giderin %${Math.round(enKat[2] / s.gider * 100)}'i).` : ""}`,
+      `${seg === "gun" ? dGunAd() : seg === "hafta" ? "Son 7 günde" : p.ad[0] + " ayında bugüne kadar"} <b>${eur(s.gider)}</b> harcadın, <b>${eur(s.gelir)}</b> kazandın.${fark == null ? "" : ` ${p.ad[1][0].toLocaleUpperCase("tr") + p.ad[1].slice(1)} <b>${eur(o.gider)}</b> idi.`}${enKat ? ` En büyük kalem <b>${esc(enKat[0])}</b> (${eur(enKat[2])} · %${Math.round(enKat[2] / s.gider * 100)}).` : ""}`,
     koc: ayKalan != null && ayKalan >= 0 && ayGun > 0 ? `Bütçeden ${eur(ayKalan)} kaldı; ay sonuna ${ayGun} gün var, günde ${eur(ayKalan / ayGun)} rahat rahat yeter. Rakamlar senin, karar senin.` :
       ayKalan != null && ayKalan < 0 ? `Bu ay bütçeyi ${eur(-ayKalan)} geçtin. Olur böyle aylar; önümüzdeki hafta tek bir kalemi kısmak dengeyi toplar.` :
       fark != null && fark <= -5 ? `Önceki döneme göre %${Math.abs(fark)} daha az harcamışsın. Cüzdanın sana selam söylüyor.` :
@@ -4009,15 +4012,15 @@ function detayGeri(){
 (() => {
   const el = detayEl(); if (!el) return;
   let x0 = 0, y0 = 0, t0 = 0, dx = 0, izle = false;
-  el.addEventListener("touchstart", e => { const t = e.touches[0]; izle = e.touches.length === 1 && t.clientX < 28 && !!DT.acik; x0 = t.clientX; y0 = t.clientY; dx = 0; t0 = Date.now(); }, {passive: true});
+  el.addEventListener("touchstart", e => { const t = e.touches[0]; izle = e.touches.length === 1 && t.clientX < 28 && !!DT.acik; x0 = t.clientX; y0 = t.clientY; dx = 0; t0 = e.timeStamp; }, {passive: true});
   el.addEventListener("touchmove", e => {
     if (!izle) return; const t = e.touches[0]; dx = Math.max(0, t.clientX - x0);
     if (Math.abs(t.clientY - y0) > 44 && dx < 24) { izle = false; el.style.transform = ""; return; }
     el.style.transform = `translateX(${dx}px)`;
   }, {passive: true});
-  const bitir = () => {
+  const bitir = e => {
     if (!izle) return; izle = false;
-    const hiz = dx / Math.max(1, Date.now() - t0), kapat = dx > window.innerWidth * .33 || (dx > 40 && hiz > .5);
+    const hiz = dx / Math.max(1, e.timeStamp - t0), kapat = dx > window.innerWidth * .33 || (dx > 60 && hiz > .6);   /* üçte birini geçince ya da hızlı bir fiskeyle */
     if (!el.animate) { el.style.transform = ""; if (kapat) detayGeri(); return; }
     if (kapat) { DT.kaydi = true; const an = el.animate([{transform: `translateX(${dx}px)`}, {transform: "translateX(100%)"}], {duration: 190, easing: "ease-out", fill: "forwards"});
       an.onfinish = () => setTimeout(() => { if (S.detay) detayGeri(); else { DT.kaydi = false; } }, 0); }
