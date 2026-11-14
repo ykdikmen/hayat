@@ -934,9 +934,99 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 .his-h small{position:relative;font-size:11.5px;font-weight:700;color:var(--ink-2)}
 .his-bos{grid-column:1/4;color:var(--ink-2);font-size:14px;padding:6px 0}
 /* ==== /DETAY SAYFALARI ==== */
+
+/* ==== ROMA TEMALARI (2.9.2) ====
+   TV panelinin dili: arkada Roma fotoğrafları, üstünde buzlu cam kartlar, siyah/beyaz zemin, Vespa kırmızısı vurgular.
+   Fotoğraflar TV panelinin sunucusundan gelir (Ayarlar > Görünüm > TV kodu); yoksa sade koyu/açık zemin kalır. */
+@font-face{font-family:"Archivo";font-style:normal;font-weight:100 900;font-stretch:62% 125%;font-display:swap;src:url(fontlar/archivo-latin-ext-wdth-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Archivo";font-style:normal;font-weight:100 900;font-stretch:62% 125%;font-display:swap;src:url(fontlar/archivo-latin-wdth-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root[data-renk="nero"]{color-scheme:dark;
+  --font-display:"Archivo","Saira Semi Condensed",system-ui,sans-serif;--font-body:"Archivo",system-ui,-apple-system,sans-serif;
+  --bg:#050505;--bg-2:#0b0b0c;--surface:#141415;--surface-2:rgba(255,255,255,.08);--surface-3:rgba(255,255,255,.14);
+  --line:rgba(255,255,255,.16);--line-2:rgba(255,255,255,.30);
+  --ink:#ffffff;--ink-2:rgba(255,255,255,.80);--ink-3:rgba(255,255,255,.58);
+  --mint:#f23a2e;--on-mint:#ffffff;--mint-soft:rgba(242,58,46,.20);
+  --coral:#ff9f43;--coral-soft:rgba(255,159,67,.18);--amber:#ffc65a;--amber-soft:rgba(255,198,90,.16);
+  --sky:#8fc3ff;--rose:#ff8fb0;--violet:#c6b0ff;--mood-low:#ff9f43;--mood-high:#8fc3ff;--good:#7fe0a0;--bad:#ff6a5e;
+  --shadow:0 18px 46px rgba(0,0,0,.40);--cam:rgba(18,18,20,.38);--parilti:rgba(255,255,255,.34);
+  --foto-ort:rgba(0,0,0,.30);--foto-alt:rgba(0,0,0,.62);--yazi-golge:0 1px 2px rgba(0,0,0,.45)}
+:root[data-renk="bianco"]{color-scheme:light;
+  --font-display:"Archivo","Saira Semi Condensed",system-ui,sans-serif;--font-body:"Archivo",system-ui,-apple-system,sans-serif;
+  --bg:#f3f1ee;--bg-2:#faf9f7;--surface:#ffffff;--surface-2:rgba(0,0,0,.05);--surface-3:rgba(0,0,0,.09);
+  --line:rgba(0,0,0,.11);--line-2:rgba(0,0,0,.22);
+  --ink:#0b0b0b;--ink-2:rgba(0,0,0,.72);--ink-3:rgba(0,0,0,.52);
+  --mint:#c8102e;--on-mint:#ffffff;--mint-soft:rgba(200,16,46,.11);
+  --coral:#c25a00;--coral-soft:rgba(194,90,0,.12);--amber:#9a6400;--amber-soft:rgba(176,122,20,.13);
+  --sky:#1f6fd0;--rose:#c4426f;--violet:#6b4fd6;--mood-low:#d9622b;--mood-high:#2a78d6;--good:#12884a;--bad:#c8102e;
+  --shadow:0 14px 36px rgba(0,0,0,.14);--cam:rgba(255,255,255,.56);--parilti:rgba(255,255,255,.9);
+  --foto-ort:rgba(246,244,241,.38);--foto-alt:rgba(246,244,241,.70);--yazi-golge:none}
+/* fotoğraf katmanı: iki katman çapraz geçişle değişir; fotoğraf yoksa yalnızca zemin */
+#arka{display:none;position:fixed;inset:0;z-index:0;pointer-events:none;background:var(--bg)}
+#arka .ft{position:absolute;inset:-2%;background-size:cover;background-position:center;opacity:0;transition:opacity 2.2s ease-in-out}
+#arka .ft.acik{opacity:1}
+#arka::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,var(--foto-ort) 0%,var(--foto-ort) 45%,var(--foto-alt) 100%)}
+:root[data-renk="nero"] #arka{background:radial-gradient(90% 55% at 85% 0%,rgba(242,58,46,.22),transparent 70%),radial-gradient(80% 50% at 0% 100%,rgba(255,255,255,.07),transparent 70%),#050505}
+:root[data-renk="bianco"] #arka{background:radial-gradient(90% 55% at 85% 0%,rgba(200,16,46,.10),transparent 70%),radial-gradient(80% 50% at 0% 100%,rgba(0,0,0,.05),transparent 70%),#f3f1ee}
+:root.siyahbeyaz #arka .ft{filter:grayscale(1) contrast(1.06)}
+:root[data-renk^="nero"] #arka,:root[data-renk^="bianco"] #arka{display:block}
+:root[data-renk="nero"] #aura,:root[data-renk="bianco"] #aura{display:none}
+:root[data-renk="nero"] body,:root[data-renk="bianco"] body{background:var(--bg)}
+/* cam kartlar: TV'deki gibi ince parlak kenar, üstte ışık, az bulanık */
+:root[data-renk="nero"] .card,:root[data-renk="bianco"] .card{background:linear-gradient(150deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,.02) 40%,transparent 100%),var(--cam);border:1px solid var(--line-2);-webkit-backdrop-filter:blur(16px) saturate(1.35);backdrop-filter:blur(16px) saturate(1.35);box-shadow:var(--shadow),inset 0 1px 0 var(--parilti)}
+:root[data-renk="bianco"] .card{background:linear-gradient(150deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.15) 45%,transparent 100%),var(--cam);border-color:rgba(255,255,255,.75)}
+:root[data-renk="nero"] .card.flat,:root[data-renk="bianco"] .card.flat{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border-style:dashed}
+:root[data-renk="nero"] #main{text-shadow:var(--yazi-golge)}
+:root[data-renk="nero"] :is(.btn,.chip,.badge,.pill,.say,input,textarea,select){text-shadow:none}
+/* başlıklar: geniş, sıkı Archivo; küçük başlıklar ve vurgular kırmızı */
+:root[data-renk="nero"] h1,:root[data-renk="bianco"] h1{font-weight:750;font-stretch:108%;letter-spacing:-.02em}
+:root[data-renk="nero"] h2,:root[data-renk="bianco"] h2{font-weight:700;font-stretch:104%;letter-spacing:-.01em}
+:root[data-renk="nero"] .eyebrow,:root[data-renk="bianco"] .eyebrow,:root[data-renk="nero"] .sub,:root[data-renk="bianco"] .sub{color:var(--mint);letter-spacing:.14em}
+:root[data-renk="nero"] .card-h .meta,:root[data-renk="bianco"] .card-h .meta{color:var(--mint);font-weight:700}
+/* gök kartı camlaşır: gökyüzü degradesi, yıldızlar ve siluet yerine arkadaki fotoğraf görünür */
+:root[data-renk="nero"] .sky,:root[data-renk="bianco"] .sky{background:linear-gradient(150deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.03) 42%,transparent 100%),var(--cam);color:var(--ink);border:1px solid var(--line-2);-webkit-backdrop-filter:blur(10px) saturate(1.4);backdrop-filter:blur(10px) saturate(1.4);box-shadow:var(--shadow),inset 0 1px 0 var(--parilti);padding-bottom:16px}
+:root[data-renk="bianco"] .sky{background:linear-gradient(150deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,.2) 45%,transparent 100%),var(--cam);border-color:rgba(255,255,255,.8)}
+:root[data-renk="nero"] .sky::before,:root[data-renk="bianco"] .sky::before,:root[data-renk="nero"] .sky .moon,:root[data-renk="bianco"] .sky .moon,:root[data-renk="nero"] .skyline,:root[data-renk="bianco"] .skyline{display:none}
+:root[data-renk="nero"] .sky .hello,:root[data-renk="bianco"] .sky .hello{font-size:36px;font-weight:780;font-stretch:110%;letter-spacing:-.025em}
+:root[data-renk="nero"] .sky .date,:root[data-renk="bianco"] .sky .date{color:var(--mint)}
+:root[data-renk="nero"] .sky .date span,:root[data-renk="bianco"] .sky .date span{opacity:1;letter-spacing:.02em}
+:root[data-renk="nero"] .sstat,:root[data-renk="bianco"] .sstat{border-bottom-color:var(--line)}
+:root[data-renk="nero"] .sstat b,:root[data-renk="bianco"] .sstat b{font-stretch:96%}
+:root[data-renk="nero"] .next,:root[data-renk="bianco"] .next{background:var(--surface-2);border:1px solid var(--line)}
+:root[data-renk="nero"] .next .t,:root[data-renk="bianco"] .next .t{color:var(--mint);font-weight:750}
+:root[data-renk="nero"] .sky .iconbtn{background:rgba(255,255,255,.10);border-color:var(--line-2)}
+:root[data-renk="bianco"] .sky .iconbtn{background:rgba(255,255,255,.55);border-color:rgba(0,0,0,.08)}
+:root[data-renk="nero"] .sky .badge,:root[data-renk="bianco"] .sky .badge{background:var(--mint)}
+:root[data-renk="nero"] .sky-acts .dinle,:root[data-renk="bianco"] .sky-acts .dinle{background:var(--mint);color:var(--on-mint);border-color:var(--mint);text-shadow:none}
+:root[data-renk="nero"] .sky-acts .dinle svg,:root[data-renk="bianco"] .sky-acts .dinle svg{fill:currentColor;stroke:currentColor}
+/* gösterge: beyazdan kırmızıya */
+:root[data-renk="nero"] #gg stop:nth-child(1){stop-color:#ffffff}:root[data-renk="nero"] #gg stop:nth-child(2){stop-color:#ff8a80}:root[data-renk="nero"] #gg stop:nth-child(3){stop-color:#f23a2e}
+:root[data-renk="bianco"] #gg stop:nth-child(1){stop-color:#9a9a9a}:root[data-renk="bianco"] #gg stop:nth-child(2){stop-color:#e0606e}:root[data-renk="bianco"] #gg stop:nth-child(3){stop-color:#c8102e}
+:root[data-renk="nero"] .gauge .tk.on{stroke:var(--mint)}:root[data-renk="bianco"] .gauge .tk.on{stroke:var(--mint)}
+/* alt menü ve pencereler de cam */
+:root[data-renk="nero"] .iconbtn,:root[data-renk="bianco"] .iconbtn{background:var(--cam);border-color:var(--line-2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+:root[data-renk="nero"] .serit,html.sade:root[data-renk="nero"] .serit{background:rgba(8,8,9,.52);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)}
+:root[data-renk="bianco"] .serit,html.sade:root[data-renk="bianco"] .serit{background:rgba(250,249,247,.60);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)}
+:root[data-renk="nero"] .mtile.in b,:root[data-renk="bianco"] .mtile.in b{color:var(--good)}
+:root[data-renk="nero"] nav.tabs{background:rgba(8,8,9,.55);border-top-color:var(--line)}
+:root[data-renk="bianco"] nav.tabs{background:rgba(250,249,247,.62);border-top-color:var(--line)}
+:root[data-renk="nero"] .say,:root[data-renk="bianco"] .say{box-shadow:0 10px 26px rgba(200,16,46,.45),0 0 0 5px transparent}
+:root[data-renk="nero"] .sheet{background:rgba(16,16,17,.78);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
+:root[data-renk="bianco"] .sheet{background:rgba(255,255,255,.80);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
+/* alan sayfaları: aynı fotoğraf, biraz daha koyu/açık */
+:root[data-renk="nero"] .dt-yuzey,:root[data-renk="bianco"] .dt-yuzey{isolation:isolate}
+:root[data-renk="nero"] .dt-yuzey::after,:root[data-renk="bianco"] .dt-yuzey::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,var(--foto-alt),var(--foto-alt)),var(--foto-url,none) center/cover}
+:root.siyahbeyaz .dt-yuzey::after{filter:grayscale(1) contrast(1.06)}
+:root[data-renk="nero"] .dt-yuzey::before,:root[data-renk="bianco"] .dt-yuzey::before{opacity:.55}
+.ft-durum{display:flex;align-items:center;gap:10px;margin:2px 0 10px}
+.ft-durum i{flex:none;width:40px;height:40px;border-radius:12px;background:var(--surface-3) center/cover;box-shadow:0 0 0 1px var(--line-2)}
+html.sade #arka .ft{transition:none}
+:root.siyahbeyaz .ft-durum i{filter:grayscale(1)}
+@media (prefers-reduced-transparency: reduce){:root[data-renk="nero"] .card,:root[data-renk="bianco"] .card,:root[data-renk="nero"] .sky,:root[data-renk="bianco"] .sky{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* ==== /ROMA TEMALARI ==== */
 </style>
 </head>
 <body>
+<div id="arka" aria-hidden="true"><div class="ft"></div><div class="ft"></div></div>
 <main id="main"><div class="wrap" id="view"></div></main>
 <div id="serit" class="serit" aria-label="Hızlı gezinme"></div>
 <nav class="tabs" id="tabs" aria-label="Bölümler">
@@ -967,7 +1057,7 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.9.1";
+const SURUM = "2.9.2";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -2333,7 +2423,7 @@ function claudeAyarlar(){
       <label class="small" style="display:grid;gap:5px;font-weight:700;color:var(--ink-2)" for="aButce">Aylık bütçe (€)<input class="field" id="aButce" inputmode="decimal" value="${a.butce ?? ""}" placeholder="örn. 1200"></label>
       <label class="small" style="display:grid;gap:5px;font-weight:700;color:var(--ink-2)" for="aPaket">Sigara paketi (€)<input class="field" id="aPaket" inputmode="decimal" value="${a.paket ?? ""}" placeholder="6,50"></label>
       <button class="btn full">Kaydet</button></form></section>`;
-  h += `<section class="card"><div class="card-h"><h2>Görünüm</h2></div>${renkSecici()}${(LS.get("hayat.renk") || "gece") === "gece" ? `<div class="small ayar-b" style="margin-top:4px">Gece teması</div>` : ""}<div class="seg" ${(LS.get("hayat.renk") || "gece") === "gece" ? "" : "hidden"}>${[["sistem","Telefona göre"],["dark","Koyu"],["light","Açık"]].map(([v,l]) => `<button type="button" data-act="tema" data-v="${v}" aria-pressed="${tema === v}">${l}</button>`).join("")}</div>
+  h += `<section class="card"><div class="card-h"><h2>Görünüm</h2></div>${renkSecici()}${fotoAyarKart()}${(LS.get("hayat.renk") || "gece") === "gece" ? `<div class="small ayar-b" style="margin-top:4px">Gece teması</div>` : ""}<div class="seg" ${(LS.get("hayat.renk") || "gece") === "gece" ? "" : "hidden"}>${[["sistem","Telefona göre"],["dark","Koyu"],["light","Açık"]].map(([v,l]) => `<button type="button" data-act="tema" data-v="${v}" aria-pressed="${tema === v}">${l}</button>`).join("")}</div>
     <div class="small" style="margin:14px 0 8px;font-weight:700;color:var(--ink-2)">Alt menüyü ekranın dibine yasla</div>
     <div class="seg">${[["1","Otomatik"],["0","Kapalı"]].map(([v,l]) => `<button type="button" data-act="altduzelt" data-v="${v}" aria-pressed="${(LS.get("hayat.altDuzelt") !== false) === (v === "1")}">${l}</button>`).join("")}</div>
     <p class="small muted" style="margin:8px 0 0">iPhone ana ekranında menünün altında boşluk kalırsa düzeltir. Menü ekrandan taşarsa “Kapalı” yap.</p>
@@ -2972,7 +3062,8 @@ function anlikKart(){
    dokunsal titreşim (iOS 18+), renk temaları ve günün tohumuyla dalgalanan arka plan ---------- */
 const SEKMELER = ["bugun", "para", "gunluk", "ilerleme", "claude"];
 const RENKLER = [["gece", "Gece", "#0c1118", "#7bdcb8"], ["orman", "Orman", "#0d1a14", "#9fd8a8"], ["kum", "Kum", "#f3ece2", "#e8692f"], ["bulut", "Bulut", "#eef3fa", "#2c78d6"],
-  ["tramonto", "Tramonto", "#170f1e", "#ffae52"], ["limon", "Limon", "#fff4c7", "#2747f5"], ["neon", "Neon", "#07080f", "#b08cff"]];
+  ["tramonto", "Tramonto", "#170f1e", "#ffae52"], ["limon", "Limon", "#fff4c7", "#2747f5"], ["neon", "Neon", "#07080f", "#b08cff"],
+  ["nero", "Roma Nero", "#050505", "#f23a2e"], ["bianco", "Roma Bianco", "#f3f1ee", "#c8102e"]];
 const hareketAcik = () => LS.get("hayat.hareket") !== false && !AZ_HAREKET();
 const HRK = {sekme: null, gun: null, pop: null, tik: null, auraGun: null, hab: null, yeni: null, prg: null, vespaT: null, acilan: null};
 
@@ -2983,6 +3074,102 @@ function renkUygula(){
   h.classList.toggle("sade", LS.get("hayat.hareket") === false);
   const m = document.querySelector('meta[name="theme-color"]'), c = (RENKLER.find(x => x[0] === r) || RENKLER[0])[2];
   if (m) m.setAttribute("content", c);
+  h.classList.toggle("siyahbeyaz", LS.get("hayat.fotoSB") !== false);
+  fotoBaslat();
+}
+
+/* ---- Roma temalarının arka plan fotoğrafları ----
+   TV panelinin sunucusundan (Drive > "TV Panel" klasörü) gelir; TV kodu yalnızca bu telefonda saklanır.
+   Fotoğraflar telefonda "hayat-foto" önbelleğinde durur, uygulama çevrimdışı da açılır; günde bir yenilenir. */
+const TV_SUNUCU = "https://script.google.com/macros/s/AKfycbzpsH10-_-h2l-c27YS7Yrf17tj0PKXSlFp-OdF8mf1eY6PM-08gvjloCsRz-pbtdOyyw/exec";
+const K_FOTO_KOD = "hayat.fotoKod", K_FOTO_ZAMAN = "hayat.fotoZaman", FOTO_CACHE = "hayat-foto", FOTO_EN_COK = 8;
+const FT = {urller: [], no: -1, kat: 0, zaman: null, yukleniyor: false, durum: "", hazir: false};
+const romaTema = () => ["nero", "bianco"].includes(LS.get("hayat.renk"));
+function tvIste(param, kod){
+  return new Promise((ok, hata) => {
+    const ad = "hft" + Date.now().toString(36) + Math.floor(Math.random() * 1e4), s = document.createElement("script");
+    let bitti = false;
+    const kapat = () => { bitti = true; window[ad] = () => {}; s.remove(); clearTimeout(z); };
+    const z = setTimeout(() => { if (!bitti) { kapat(); hata(new Error("zaman")); } }, 60000);
+    window[ad] = v => { if (!bitti) { kapat(); ok(v); } };
+    s.onerror = () => { if (!bitti) { kapat(); hata(new Error("ag")); } };
+    s.src = TV_SUNUCU + "?k=" + encodeURIComponent(kod) + "&cb=" + ad + (param ? "&" + param : "") + "&t=" + Date.now();
+    document.body.appendChild(s);
+  });
+}
+async function fotoOnbellek(){
+  try { if (!window.caches) return []; const c = await caches.open(FOTO_CACHE), ks = await c.keys(); ks.sort((a, b) => a.url.localeCompare(b.url));
+    return Promise.all(ks.map(async k => URL.createObjectURL(await (await c.match(k)).blob()))); } catch (e) { return []; }
+}
+function fotoGoster(i){
+  const a = document.getElementById("arka"); if (!a || !FT.urller.length) return;
+  FT.no = (i + FT.urller.length) % FT.urller.length;
+  const ft = a.querySelectorAll(".ft"), yeni = ft[FT.kat], eski = ft[1 - FT.kat], u = FT.urller[FT.no];
+  yeni.style.backgroundImage = `url("${u}")`; yeni.classList.add("acik"); eski.classList.remove("acik");
+  document.documentElement.style.setProperty("--foto-url", `url("${u}")`);
+  FT.kat = 1 - FT.kat;
+  fotoParlaklik(u).then(p => { if (FT.urller[FT.no] === u) fotoPerde(p); });
+}
+/* Parlak fotoğrafta perde koyulaşır (Roma Nero), karanlık fotoğrafta açılır (Roma Bianco); yazı her fotoğrafta okunur. */
+const FT_PARLAK = {};
+function fotoParlaklik(u){
+  if (FT_PARLAK[u] != null) return Promise.resolve(FT_PARLAK[u]);
+  return new Promise(ok => { const im = new Image(); im.onload = () => { let p = .5; try { const c = document.createElement("canvas"); c.width = 24; c.height = 40; const x = c.getContext("2d"); x.drawImage(im, 0, 0, 24, 40); const d = x.getImageData(0, 0, 24, 40).data; let t = 0; for (let i = 0; i < d.length; i += 4) t += .299 * d[i] + .587 * d[i + 1] + .114 * d[i + 2]; p = t / (d.length / 4) / 255; } catch (e) {} ok(FT_PARLAK[u] = p); }; im.onerror = () => ok(.5); im.src = u; });
+}
+function fotoPerde(p){
+  const h = document.documentElement.style, koyu = LS.get("hayat.renk") === "nero";
+  const ort = koyu ? Math.min(.62, Math.max(.22, .18 + p * .55)) : Math.min(.66, Math.max(.30, .70 - p * .45));
+  h.setProperty("--foto-ort", `rgba(${koyu ? "0,0,0" : "246,244,241"},${ort.toFixed(2)})`);
+  h.setProperty("--foto-alt", `rgba(${koyu ? "0,0,0" : "246,244,241"},${Math.min(.82, ort + .26).toFixed(2)})`);
+  h.setProperty("--cam", koyu ? `rgba(18,18,20,${(.30 + p * .36).toFixed(2)})` : `rgba(255,255,255,${(.46 + (1 - p) * .30).toFixed(2)})`);
+}
+function fotoDongu(){
+  clearInterval(FT.zaman); FT.zaman = null;
+  if (romaTema() && FT.urller.length > 1) FT.zaman = setInterval(() => { if (document.visibilityState === "visible") fotoGoster(FT.no + 1); }, 45000);
+}
+async function fotoBaslat(){
+  if (!romaTema()) { clearInterval(FT.zaman); FT.zaman = null; ["--foto-ort", "--foto-alt", "--cam"].forEach(k => document.documentElement.style.removeProperty(k)); return; }
+  if (FT.no >= 0 && FT.urller[FT.no]) fotoParlaklik(FT.urller[FT.no]).then(fotoPerde);
+  if (!FT.hazir) { FT.hazir = true; FT.urller = await fotoOnbellek(); if (FT.urller.length) fotoGoster(Math.floor(Math.random() * FT.urller.length)); }
+  fotoDongu();
+  const kod = LS.get(K_FOTO_KOD);
+  if (kod && Date.now() - (LS.get(K_FOTO_ZAMAN) || 0) > 20 * 3600e3) fotoYenile(kod);
+}
+/* Sunucudan en çok 8 fotoğraf alır, önbelleği baştan yazar. Kod yanlışsa hiçbir şeye dokunmaz. */
+async function fotoYenile(kod, elle){
+  if (FT.yukleniyor) return; FT.yukleniyor = true; FT.durum = "Fotoğraflar alınıyor…"; if (elle) render();
+  try {
+    const ilk = await tvIste("islem=foto&no=0", kod);
+    if (ilk && ilk.hata) throw new Error(ilk.hata);
+    const n = Math.min((ilk && ilk.n) || 0, FOTO_EN_COK), bloblar = [];
+    if (ilk && ilk.u) bloblar.push(await (await fetch(ilk.u)).blob());
+    for (let i = 1; i < n; i++) {
+      FT.durum = `Fotoğraflar alınıyor… ${i + 1}/${n}`; if (elle) render();
+      try { const f = await tvIste("islem=foto&no=" + i, kod); if (f && f.u) bloblar.push(await (await fetch(f.u)).blob()); } catch (e) {}
+    }
+    if (!bloblar.length) throw new Error("bos");
+    if (window.caches) { await caches.delete(FOTO_CACHE); const c = await caches.open(FOTO_CACHE); await Promise.all(bloblar.map((b, i) => c.put(`foto/${String(i).padStart(2, "0")}`, new Response(b, {headers: {"Content-Type": b.type || "image/jpeg"}})))); }
+    FT.urller.forEach(u => URL.revokeObjectURL(u));
+    FT.urller = bloblar.map(b => URL.createObjectURL(b));
+    LS.set(K_FOTO_KOD, kod); LS.set(K_FOTO_ZAMAN, Date.now());
+    FT.durum = ""; fotoGoster(0); fotoDongu();
+    if (elle) { toast(`${bloblar.length} Roma fotoğrafı yüklendi`); titret(); }
+  } catch (e) {
+    const m = String(e && e.message);
+    FT.durum = m === "kod" ? "TV kodu tutmadı. TV Panel tablosundaki Ayarlar sayfasındaki kodu yaz." : m === "kilit" ? "Çok fazla yanlış deneme oldu, 10 dakika sonra tekrar dene." : m === "bos" ? "Drive'daki TV Panel klasöründe fotoğraf bulunamadı." : "Fotoğraflar alınamadı. İnternet bağlantısını kontrol edip tekrar dene.";
+    if (m === "kod" && elle) LS.del(K_FOTO_KOD);
+  }
+  FT.yukleniyor = false; if (elle || FT.durum) render();
+}
+function fotoAyarKart(){
+  if (!romaTema()) return "";
+  const kod = LS.get(K_FOTO_KOD), n = FT.urller.length, sb = LS.get("hayat.fotoSB") !== false, onizle = n ? FT.urller[Math.max(0, FT.no)] : "";
+  return `<div class="small ayar-b">Arka plan: Roma fotoğrafları</div>
+    ${n ? `<div class="ft-durum"><i style="background-image:url('${onizle}')"></i><span class="small muted">${n} fotoğraf · 45 saniyede bir değişir${kod ? " · TV panelinden her gün yenilenir" : ""}</span></div>` : `<p class="small muted" style="margin:0 0 10px">TV panelindeki fotoğraflar (Drive › “TV Panel” klasörü) burada da görünsün. TV kodunu bir kez yazman yeter; kod yalnızca bu telefonda kalır.</p>`}
+    ${FT.durum ? `<p class="small" style="margin:0 0 10px;color:${FT.yukleniyor ? "var(--ink-2)" : "var(--coral)"}">${esc(FT.durum)}</p>` : ""}
+    <div class="add" style="margin-bottom:10px"><input class="field grow" id="ftKod" type="password" autocomplete="off" placeholder="TV kodu" value="${kod ? "••••••" : ""}" aria-label="TV kodu"><button type="button" class="btn" data-act="fotokod" ${FT.yukleniyor ? "disabled" : ""}>${kod ? "Yenile" : "Bağla"}</button></div>
+    <div class="seg">${[["1","Siyah-beyaz"],["0","Renkli"]].map(([v,l]) => `<button type="button" data-act="fotosb" data-v="${v}" aria-pressed="${sb === (v === "1")}">${l}</button>`).join("")}</div>
+    ${kod || n ? `<button type="button" class="minibtn danger" style="margin-top:10px" data-act="fotosil">Fotoğrafları kaldır</button>` : ""}`;
 }
 
 /* ---- arka plan: günün tarihinden tohumlanan üç yumuşak ışık, yavaşça süzülür (her gün başka bir düzen) ---- */
@@ -3591,6 +3778,9 @@ document.addEventListener("click", e => {
     case "anlikkaydet": { const u = (document.getElementById("anlikUrl") || {}).value || "", t = (document.getElementById("anlikTok") || {}).value || ""; if (!u.trim() || !t.trim()) { toast("Adresi ve anahtarı yapıştır."); break; } anlikIslem({url: u.trim(), token: t.trim()}, "Kaydediliyor…"); break; }
     case "anlikdene": anlikIslem({dene: true}, "Claude uyandırılıyor…"); break;
     case "anliksil": anlikIslem({sil: true}, "Kaldırılıyor…"); break;
+    case "fotokod": { const g = (document.getElementById("ftKod") || {}).value || "", kod = /^•+$/.test(g) ? LS.get(K_FOTO_KOD) : g.trim(); if (!kod) { toast("Önce TV kodunu yaz"); break; } fotoYenile(kod, true); break; }
+    case "fotosb": { LS.set("hayat.fotoSB", b.dataset.v === "1"); renkUygula(); render(); break; }
+    case "fotosil": { LS.del(K_FOTO_KOD); LS.del(K_FOTO_ZAMAN); FT.urller.forEach(u => URL.revokeObjectURL(u)); FT.urller = []; FT.no = -1; FT.durum = ""; if (window.caches) caches.delete(FOTO_CACHE); document.querySelectorAll("#arka .ft").forEach(x => { x.classList.remove("acik"); x.style.backgroundImage = ""; }); document.documentElement.style.removeProperty("--foto-url"); fotoDongu(); render(); break; }
     case "renk": { const v = b.dataset.v, uygula = () => { LS.set("hayat.renk", v); renkUygula(); render(); }; if (document.startViewTransition && hareketAcik()) document.startViewTransition(uygula); else uygula(); break; }
     case "hareket": LS.set("hayat.hareket", b.dataset.v === "1"); renkUygula(); render(); break;
     case "titresim": LS.set("hayat.titresim", b.dataset.v === "1"); render(); if (b.dataset.v === "1") titret(); break;

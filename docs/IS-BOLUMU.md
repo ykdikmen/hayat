@@ -4,13 +4,14 @@ Bu repo üzerinde iki ayrı Claude oturumu çalışıyor. Oturumlar birbirine me
 gönderemez; ortak defterimiz bu dosya ve PR'lar. Bir işe başlamadan önce burayı
 oku, bitirince güncelle.
 
-Son güncelleme: 11 Kasım 2026, Opus oturumu.
+Son güncelleme: 14 Kasım 2026, Opus oturumu.
 
 ## Şu anki durum
 
 - Yayındaki sürüm: `main` = 2.9.0 (`hayat-v290`). PR #1, #3 ve #4 merge edildi.
 - PR #2 (Opus, `claude/opus-gunluk-bos-formlar`) `main`'i içine aldı: **2.9.1 / `hayat-v291`**.
-  Bundan sonraki PR **2.9.2 / `hayat-v292`** olsun.
+  Bundan sonraki PR **2.9.2 / `hayat-v292`** olsun. → Roma temaları PR'ı (`claude/roma-cam-tema`) 2.9.2'yi aldı;
+  ondan sonraki **2.9.3 / `hayat-v293`**.
 - 2.8 "akıcılık" tasarım dokümanı repoda: `docs/superpowers/specs/2026-11-10-hayat-28-akicilik-design.md`.
 
 ### Sohbet modu (PR #3) ve brifing komutları
@@ -30,6 +31,18 @@ Son güncelleme: 11 Kasım 2026, Opus oturumu.
   (geçerse uygulama konu konu seslendirir).
 - Akşam brifingi görevinin komutu 10 Kasım'da Fable oturumunca bu biçime göre yeniden yazıldı (deneme).
   Sabah ve öğle komutları eski biçimde; Kerem beğenirse onlar da çevrilecek.
+
+### Roma temaları (2.9.2, `claude/roma-cam-tema`)
+
+- TV panelinin (ykdikmen/TV) görünümü Hayat'a geldi: iki yeni renk teması **Roma Nero** (`data-renk="nero"`) ve
+  **Roma Bianco** (`bianco`). Arkada Roma fotoğrafları, üstünde buzlu cam kartlar, Vespa kırmızısı vurgular, Archivo.
+- Kod tek blokta: CSS'te `/* ==== ROMA TEMALARI (2.9.2) ==== */`, JS'te `renkUygula()`'nın hemen altı
+  (`TV_SUNUCU`, `FT`, `fotoBaslat`, `fotoYenile`, `fotoAyarKart`). Diğer temalar piksel piksel aynı.
+- Fotoğraflar TV panelinin sunucusundan gelir (`islem=foto`, JSONP); kullanıcı Ayarlar > Görünüm'de TV kodunu
+  bir kez yazar, kod yalnızca telefonda (`hayat.fotoKod`) durur. En çok 8 fotoğraf `hayat-foto` önbelleğine
+  yazılır (sw.js bu önbelleği silmez), günde bir yenilenir, 45 sn'de bir çapraz geçişle değişir.
+  Fotoğrafın parlaklığına göre perde ve cam koyuluğu kendini ayarlar (`fotoPerde`). Siyah-beyaz/renkli seçimi: `hayat.fotoSB`.
+- `sunucu/Code.js` ve TV sunucusu değişmedi.
 
 ### Alan sayfaları (2.9.0, `claude/detay-sayfalari`)
 
