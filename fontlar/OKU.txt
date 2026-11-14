@@ -1,3 +1,3 @@
-Bu klasördeki yazı tipleri yeni temalar (Tramonto, Limon, Neon) içindir ve yalnızca o tema seçilince indirilir.
+Bu klasördeki yazı tipleri yeni temalar (Tramonto, Limon, Neon, Roma Nero, Roma Bianco) içindir ve yalnızca o tema seçilince indirilir.
 Hepsi SIL Open Font License 1.1 ile dağıtılır; lisans metinleri LICENSE-*.txt dosyalarındadır.
 Kaynak: fontsource.org (Google Fonts ile aynı dosyalar, latin + latin-ext alt kümeleri).
