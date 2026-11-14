@@ -1022,6 +1022,28 @@ html.sade .serit{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filt
 html.sade #arka .ft{transition:none}
 :root.siyahbeyaz .ft-durum i{filter:grayscale(1)}
 @media (prefers-reduced-transparency: reduce){:root[data-renk="nero"] .card,:root[data-renk="bianco"] .card,:root[data-renk="nero"] .sky,:root[data-renk="bianco"] .sky{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* ---- Sıvı cam (2.9.4): daha saydam kartlar, fotoğraf görünür kalır ----
+   Okunurluğu dolgu rengi değil cam süzgeci sağlar: arkadaki fotoğraf bulanıklaşıp kararır (Nero) ya da aydınlanır (Bianco),
+   böylece kart çok saydamken bile yazı okunur. Cam hissini kenardaki ışık ve köşedeki parıltı verir. */
+:root[data-renk="nero"]{--cam:rgba(12,12,14,.16);--cam-suz:blur(5px) brightness(.72) saturate(1.45);--yazi-golge:0 1px 3px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.4);
+  --cam-kenar:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -1px 0 rgba(255,255,255,.07),inset 1px 0 0 rgba(255,255,255,.10),inset -1px 0 0 rgba(255,255,255,.05),inset 0 0 0 1px rgba(255,255,255,.10);
+  --cam-isik:linear-gradient(140deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 22%,transparent 46%,transparent 78%,rgba(255,255,255,.05) 100%);--shadow:0 16px 40px rgba(0,0,0,.30)}
+:root[data-renk="bianco"]{--cam:rgba(255,255,255,.24);--cam-suz:blur(5px) brightness(1.16) saturate(1.3);
+  --cam-kenar:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.35),inset 1px 0 0 rgba(255,255,255,.55),inset -1px 0 0 rgba(255,255,255,.30),inset 0 0 0 1px rgba(0,0,0,.05);
+  --cam-isik:linear-gradient(140deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.14) 24%,transparent 48%,transparent 80%,rgba(255,255,255,.18) 100%);--shadow:0 14px 34px rgba(0,0,0,.12)}
+:root[data-renk="nero"] :is(.card,.sky),:root[data-renk="bianco"] :is(.card,.sky){background:var(--cam-isik),var(--cam);border:0;
+  -webkit-backdrop-filter:var(--cam-suz);backdrop-filter:var(--cam-suz);box-shadow:var(--cam-kenar),var(--shadow)}
+:root[data-renk="nero"] .card.flat,:root[data-renk="bianco"] .card.flat{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:inset 0 0 0 1px var(--line-2)}
+/* kartın içindeki kutular ikinci bir cam değil, ince dolgu */
+:root[data-renk="nero"] :is(.next,.mtile,.field,.seg),:root[data-renk="bianco"] :is(.next,.mtile,.field,.seg){-webkit-backdrop-filter:none;backdrop-filter:none}
+:root[data-renk="nero"] :is(.next,.mtile){background:rgba(255,255,255,.07);border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(255,255,255,.08)}
+:root[data-renk="bianco"] :is(.next,.mtile){background:rgba(255,255,255,.38);border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(0,0,0,.05)}
+:root[data-renk="nero"] #main,:root[data-renk="nero"] .dt-yuzey{text-shadow:var(--yazi-golge)}
+:root[data-renk="nero"] :is(h1,h2,b,strong,.hello,.num){font-weight:750}
+/* alt menü de aynı malzeme */
+:root[data-renk="nero"] nav.tabs{background:var(--cam-isik),rgba(10,10,12,.22);-webkit-backdrop-filter:blur(14px) brightness(.65) saturate(1.4);backdrop-filter:blur(14px) brightness(.65) saturate(1.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+:root[data-renk="bianco"] nav.tabs{background:var(--cam-isik),rgba(255,255,255,.30);-webkit-backdrop-filter:blur(14px) brightness(1.15) saturate(1.3);backdrop-filter:blur(14px) brightness(1.15) saturate(1.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
+@media (prefers-contrast: more){:root[data-renk="nero"] :is(.card,.sky){background:rgba(12,12,14,.82)}:root[data-renk="bianco"] :is(.card,.sky){background:rgba(255,255,255,.9)}}
 /* ==== /ROMA TEMALARI ==== */
 </style>
 </head>
@@ -1057,7 +1079,7 @@ html.sade #arka .ft{transition:none}
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.9.3";
+const SURUM = "2.9.4";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -3118,17 +3140,19 @@ function fotoParlaklik(u){
 }
 function fotoPerde(p){
   const h = document.documentElement.style, koyu = LS.get("hayat.renk") === "nero";
-  const ort = koyu ? Math.min(.62, Math.max(.22, .18 + p * .55)) : Math.min(.66, Math.max(.30, .70 - p * .45));
+  const ort = koyu ? Math.min(.40, Math.max(.08, p * .55 - .08)) : Math.min(.42, Math.max(.12, .50 - p * .45));
   h.setProperty("--foto-ort", `rgba(${koyu ? "0,0,0" : "246,244,241"},${ort.toFixed(2)})`);
-  h.setProperty("--foto-alt", `rgba(${koyu ? "0,0,0" : "246,244,241"},${Math.min(.82, ort + .26).toFixed(2)})`);
-  h.setProperty("--cam", koyu ? `rgba(18,18,20,${(.30 + p * .36).toFixed(2)})` : `rgba(255,255,255,${(.46 + (1 - p) * .30).toFixed(2)})`);
+  h.setProperty("--foto-alt", `rgba(${koyu ? "0,0,0" : "246,244,241"},${Math.min(.72, ort + .24).toFixed(2)})`);
+  /* parlak fotoğrafta cam biraz daha koyulaşır (Nero), karanlıkta biraz daha aydınlanır (Bianco) */
+  h.setProperty("--cam", koyu ? `rgba(12,12,14,${(.06 + p * .22).toFixed(2)})` : `rgba(255,255,255,${(.08 + (1 - p) * .26).toFixed(2)})`);
+  h.setProperty("--cam-suz", koyu ? `blur(5px) brightness(${Math.max(.42, .86 - p * .62).toFixed(2)}) saturate(1.45)` : `blur(5px) brightness(${Math.min(1.25, .94 + (1 - p) * .45).toFixed(2)}) saturate(1.3)`);
 }
 function fotoDongu(){
   clearInterval(FT.zaman); FT.zaman = null;
   if (romaTema() && FT.urller.length > 1) FT.zaman = setInterval(() => { if (document.visibilityState === "visible") fotoGoster(FT.no + 1); }, 45000);
 }
 async function fotoBaslat(){
-  if (!romaTema()) { clearInterval(FT.zaman); FT.zaman = null; ["--foto-ort", "--foto-alt", "--cam"].forEach(k => document.documentElement.style.removeProperty(k)); return; }
+  if (!romaTema()) { clearInterval(FT.zaman); FT.zaman = null; ["--foto-ort", "--foto-alt", "--cam", "--cam-suz"].forEach(k => document.documentElement.style.removeProperty(k)); return; }
   if (FT.no >= 0 && FT.urller[FT.no]) fotoParlaklik(FT.urller[FT.no]).then(fotoPerde);
   if (!FT.hazir) { FT.hazir = true; FT.urller = await fotoOnbellek(); if (FT.urller.length) fotoGoster(Math.floor(Math.random() * FT.urller.length)); }
   fotoDongu();
