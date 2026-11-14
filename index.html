@@ -1044,6 +1044,24 @@ html.sade #arka .ft{transition:none}
 :root[data-renk="nero"] nav.tabs{background:var(--cam-isik),rgba(10,10,12,.22);-webkit-backdrop-filter:blur(14px) brightness(.65) saturate(1.4);backdrop-filter:blur(14px) brightness(.65) saturate(1.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
 :root[data-renk="bianco"] nav.tabs{background:var(--cam-isik),rgba(255,255,255,.30);-webkit-backdrop-filter:blur(14px) brightness(1.15) saturate(1.3);backdrop-filter:blur(14px) brightness(1.15) saturate(1.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
 @media (prefers-contrast: more){:root[data-renk="nero"] :is(.card,.sky){background:rgba(12,12,14,.82)}:root[data-renk="bianco"] :is(.card,.sky){background:rgba(255,255,255,.9)}}
+/* ---- Renkli cam düğmeler ve dokunma tepkisi (2.9.5) ----
+   iOS 26'daki "glassProminent" düğmenin web karşılığı: düz kırmızı yerine kırmızı renkli cam, üstte ışık çizgisi.
+   Dokununca cam hafifçe içe basar ve parlar ("interactive" cam). Yazı kontrastı ölçüldü: beyaz yazı ≥ 4.5:1. */
+:root[data-renk="nero"]{--cam-kirmizi:rgba(232,44,34,.84)}
+:root[data-renk="bianco"]{--cam-kirmizi:rgba(196,14,42,.90)}
+:root[data-renk="nero"] :is(.btn:not(.ghost):not(.soft),.sky-acts .dinle),:root[data-renk="bianco"] :is(.btn:not(.ghost):not(.soft),.sky-acts .dinle){
+  background:linear-gradient(180deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.06) 48%,rgba(0,0,0,.06) 100%),var(--cam-kirmizi);color:#fff;
+  -webkit-backdrop-filter:blur(6px) brightness(.7) saturate(1.6);backdrop-filter:blur(6px) brightness(.7) saturate(1.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.50),inset 0 -1px 0 rgba(0,0,0,.14),inset 0 0 0 1px rgba(255,255,255,.12),0 6px 18px rgba(200,16,46,.30);text-shadow:0 1px 1px rgba(0,0,0,.18)}
+:root[data-renk="nero"] .say,:root[data-renk="bianco"] .say{background:linear-gradient(180deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.05) 50%,rgba(0,0,0,.08) 100%),var(--cam-kirmizi);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.14),0 10px 26px rgba(200,16,46,.42)}
+:root[data-renk="nero"] :is(.sky .date,.eyebrow,.sub,.card-h .meta,.dt-yuzey .eyebrow){text-shadow:0 0 8px rgba(0,0,0,.75),0 1px 2px rgba(0,0,0,.6)}
+/* dokunma tepkisi: kısa, yaylanmasız */
+:root[data-renk="nero"] :is(.btn,.dinle,.iconbtn,.minibtn,.mtile,.next,.chip,.say),:root[data-renk="bianco"] :is(.btn,.dinle,.iconbtn,.minibtn,.mtile,.next,.chip,.say){transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+:root[data-renk="nero"] :is(.btn,.dinle,.iconbtn,.minibtn,.mtile,.next,.chip):active,:root[data-renk="bianco"] :is(.btn,.dinle,.iconbtn,.minibtn,.mtile,.next,.chip):active{transform:scale(.965);filter:brightness(1.18) saturate(1.1)}
+:root[data-renk="nero"] .say:active,:root[data-renk="bianco"] .say:active{transform:translateY(-1px) scale(.95);filter:brightness(1.15)}
+:root[data-renk="nero"] .card:active:has(> .card-h[data-act], > [data-act="git"]),:root[data-renk="bianco"] .card:active:has(> .card-h[data-act], > [data-act="git"]){transform:scale(.99)}
+html.sade:root[data-renk] :is(.btn,.dinle,.iconbtn,.minibtn,.mtile,.next,.chip,.say,.card):active{transform:none}
 /* ==== /ROMA TEMALARI ==== */
 </style>
 </head>
@@ -1079,7 +1097,7 @@ html.sade #arka .ft{transition:none}
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.9.4";
+const SURUM = "2.9.5";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
