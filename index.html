@@ -1057,7 +1057,7 @@ html.sade #arka .ft{transition:none}
 "use strict";
 /* Hayat Paneli 2.0 — personal panel. Data lives in the owner's Google Drive behind his Apps Script;
    this file only talks to that script (ops: yukle, kaydet, gelen, gelenIptal, turlar, randevu). */
-const SURUM = "2.9.2";
+const SURUM = "2.9.3";
 
 /* ---------- constants ---------- */
 const TZ = "Europe/Rome";
@@ -3135,38 +3135,67 @@ async function fotoBaslat(){
   const kod = LS.get(K_FOTO_KOD);
   if (kod && Date.now() - (LS.get(K_FOTO_ZAMAN) || 0) > 20 * 3600e3) fotoYenile(kod);
 }
-/* Sunucudan en çok 8 fotoğraf alır, önbelleği baştan yazar. Kod yanlışsa hiçbir şeye dokunmaz. */
+/* data:...;base64 adresini fetch'e vermeden doğrudan Blob'a çevirir (iPhone'da daha güvenilir). */
+function veriBlob(u){
+  const m = /^data:([^;,]+)?(;base64)?,(.*)$/.exec(u || ""); if (!m) return null;
+  const ham = m[2] ? atob(m[3]) : decodeURIComponent(m[3]), d = new Uint8Array(ham.length);
+  for (let i = 0; i < ham.length; i++) d[i] = ham.charCodeAt(i);
+  return d.length ? new Blob([d], {type: m[1] || "image/jpeg"}) : null;
+}
+/* Sunucudan en çok 8 fotoğraf alır. İlk fotoğraf gelir gelmez ekrana konur ve her biri geldikçe telefona yazılır;
+   kod yanlışsa ya da hiç fotoğraf gelmezse eski fotoğraflara dokunmaz. Son hata Ayarlar'da açıkça yazar. */
 async function fotoYenile(kod, elle){
-  if (FT.yukleniyor) return; FT.yukleniyor = true; FT.durum = "Fotoğraflar alınıyor…"; if (elle) render();
-  try {
-    const ilk = await tvIste("islem=foto&no=0", kod);
-    if (ilk && ilk.hata) throw new Error(ilk.hata);
-    const n = Math.min((ilk && ilk.n) || 0, FOTO_EN_COK), bloblar = [];
-    if (ilk && ilk.u) bloblar.push(await (await fetch(ilk.u)).blob());
-    for (let i = 1; i < n; i++) {
-      FT.durum = `Fotoğraflar alınıyor… ${i + 1}/${n}`; if (elle) render();
-      try { const f = await tvIste("islem=foto&no=" + i, kod); if (f && f.u) bloblar.push(await (await fetch(f.u)).blob()); } catch (e) {}
+  if (FT.yukleniyor) return; FT.yukleniyor = true; FT.durum = "Sunucuya bağlanılıyor… (ilk fotoğraf 10-30 sn sürebilir)"; if (elle) render();
+  let alinan = 0, bos = 0, toplam = 0, c = null;
+  const yeniUrller = [];
+  const ekle = async b => {
+    if (!alinan) {   /* ilk başarılı fotoğraf: eski seti bırak */
+      if (window.caches) { try { await caches.delete(FOTO_CACHE); c = await caches.open(FOTO_CACHE); } catch (e) { c = null; } }
+      FT.urller.forEach(u => URL.revokeObjectURL(u)); FT.urller = yeniUrller;
+      LS.set(K_FOTO_KOD, kod);
     }
-    if (!bloblar.length) throw new Error("bos");
-    if (window.caches) { await caches.delete(FOTO_CACHE); const c = await caches.open(FOTO_CACHE); await Promise.all(bloblar.map((b, i) => c.put(`foto/${String(i).padStart(2, "0")}`, new Response(b, {headers: {"Content-Type": b.type || "image/jpeg"}})))); }
-    FT.urller.forEach(u => URL.revokeObjectURL(u));
-    FT.urller = bloblar.map(b => URL.createObjectURL(b));
-    LS.set(K_FOTO_KOD, kod); LS.set(K_FOTO_ZAMAN, Date.now());
-    FT.durum = ""; fotoGoster(0); fotoDongu();
-    if (elle) { toast(`${bloblar.length} Roma fotoğrafı yüklendi`); titret(); }
+    if (c) { try { await c.put(`foto/${String(alinan).padStart(2, "0")}`, new Response(b, {headers: {"Content-Type": b.type || "image/jpeg"}})); } catch (e) {} }
+    yeniUrller.push(URL.createObjectURL(b)); alinan++;
+    if (alinan === 1) { fotoGoster(0); fotoDongu(); }
+  };
+  try {
+    for (let i = 0; i < (toplam || 1); i++) {
+      FT.durum = toplam ? `Fotoğraflar alınıyor… ${i + 1}/${toplam}` : FT.durum; if (elle && i) render();
+      let f;
+      try { f = await tvIste("islem=foto&no=" + i, kod); }
+      catch (e) { if (i === 0) throw e; continue; }
+      if (f && f.hata) { if (i === 0 || f.hata === "kod" || f.hata === "kilit") throw Object.assign(new Error(f.hata), {ayrinti: f.ayrinti}); continue; }
+      if (i === 0) toplam = Math.min(+(f && f.n) || 0, FOTO_EN_COK);
+      if (!toplam) throw new Error("bos");
+      const b = f && f.u ? veriBlob(f.u) : null;
+      if (b) await ekle(b); else bos++;
+    }
+    if (!alinan) throw new Error(bos ? "bozuk" : "bos");
+    LS.set(K_FOTO_ZAMAN, Date.now()); LS.del("hayat.fotoHata");
+    FT.durum = ""; fotoDongu();
+    if (elle) { toast(`${alinan} Roma fotoğrafı yüklendi`); titret(); }
   } catch (e) {
-    const m = String(e && e.message);
-    FT.durum = m === "kod" ? "TV kodu tutmadı. TV Panel tablosundaki Ayarlar sayfasındaki kodu yaz." : m === "kilit" ? "Çok fazla yanlış deneme oldu, 10 dakika sonra tekrar dene." : m === "bos" ? "Drive'daki TV Panel klasöründe fotoğraf bulunamadı." : "Fotoğraflar alınamadı. İnternet bağlantısını kontrol edip tekrar dene.";
+    const m = String(e && e.message), ay = e && e.ayrinti ? ` (${String(e.ayrinti).slice(0, 120)})` : "";
+    FT.durum = m === "kod" ? "TV kodu tutmadı. TV Panel tablosunun Ayarlar sayfasındaki “Kod” satırını aynen yaz."
+      : m === "kilit" ? "Çok fazla yanlış deneme oldu; sunucu 10 dakika kilitli. Sonra tekrar dene."
+      : m === "bos" ? "Sunucu bağlandı ama Drive'daki “TV Panel” klasöründe fotoğraf görmüyor."
+      : m === "bozuk" ? `Sunucu ${toplam} fotoğraf gördü ama hiçbirini gönderemedi (Drive küçültmesi alınamadı ya da dosyalar 3 MB'tan büyük).`
+      : m === "sunucu" ? "Sunucuda hata oldu" + ay + "."
+      : m === "zaman" ? "Sunucu 60 saniyede cevap vermedi. Biraz sonra tekrar dene."
+      : m === "ag" ? "Sunucuya ulaşılamadı. İnternet bağlantısını kontrol edip tekrar dene."
+      : "Fotoğraflar alınamadı: " + m;
+    if (alinan) FT.durum = `${alinan} fotoğraf geldi, gerisi alınamadı. ` + FT.durum;
+    LS.set("hayat.fotoHata", FT.durum);
     if (m === "kod" && elle) LS.del(K_FOTO_KOD);
   }
-  FT.yukleniyor = false; if (elle || FT.durum) render();
+  FT.yukleniyor = false; render();
 }
 function fotoAyarKart(){
   if (!romaTema()) return "";
   const kod = LS.get(K_FOTO_KOD), n = FT.urller.length, sb = LS.get("hayat.fotoSB") !== false, onizle = n ? FT.urller[Math.max(0, FT.no)] : "";
   return `<div class="small ayar-b">Arka plan: Roma fotoğrafları</div>
     ${n ? `<div class="ft-durum"><i style="background-image:url('${onizle}')"></i><span class="small muted">${n} fotoğraf · 45 saniyede bir değişir${kod ? " · TV panelinden her gün yenilenir" : ""}</span></div>` : `<p class="small muted" style="margin:0 0 10px">TV panelindeki fotoğraflar (Drive › “TV Panel” klasörü) burada da görünsün. TV kodunu bir kez yazman yeter; kod yalnızca bu telefonda kalır.</p>`}
-    ${FT.durum ? `<p class="small" style="margin:0 0 10px;color:${FT.yukleniyor ? "var(--ink-2)" : "var(--coral)"}">${esc(FT.durum)}</p>` : ""}
+    ${(FT.durum || LS.get("hayat.fotoHata")) ? `<p class="small" style="margin:0 0 10px;color:${FT.yukleniyor ? "var(--ink-2)" : "var(--coral)"}">${esc(FT.durum || LS.get("hayat.fotoHata"))}</p>` : ""}
     <div class="add" style="margin-bottom:10px"><input class="field grow" id="ftKod" type="password" autocomplete="off" placeholder="TV kodu" value="${kod ? "••••••" : ""}" aria-label="TV kodu"><button type="button" class="btn" data-act="fotokod" ${FT.yukleniyor ? "disabled" : ""}>${kod ? "Yenile" : "Bağla"}</button></div>
     <div class="seg">${[["1","Siyah-beyaz"],["0","Renkli"]].map(([v,l]) => `<button type="button" data-act="fotosb" data-v="${v}" aria-pressed="${sb === (v === "1")}">${l}</button>`).join("")}</div>
     ${kod || n ? `<button type="button" class="minibtn danger" style="margin-top:10px" data-act="fotosil">Fotoğrafları kaldır</button>` : ""}`;
