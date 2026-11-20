@@ -14,6 +14,14 @@ Son güncelleme: 14 Kasım 2026, Opus oturumu.
   ondan sonraki **2.9.3 / `hayat-v293`**.
 - 2.8 "akıcılık" tasarım dokümanı repoda: `docs/superpowers/specs/2026-11-10-hayat-28-akicilik-design.md`.
 
+### Hayat Saat (`saat/`, dal `claude/apple-watch-apps-v44i6r`)
+
+- Apple Watch'tan Claude ile sesli sohbet için AYRI bir Apps Script projesi: `saat/Code.js`, kurulum `saat/KURULUM.md`.
+  Kestirme dikte edilen metni POST eder, cevap düz metin döner, saat seslendirir. Claude API'yi Kerem'in kendi anahtarıyla çağırır.
+- Ana sunucuya dokunmaz: Hayat'ı Drive'daki `hayat-veri.json`'dan okur, Hayat'a `komutlar/` klasörüne
+  `komut-saat-….json` yazarak (claude.ai'deki hayat-paneli becerisiyle aynı op biçimi) yazar. `sunucu/Code.js` ve `index.html` değişmedi.
+- Uygulama sürümü değişmedi (2.9.5).
+
 ### Sohbet modu (PR #3) ve brifing komutları
 
 - Brifing metninde `[[bolum Ad]]` satırları varsa Dinle ekranı konu konu okur ve her konudan sonra cevap
