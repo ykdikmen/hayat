@@ -144,3 +144,16 @@ Son güncelleme: 14 Kasım 2026, Opus oturumu.
 adımı ve bağımlılık yok; `hayat-veri.json` alanları ve komut op'ları (`gun`,
 `hedef`, `odak`, `gelen`) aynen çalışır; `sunucu/Code.js` yalnızca gerçekten
 gerekirse değişir; repoya anahtar, giriş linki ve kişisel veri girmez.
+
+### Tur Programı takvimine yazma kuralları (2.9.6, `claude/tur-takvimi-yazma-kurallari`)
+
+- 26 Kasım: "Hayat Anında" görevi bir turun ekibini `Drivers: — (yok, sadece Ruslan)` ve `Guide: Ruslan (tek başına çıkıyor)`
+  diye yazınca Turlar uygulaması "Ekip yazılmamış" gösterdi ve satırları "Ek notlar"a attı. Uygulama bu satırlardan
+  yalnız düz isimleri okuyor.
+- `claudeKurulumMesaji()` içindeki saatlik gelen kutusu görevine (GÖREV 1) "tur değişikliği" maddesi ve yazma kuralları eklendi:
+  `Guide: Ad` / `Drivers: Ad1, Ad2` düz isim, parantez ya da açıklama yok; yalnız istenen satır değişir, `[REF]`/`[SYNC2]`/`[KILIT]`
+  etiketleri aynen kalır; saat değişince başlıktaki HH:MM de güncellenir; iptal = başlığa `IPTAL - `, etkinlik silinmez;
+  açıklama tek bir `Son düzenleme:` satırına; müşteriye asla mesaj gitmez.
+- Bu metin yalnız yeni kurulumlarda kullanılır. Claude'daki mevcut "Hayat gelen kutusu" ve "Hayat Anında" görevlerinin komutuna
+  da aynı maddeyi Kerem elle eklemeli (claude.ai/code/routines → görev → düzenle).
+
